@@ -1053,6 +1053,15 @@ function applyAppearance(){
   const tsh = document.getElementById('textShadowCtl').value/100;
   if(tsh>0) css += '.covttl,.en,.ren,.len,.len2,.cken,.nen,.ten{text-shadow:'+(6*tsh)+'px '+(8*tsh)+'px '+(14*tsh)+'px rgba(0,0,0,'+(0.45*tsh)+')}';
 
+  /* feature 4/23: text gradient fill */
+  if(document.getElementById('textGradientOn').checked){
+    css += '.covttl,.en,.ren,.len,.len2,.cken,.nen,.ten{'+
+      'background:linear-gradient(120deg,var(--a0),var(--a1));-webkit-background-clip:text;background-clip:text;'+
+      '-webkit-text-fill-color:transparent;color:transparent}';
+    css += '.plate{-webkit-text-fill-color:var(--bg) !important;color:var(--bg) !important;background:var(--a0) !important;'+
+      '-webkit-background-clip:border-box !important;background-clip:border-box !important}';
+  }
+
   // ensure text inside light card surfaces stays readable regardless of --ink
   const inkHex = palette.ink.replace('#','');
   const inkLum = (0.299*parseInt(inkHex.slice(0,2),16) + 0.587*parseInt(inkHex.slice(2,4),16) + 0.114*parseInt(inkHex.slice(4,6),16));
