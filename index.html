@@ -3020,6 +3020,12 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
     <button class="btn ghost" id="lockPalette">🔒 Закрепить палитру</button>
     <button class="btn ghost" id="invertPalette">🌗 Инвертировать</button>
   </div>
+  <div class="section"></div>
+  <div class="btns">
+    <button class="btn ghost" id="savePaletteFav" style="flex:1">⭐ Сохранить эту палитру в избранное</button>
+  </div>
+  <div id="favPalettesList" class="swatches" style="margin-top:8px"></div>
+  <div class="hint" id="favPaletteHint"></div>
 </div>
 
 <div class="panel">
@@ -3210,6 +3216,49 @@ document.getElementById('invertPalette').onclick=()=>{
   const t2=palette.a2; palette.a2=palette.a0; palette.a0=t2;
   renderSwatches(); if(built) applyPalette();
 };
+
+/* feature 17/23: favorite palette library */
+const FAV_PALETTES_KEY='postConstructorFavPalettes';
+function loadFavPalettes(){
+  try{ return JSON.parse(localStorage.getItem(FAV_PALETTES_KEY)||'[]'); }catch(e){ return []; }
+}
+function saveFavPalettes(list){
+  try{ localStorage.setItem(FAV_PALETTES_KEY, JSON.stringify(list)); }catch(e){}
+}
+function renderFavPalettes(){
+  const el=document.getElementById('favPalettesList');
+  const list=loadFavPalettes();
+  el.innerHTML='';
+  if(list.length===0){ el.innerHTML='<span style="color:#8a8272;font-size:13px">Пока пусто — сохрани первую палитру выше</span>'; return; }
+  list.forEach((p,i)=>{
+    const wrap=document.createElement('div');
+    wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer';
+    wrap.title='Нажми, чтобы применить. Дважды — чтобы удалить.';
+    const strip=document.createElement('div');
+    strip.style.cssText='display:flex;border-radius:8px;overflow:hidden;width:66px;height:28px;border:2px solid rgba(255,255,255,.15)';
+    ['bg','ink','a0','a1'].forEach(k=>{
+      const sw=document.createElement('div'); sw.style.cssText='flex:1;background:'+p[k]; strip.appendChild(sw);
+    });
+    wrap.appendChild(strip);
+    wrap.onclick=()=>{ palette={...p}; renderSwatches(); if(built) applyPalette(); };
+    wrap.ondblclick=(e)=>{
+      e.stopPropagation();
+      const cur=loadFavPalettes(); cur.splice(i,1); saveFavPalettes(cur); renderFavPalettes();
+      document.getElementById('favPaletteHint').textContent='Удалено из избранного.';
+    };
+    el.appendChild(wrap);
+  });
+}
+document.getElementById('savePaletteFav').onclick=()=>{
+  const list=loadFavPalettes();
+  list.push({...palette});
+  if(list.length>24) list.shift();
+  saveFavPalettes(list);
+  renderFavPalettes();
+  document.getElementById('favPaletteHint').textContent='Палитра сохранена в избранное ('+list.length+' всего).';
+};
+renderFavPalettes();
+
 ['bgStyle','borderSel','progressSel','watermark','swipeHint','coverEmoji','alignSel','caseSel','perSlideSel'].forEach(id=>{
   const el=document.getElementById(id);
   const ev=(el.type==='text')?'input':'change';
