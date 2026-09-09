@@ -1745,6 +1745,28 @@ document.getElementById('slidePhotoInput').onchange=(e)=>{
   r.readAsDataURL(f);
 };
 
+/* feature 13/23: reorder slide position */
+document.getElementById('moveSlideLeft').onclick=()=>{
+  if(!built) return;
+  const active=document.querySelector('.sl.show');
+  const prevEl=active && active.previousElementSibling;
+  if(!active || !prevEl) return;
+  active.parentNode.insertBefore(active, prevEl);
+  slides=[...document.querySelectorAll('.sl')];
+  show(cur-1);
+  document.getElementById('status').textContent='Слайд передвинут влево.';
+};
+document.getElementById('moveSlideRight').onclick=()=>{
+  if(!built) return;
+  const active=document.querySelector('.sl.show');
+  const nextEl=active && active.nextElementSibling;
+  if(!active || !nextEl) return;
+  active.parentNode.insertBefore(nextEl, active);
+  slides=[...document.querySelectorAll('.sl')];
+  show(cur+1);
+  document.getElementById('status').textContent='Слайд передвинут вправо.';
+};
+
 /* feature 12/23: delete slide */
 document.getElementById('delSlide').onclick=()=>{
   if(!built) return;
