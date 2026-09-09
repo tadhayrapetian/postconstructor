@@ -686,6 +686,8 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
     <option value="dots">Точки</option>
     <option value="lines">Тонкие линии</option>
     <option value="grid">Клетка</option>
+    <option value="paper">Бумажная текстура</option>
+    <option value="noise">Шум/зерно</option>
   </select></div>
   <div class="row"><label>Ручная правка</label><div class="swatches" id="manualSwatches" style="flex:1"></div></div>
   <div class="row"><label>Прозрачность блоков</label><input type="range" id="opacityCtl" min="40" max="100" value="100"></div>
@@ -1033,6 +1035,16 @@ function applyAppearance(){
   else if(bgs==='dots') css += '.sl{background-color:var(--bg) !important;background-image:radial-gradient(var(--a2) 2.5px,transparent 2.5px) !important;background-size:34px 34px !important}';
   else if(bgs==='lines') css += '.sl{background-color:var(--bg) !important;background-image:repeating-linear-gradient(0deg,var(--a2) 0 1px,transparent 1px 40px) !important}';
   else if(bgs==='grid') css += '.sl{background-color:var(--bg) !important;background-image:repeating-linear-gradient(0deg,var(--a2) 0 1px,transparent 1px 46px),repeating-linear-gradient(90deg,var(--a2) 0 1px,transparent 1px 46px) !important}';
+  else if(bgs==='paper' || bgs==='noise'){
+    const freq = bgs==='paper' ? '0.75' : '0.9';
+    const op = bgs==='paper' ? '0.05' : '0.10';
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300">'+
+      '<filter id="n"><feTurbulence type="fractalNoise" baseFrequency="'+freq+'" numOctaves="3"/></filter>'+
+      '<rect width="300" height="300" filter="url(%23n)" opacity="'+op+'"/></svg>';
+    css += '.sl{background-color:var(--bg) !important}';
+    css += '.sl::before{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;'+
+      'background-image:url(\\'data:image/svg+xml,'+encodeURIComponent(svg)+'\\');mix-blend-mode:multiply}';
+  }
 
   const bd = document.getElementById('borderSel').value;
   if(bd==='thin') css += '.sl{border:6px solid var(--a0)}';
