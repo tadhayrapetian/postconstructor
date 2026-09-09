@@ -3072,6 +3072,8 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
     <button id="next">→</button>
   </div>
   <div class="btns" style="justify-content:center">
+    <button class="btn ghost" id="undoBtn" title="Отменить (Ctrl+Z)">↩ Отменить</button>
+    <button class="btn ghost" id="redoBtn" title="Повторить (Ctrl+Y)">↪ Повторить</button>
     <button class="btn ghost" id="dupSlide" title="Дублировать текущий слайд">⧉ Дублировать</button>
     <button class="btn ghost" id="delSlide" title="Удалить текущий слайд">🗑 Удалить</button>
     <button class="btn ghost" id="moveSlideLeft" title="Передвинуть влево">⇤</button>
@@ -4067,6 +4069,7 @@ document.getElementById('moveSlideLeft').onclick=()=>{
   slides=[...document.querySelectorAll('.sl')];
   show(cur-1);
   document.getElementById('status').textContent='Слайд передвинут влево.';
+  pushHistory();
 };
 document.getElementById('moveSlideRight').onclick=()=>{
   if(!built) return;
@@ -4077,6 +4080,7 @@ document.getElementById('moveSlideRight').onclick=()=>{
   slides=[...document.querySelectorAll('.sl')];
   show(cur+1);
   document.getElementById('status').textContent='Слайд передвинут вправо.';
+  pushHistory();
 };
 
 /* feature 12/23: delete slide */
@@ -4091,6 +4095,7 @@ document.getElementById('delSlide').onclick=()=>{
   slides=[...document.querySelectorAll('.sl')];
   show(Math.min(idx,slides.length-1));
   document.getElementById('status').textContent='Слайд удалён.';
+  pushHistory();
 };
 
 /* feature 11/23: duplicate slide */
@@ -4103,7 +4108,45 @@ document.getElementById('dupSlide').onclick=()=>{
   slides=[...document.querySelectorAll('.sl')];
   show(cur+1);
   document.getElementById('status').textContent='Слайд продублирован.';
+  pushHistory();
 };
+
+/* feature 15/23: undo / redo */
+let historyStack=[], historyIndex=-1, restoringHistory=false;
+function pushHistory(){
+  if(!built || restoringHistory) return;
+  const snap=document.getElementById('wrap').innerHTML;
+  if(historyStack[historyIndex]===snap) return;
+  historyStack=historyStack.slice(0,historyIndex+1);
+  historyStack.push(snap);
+  if(historyStack.length>30) historyStack.shift();
+  historyIndex=historyStack.length-1;
+  updateUndoRedoBtns();
+}
+function updateUndoRedoBtns(){
+  document.getElementById('undoBtn').disabled = historyIndex<=0;
+  document.getElementById('redoBtn').disabled = historyIndex>=historyStack.length-1;
+}
+function restoreHistory(idx){
+  if(idx<0 || idx>=historyStack.length) return;
+  restoringHistory=true;
+  document.getElementById('wrap').innerHTML=historyStack[idx];
+  historyIndex=idx;
+  slides=[...document.querySelectorAll('.sl')];
+  show(Math.min(cur, slides.length-1));
+  updateUndoRedoBtns();
+  restoringHistory=false;
+}
+document.getElementById('undoBtn').onclick=()=>restoreHistory(historyIndex-1);
+document.getElementById('redoBtn').onclick=()=>restoreHistory(historyIndex+1);
+document.addEventListener('keydown', e=>{
+  if((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key.toLowerCase()==='z'){ e.preventDefault(); restoreHistory(historyIndex-1); }
+  else if((e.ctrlKey||e.metaKey) && (e.key.toLowerCase()==='y' || (e.shiftKey && e.key.toLowerCase()==='z'))){ e.preventDefault(); restoreHistory(historyIndex+1); }
+});
+document.addEventListener('blur', (e)=>{
+  if(e.target && e.target.hasAttribute && e.target.hasAttribute('contenteditable')) pushHistory();
+}, true);
+document.addEventListener('pointerup', ()=>{ if(moveMode) setTimeout(pushHistory, 30); });
 
 /* feature 14/23: copy block positions from current slide to all slides */
 document.getElementById('copyStyleToAll').onclick=()=>{
@@ -4201,6 +4244,7 @@ document.getElementById('buildBtn').onclick=()=>{
   document.getElementById('previewArea').style.display='flex';
   const ph=document.getElementById('previewPlaceholder'); if(ph) ph.style.display='none';
   renderPlayer();
+  historyStack=[]; historyIndex=-1; pushHistory();
 };
 function rebuildPreview(){
   applyPalette();
