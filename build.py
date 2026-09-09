@@ -700,6 +700,9 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
 
 <div class="panel">
   <h2>5. Брендинг</h2>
+  <div class="row"><label>Фото слайда</label><button class="btn ghost" id="slidePhotoBtn" style="flex:1">🖼️ Добавить фото на текущий слайд</button></div>
+  <div class="hint" id="slidePhotoHint" style="text-align:left;margin:-2px 0 6px 132px">Ставится полупрозрачным фоном именно этого слайда</div>
+  <input type="file" id="slidePhotoInput" accept="image/*" style="display:none">
   <div class="row"><label>Рамка слайда</label><select id="borderSel">
     <option value="none">Без рамки</option>
     <option value="thin">Тонкая</option>
@@ -1670,6 +1673,25 @@ document.addEventListener('pointerdown', e=>{
   function up(){ blk.classList.remove('dragging'); document.removeEventListener('pointermove',mv); document.removeEventListener('pointerup',up); }
   document.addEventListener('pointermove',mv); document.addEventListener('pointerup',up);
 });
+
+/* feature 8/23: custom photo per slide */
+document.getElementById('slidePhotoBtn').onclick=()=>{
+  if(!built){ document.getElementById('slidePhotoHint').textContent='Сначала собери пост.'; return; }
+  document.getElementById('slidePhotoInput').click();
+};
+document.getElementById('slidePhotoInput').onchange=(e)=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const activeSlide=document.querySelector('.sl.show');
+    if(!activeSlide) return;
+    activeSlide.style.backgroundImage='linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.28)), url('+r.result+')';
+    activeSlide.style.backgroundSize='cover';
+    activeSlide.style.backgroundPosition='center';
+    document.getElementById('slidePhotoHint').textContent='Фото добавлено на слайд '+(cur+1)+'.';
+  };
+  r.readAsDataURL(f);
+};
 
 document.getElementById('shuffleAccents').onclick=()=>{
   const t=palette.a0; palette.a0=palette.a1; palette.a1=t;
