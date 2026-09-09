@@ -795,6 +795,25 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
     <button class="btn ghost" id="moveSlideRight" title="Передвинуть вправо">⇥</button>
   </div>
   <div class="stage" id="stage"><div class="wrap" id="wrap"></div></div>
+  <div class="btns" style="justify-content:center">
+    <button class="btn ghost" id="igPreviewBtn">📱 Показать как в ленте Instagram</button>
+  </div>
+  <div id="igFeedMock" style="display:none;width:100%;max-width:400px;background:#000;border-radius:24px;padding:10px;
+    box-shadow:0 20px 50px rgba(0,0,0,.5)">
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 8px;color:#fff;font:600 14px -apple-system,sans-serif">
+      <div id="igAvaMock" style="width:34px;height:34px;border-radius:50%;background:#333;background-size:cover;background-position:center;flex:0 0 auto"></div>
+      <span id="igHandleMock">@tadhayrapetian</span>
+    </div>
+    <div style="width:100%;aspect-ratio:4/5;border-radius:10px;overflow:hidden;position:relative;background:#111">
+      <img id="igMockImg" style="width:100%;height:100%;object-fit:cover;display:block">
+    </div>
+    <div style="display:flex;gap:16px;padding:10px 8px;color:#fff;font-size:22px">
+      <span>♡</span><span>💬</span><span>➤</span><span style="margin-left:auto">⌕</span>
+    </div>
+    <div style="padding:0 8px 10px;color:#fff;font:13px -apple-system,sans-serif">
+      <b id="igHandleMock2">@tadhayrapetian</b> <span id="igCaptionMock" style="opacity:.85"></span>
+    </div>
+  </div>
   <div class="panel">
     <div class="row"><label>Размер текста</label><input type="range" id="tsize" min="70" max="140" value="100"></div>
     <div class="btns">
@@ -2026,6 +2045,30 @@ document.getElementById('tplSelect').addEventListener('change', scheduleAutosave
     };
   }catch(e){}
 })();
+
+/* feature 21/23: Instagram feed preview mockup */
+document.getElementById('igPreviewBtn').onclick=async()=>{
+  if(!built){ document.getElementById('status').textContent='Сначала собери пост.'; return; }
+  const mock=document.getElementById('igFeedMock');
+  const showing = mock.style.display==='block';
+  if(showing){ mock.style.display='none'; document.getElementById('igPreviewBtn').textContent='📱 Показать как в ленте Instagram'; return; }
+  document.getElementById('status').textContent='Готовлю превью…';
+  try{
+    const active=document.querySelector('.sl.show');
+    const c=await renderToCanvas(active);
+    const dataUrl=c.toDataURL('image/png');
+    document.getElementById('igMockImg').src=dataUrl;
+    const handle=document.getElementById('inHandle').value.trim()||'@account';
+    document.getElementById('igHandleMock').textContent=handle;
+    document.getElementById('igHandleMock2').textContent=handle;
+    const capBox=document.getElementById('captionBox');
+    const capShort=(capBox && capBox.value ? capBox.value.split('\\n')[0] : '').slice(0,60);
+    document.getElementById('igCaptionMock').textContent=capShort;
+    mock.style.display='block';
+    document.getElementById('igPreviewBtn').textContent='📱 Скрыть превью ленты';
+    document.getElementById('status').textContent='';
+  }catch(e){ document.getElementById('status').textContent='Не получилось собрать превью.'; }
+};
 
 document.getElementById('undoBtn').onclick=()=>restoreHistory(historyIndex-1);
 document.getElementById('redoBtn').onclick=()=>restoreHistory(historyIndex+1);
