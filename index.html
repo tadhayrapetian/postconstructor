@@ -3083,6 +3083,7 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
     <div class="btns">
       <button class="btn ghost" id="moveMode">Двигать блоки</button>
       <button class="btn ghost" id="shuffleAccents">Поменять акценты местами</button>
+      <button class="btn ghost" id="copyStyleToAll">Копировать позиции блоков на все слайды</button>
     </div>
     <div class="section"></div>
     <div class="btns">
@@ -4102,6 +4103,29 @@ document.getElementById('dupSlide').onclick=()=>{
   slides=[...document.querySelectorAll('.sl')];
   show(cur+1);
   document.getElementById('status').textContent='Слайд продублирован.';
+};
+
+/* feature 14/23: copy block positions from current slide to all slides */
+document.getElementById('copyStyleToAll').onclick=()=>{
+  if(!built) return;
+  const active=document.querySelector('.sl.show');
+  if(!active) return;
+  const srcBlocks=[...active.querySelectorAll('.in > *')];
+  if(srcBlocks.length===0 || !srcBlocks.some(b=>b.style.top)){ document.getElementById('status').textContent='На этом слайде нет перемещённых блоков (включи "Двигать блоки" и подвинь что-нибудь).'; return; }
+  let applied=0;
+  document.querySelectorAll('.sl').forEach(sl=>{
+    if(sl===active) return;
+    const tgtBlocks=[...sl.querySelectorAll('.in > *')];
+    srcBlocks.forEach((sb,i)=>{
+      const tb=tgtBlocks[i]; if(!tb) return;
+      if(sb.style.top) tb.style.top=sb.style.top;
+      if(sb.style.left) tb.style.left=sb.style.left;
+      if(sb.style.right) tb.style.right=sb.style.right;
+      if(sb.classList.contains('movable')) tb.classList.add('movable');
+    });
+    applied++;
+  });
+  document.getElementById('status').textContent='Позиции блоков скопированы на '+applied+' слайдов.';
 };
 
 document.getElementById('shuffleAccents').onclick=()=>{
