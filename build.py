@@ -541,6 +541,15 @@ def make_html():
 <body>
 <div id="appShell">
 <div id="toolCol">
+<div id="draftBanner" class="panel" style="display:none;background:#3A2F1A;border:1px solid #E0A857">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <span>Нашла несохранённый черновик — восстановить?</span>
+    <div class="btns">
+      <button class="btn" id="restoreDraftBtn">Восстановить</button>
+      <button class="btn ghost" id="dismissDraftBtn">Не надо</button>
+    </div>
+  </div>
+</div>
 
 <div class="panel">
   <h2>1. Контент</h2>
@@ -787,9 +796,11 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
       <button class="btn ghost" id="loadProject">📂 Загрузить проект</button>
       <button class="btn ghost" id="copyCaption">📋 Скопировать подпись</button>
     </div>
+    <div class="hint" id="autosaveHint" style="opacity:.7"></div>
     <div id="status" class="hint"></div>
   </div>
 </div>
+
 
 <input type="file" id="projectFileInput" accept=".json" style="display:none">
 
@@ -1811,6 +1822,7 @@ function pushHistory(){
   if(historyStack.length>30) historyStack.shift();
   historyIndex=historyStack.length-1;
   updateUndoRedoBtns();
+  scheduleAutosave();
 }
 function updateUndoRedoBtns(){
   document.getElementById('undoBtn').disabled = historyIndex<=0;
@@ -1826,6 +1838,78 @@ function restoreHistory(idx){
   updateUndoRedoBtns();
   restoringHistory=false;
 }
+/* feature 16/23: autosave draft to localStorage */
+const AUTOSAVE_KEY='postConstructorAutosaveDraft';
+function serializeProject(){
+  const proj={
+    title:document.getElementById('inTitle').value,
+    highlightColor:document.getElementById('inHighlightColor').value,
+    eyebrow:document.getElementById('inEyebrow').value,
+    sub:document.getElementById('inSub').value,
+    handle:document.getElementById('inHandle').value,
+    phrases:document.getElementById('inPhrases').value,
+    tpl:currentTpl, palette:palette,
+    settings:{}
+  };
+  ['radiusCtl','shadowCtl','lineHeightCtl','paddingCtl','grainCtl','fontHead','fontTrans','ratioSel',
+   'numStyle','orderSel','covTextSize','tsize'].forEach(id=>{ const el=document.getElementById(id); if(el) proj.settings[id]=el.value; });
+  ['showPg','showHandle','showTag','showCover','showFollow','showCta'].forEach(id=>{ const el=document.getElementById(id); if(el) proj.settings[id]=el.checked; });
+  return proj;
+}
+function applyProject(proj){
+  document.getElementById('inTitle').value=proj.title||'';
+  document.getElementById('inHighlightColor').value=proj.highlightColor||'#2E2A20';
+  document.getElementById('inEyebrow').value=proj.eyebrow||'';
+  document.getElementById('inSub').value=proj.sub||'';
+  document.getElementById('inHandle').value=proj.handle||'';
+  document.getElementById('inPhrases').value=proj.phrases||'';
+  if(proj.palette){ palette=proj.palette; renderSwatches(); }
+  if(proj.tpl){ currentTpl=proj.tpl; document.getElementById('tplSelect').value=proj.tpl; }
+  if(proj.settings){
+    Object.entries(proj.settings).forEach(([k,v])=>{
+      const el=document.getElementById(k); if(!el) return;
+      if(el.type==='checkbox') el.checked=v; else el.value=v;
+    });
+  }
+}
+let autosaveTimer=null;
+function scheduleAutosave(){
+  if(!built) return;
+  clearTimeout(autosaveTimer);
+  autosaveTimer=setTimeout(()=>{
+    try{
+      localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(serializeProject()));
+      const h=document.getElementById('autosaveHint');
+      if(h) h.textContent='Черновик автосохранён '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    }catch(e){}
+  }, 1200);
+}
+document.getElementById('inTitle').addEventListener('input', scheduleAutosave);
+document.getElementById('inEyebrow').addEventListener('input', scheduleAutosave);
+document.getElementById('inSub').addEventListener('input', scheduleAutosave);
+document.getElementById('inHandle').addEventListener('input', scheduleAutosave);
+document.getElementById('inPhrases').addEventListener('input', scheduleAutosave);
+document.getElementById('tplSelect').addEventListener('change', scheduleAutosave);
+
+(function checkDraftOnLoad(){
+  try{
+    const raw=localStorage.getItem(AUTOSAVE_KEY);
+    if(!raw) return;
+    document.getElementById('draftBanner').style.display='block';
+    document.getElementById('restoreDraftBtn').onclick=()=>{
+      try{
+        applyProject(JSON.parse(raw));
+        applyAppearance();
+        document.getElementById('draftBanner').style.display='none';
+      }catch(e){}
+    };
+    document.getElementById('dismissDraftBtn').onclick=()=>{
+      localStorage.removeItem(AUTOSAVE_KEY);
+      document.getElementById('draftBanner').style.display='none';
+    };
+  }catch(e){}
+})();
+
 document.getElementById('undoBtn').onclick=()=>restoreHistory(historyIndex-1);
 document.getElementById('redoBtn').onclick=()=>restoreHistory(historyIndex+1);
 document.addEventListener('keydown', e=>{
