@@ -606,6 +606,11 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
     <option value="MA500">Montserrat Medium</option>
     <option value="MA700">Montserrat Bold</option>
   </select></div>
+  <div class="row"><label>Свой шрифт</label>
+    <button class="btn ghost" id="uploadFontBtn" style="flex:1">📁 Загрузить .ttf / .otf / .woff</button>
+  </div>
+  <div class="hint" id="customFontHint" style="text-align:left;margin:-2px 0 0 132px">Появится в списках выше как «Свой шрифт»</div>
+  <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" style="display:none">
   <div class="row"><label>Скругление углов</label><input type="range" id="radiusCtl" min="0" max="60" value="24"></div>
   <div class="row"><label>Тень блоков</label><input type="range" id="shadowCtl" min="0" max="100" value="100"></div>
   <div class="row"><label>Межстрочный</label><input type="range" id="lineHeightCtl" min="90" max="180" value="100"></div>
@@ -945,6 +950,38 @@ const FONTMAP = {
   'MA400': "font-family:'MA';font-weight:400",
   'Disp':  "font-family:'Disp';font-style:italic"
 };
+
+/* ---- feature 1/23: custom font upload ---- */
+let customFontDataURL = null;
+let customFontFormat = 'woff2';
+document.getElementById('uploadFontBtn').onclick=()=>document.getElementById('fontFileInput').click();
+document.getElementById('fontFileInput').onchange=async (e)=>{
+  const f=e.target.files[0]; if(!f) return;
+  const hint=document.getElementById('customFontHint');
+  hint.textContent='Загружаю...';
+  try{
+    const buf=await f.arrayBuffer();
+    const face=new FontFace('CustomUserFont', buf);
+    await face.load();
+    document.fonts.add(face);
+    const b64=btoa(new Uint8Array(buf).reduce((s,b)=>s+String.fromCharCode(b),''));
+    const ext=(f.name.split('.').pop()||'woff2').toLowerCase();
+    const fmt=ext==='ttf'?'truetype':ext==='otf'?'opentype':ext;
+    customFontDataURL='data:font/'+ext+';base64,'+b64;
+    customFontFormat=fmt;
+    FONTMAP['Custom']="font-family:'CustomUserFont'";
+    ['fontHead','fontTrans'].forEach(id=>{
+      const sel=document.getElementById(id);
+      if(![...sel.options].some(o=>o.value==='Custom')){
+        const opt=document.createElement('option'); opt.value='Custom'; opt.textContent='Свой шрифт ('+f.name+')';
+        sel.appendChild(opt);
+      }
+    });
+    hint.textContent='Готово: "'+f.name+'" добавлен в списки шрифтов выше.';
+    if(built) applyAppearance();
+  }catch(err){ hint.textContent='Не смогла прочитать файл шрифта.'; }
+};
+
 function applyAppearance(){
   let st = document.getElementById('appearanceVars');
   if(!st){ st=document.createElement('style'); st.id='appearanceVars'; document.head.appendChild(st); }
@@ -1676,7 +1713,8 @@ function svgURL(el){
   const NS='http://www.w3.org/1999/xhtml';
   const holder=document.createElementNS(NS,'div');
   const st=document.createElementNS(NS,'style');
-  st.textContent=document.getElementById('fontfaces').textContent+
+  const customFace = customFontDataURL ? "@font-face{font-family:'CustomUserFont';src:url("+customFontDataURL+") format('"+customFontFormat+"')}" : '';
+  st.textContent=document.getElementById('fontfaces').textContent+customFace+
     document.getElementById('tplcss').textContent+
     (document.getElementById('paletteVars')?document.getElementById('paletteVars').textContent:'')+
     (document.getElementById('appearanceVars')?document.getElementById('appearanceVars').textContent:'')+
