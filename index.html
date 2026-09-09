@@ -677,6 +677,8 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
     <option value="grid">Клетка</option>
   </select></div>
   <div class="row"><label>Ручная правка</label><div class="swatches" id="manualSwatches" style="flex:1"></div></div>
+  <div class="row"><label>Прозрачность блоков</label><input type="range" id="opacityCtl" min="40" max="100" value="100"></div>
+  <div class="row"><label>Размытие фона</label><input type="range" id="blurCtl" min="0" max="20" value="0"></div>
   <div class="btns">
     <button class="btn ghost" id="lockPalette">🔒 Закрепить палитру</button>
     <button class="btn ghost" id="invertPalette">🌗 Инвертировать</button>
@@ -1060,6 +1062,12 @@ function applyAppearance(){
     css += '.card,.tile,.ldbody,.tabcard,.tkcard,.sticker{background:#14141e !important}';
   }
 
+  /* feature 6/23: block opacity + background blur */
+  const opac = document.getElementById('opacityCtl').value/100;
+  if(opac<1) css += '.card,.tile,.ldbody,.tabcard,.tkcard,.sticker,.bbox,.seal{opacity:'+opac+'}';
+  const blurPx = document.getElementById('blurCtl').value;
+  if(blurPx>0) css += '.cnrblock,.ribbon,.ph::before{filter:blur('+blurPx+'px)}';
+
 
   // ensure text inside light card surfaces stays readable regardless of --ink
   const inkHex = palette.ink.replace('#','');
@@ -1075,7 +1083,7 @@ function applyAppearance(){
 let SLIDE_W = 1080, SLIDE_H = 1350;
 ['radiusCtl','shadowCtl','lineHeightCtl','paddingCtl','grainCtl','fontHead','fontTrans','ratioSel',
  'showPg','showHandle','showTag','numStyle','bgStyle','borderSel','alignSel','caseSel',
- 'strokeCtl','textShadowCtl','textGradientOn','neonOn'].forEach(id=>{
+ 'strokeCtl','textShadowCtl','textGradientOn','neonOn','opacityCtl','blurCtl'].forEach(id=>{
   const el=document.getElementById(id);
   const ev = (el.type==='range')?'input':'change';
   el.addEventListener(ev, ()=>{ applyAppearance(); if(built && (id==='ratioSel'||id==='numStyle')) rebuildPreview(); });
