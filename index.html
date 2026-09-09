@@ -612,6 +612,10 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
   <div class="hint" id="customFontHint" style="text-align:left;margin:-2px 0 0 132px">Появится в списках выше как «Свой шрифт»</div>
   <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" style="display:none">
   <div class="row"><label>Скругление углов</label><input type="range" id="radiusCtl" min="0" max="60" value="24"></div>
+  <div class="row"><label>Обводка текста</label><input type="range" id="strokeCtl" min="0" max="6" value="0"></div>
+  <div class="row"><label>Тень текста</label><input type="range" id="textShadowCtl" min="0" max="100" value="0"></div>
+  <div class="row"><label>Градиент на тексте</label><input type="checkbox" id="textGradientOn" style="width:auto;flex:0"></div>
+  <div class="row"><label>Неоновое свечение</label><input type="checkbox" id="neonOn" style="width:auto;flex:0"></div>
   <div class="row"><label>Тень блоков</label><input type="range" id="shadowCtl" min="0" max="100" value="100"></div>
   <div class="row"><label>Межстрочный</label><input type="range" id="lineHeightCtl" min="90" max="180" value="100"></div>
   <div class="row"><label>Отступы полей</label><input type="range" id="paddingCtl" min="60" max="160" value="100"></div>
@@ -1030,6 +1034,10 @@ function applyAppearance(){
   if(cs==='upper') css += '.en,.ren,.len,.len2,.cken,.nen,.ten,.mline{text-transform:uppercase !important}';
   else if(cs==='lower') css += '.en,.ren,.len,.len2,.cken,.nen,.ten,.mline{text-transform:lowercase !important}';
 
+  /* feature 2/23: text stroke */
+  const strokeW = document.getElementById('strokeCtl').value;
+  if(strokeW>0) css += '.covttl,.en,.ren,.len,.len2,.cken,.nen,.ten{-webkit-text-stroke:'+strokeW+'px var(--a0);paint-order:stroke fill}';
+
   // ensure text inside light card surfaces stays readable regardless of --ink
   const inkHex = palette.ink.replace('#','');
   const inkLum = (0.299*parseInt(inkHex.slice(0,2),16) + 0.587*parseInt(inkHex.slice(2,4),16) + 0.114*parseInt(inkHex.slice(4,6),16));
@@ -1043,7 +1051,8 @@ function applyAppearance(){
 }
 let SLIDE_W = 1080, SLIDE_H = 1350;
 ['radiusCtl','shadowCtl','lineHeightCtl','paddingCtl','grainCtl','fontHead','fontTrans','ratioSel',
- 'showPg','showHandle','showTag','numStyle','bgStyle','borderSel','alignSel','caseSel'].forEach(id=>{
+ 'showPg','showHandle','showTag','numStyle','bgStyle','borderSel','alignSel','caseSel',
+ 'strokeCtl','textShadowCtl','textGradientOn','neonOn'].forEach(id=>{
   const el=document.getElementById(id);
   const ev = (el.type==='range')?'input':'change';
   el.addEventListener(ev, ()=>{ applyAppearance(); if(built && (id==='ratioSel'||id==='numStyle')) rebuildPreview(); });
