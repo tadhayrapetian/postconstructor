@@ -1745,6 +1745,20 @@ document.getElementById('slidePhotoInput').onchange=(e)=>{
   r.readAsDataURL(f);
 };
 
+/* feature 12/23: delete slide */
+document.getElementById('delSlide').onclick=()=>{
+  if(!built) return;
+  const all=[...document.querySelectorAll('.sl')];
+  if(all.length<=1){ document.getElementById('status').textContent='Нельзя удалить последний слайд.'; return; }
+  const active=document.querySelector('.sl.show');
+  if(!active) return;
+  const idx=all.indexOf(active);
+  active.remove();
+  slides=[...document.querySelectorAll('.sl')];
+  show(Math.min(idx,slides.length-1));
+  document.getElementById('status').textContent='Слайд удалён.';
+};
+
 /* feature 11/23: duplicate slide */
 document.getElementById('dupSlide').onclick=()=>{
   if(!built) return;
