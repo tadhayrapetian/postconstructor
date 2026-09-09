@@ -1062,6 +1062,16 @@ function applyAppearance(){
       '-webkit-background-clip:border-box !important;background-clip:border-box !important}';
   }
 
+  /* feature 5/23: neon glow */
+  if(document.getElementById('neonOn').checked){
+    css += '.covttl,.en,.ren,.len,.len2,.cken,.nen,.ten{'+
+      'text-shadow:0 0 6px var(--a0),0 0 16px var(--a0),0 0 34px var(--a0),0 0 60px var(--a1) !important;'+
+      'color:#fff !important}';
+    css += '.sl{background:#0a0a12 !important;color:#cfd3e0 !important}';
+    css += '.card,.tile,.ldbody,.tabcard,.tkcard,.sticker{background:#14141e !important}';
+  }
+
+
   // ensure text inside light card surfaces stays readable regardless of --ink
   const inkHex = palette.ink.replace('#','');
   const inkLum = (0.299*parseInt(inkHex.slice(0,2),16) + 0.587*parseInt(inkHex.slice(2,4),16) + 0.114*parseInt(inkHex.slice(4,6),16));
