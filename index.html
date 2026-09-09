@@ -2990,6 +2990,7 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
 <div class="panel">
   <h2>4. Цвета</h2>
   <div class="swatches" id="swatches"></div>
+  <div id="contrastCheck" class="hint" style="text-align:left"></div>
   <div class="btns" style="margin-top:14px">
     <button class="btn wide" id="shufflePalette">🎲 Сгенерировать новую палитру</button>
   </div>
@@ -3205,6 +3206,32 @@ function renderSwatches(){
     sw.className='swatch'; sw.style.background=palette[k]; sw.title=label+' '+palette[k];
     el.appendChild(sw);
   });
+  updateContrastCheck();
+}
+
+/* feature 20/23: WCAG contrast checker for bg vs ink */
+function relLuminance(hex){
+  hex=hex.replace('#','');
+  const toLin = c => { c/=255; return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055,2.4); };
+  const r=toLin(parseInt(hex.slice(0,2),16)), g=toLin(parseInt(hex.slice(2,4),16)), b=toLin(parseInt(hex.slice(4,6),16));
+  return 0.2126*r+0.7152*g+0.0722*b;
+}
+function contrastRatio(hex1,hex2){
+  const L1=relLuminance(hex1), L2=relLuminance(hex2);
+  const lighter=Math.max(L1,L2), darker=Math.min(L1,L2);
+  return (lighter+0.05)/(darker+0.05);
+}
+function updateContrastCheck(){
+  const el=document.getElementById('contrastCheck');
+  if(!el) return;
+  const ratio=contrastRatio(palette.bg, palette.ink);
+  const r=ratio.toFixed(2);
+  let verdict, color;
+  if(ratio>=7){ verdict='Отлично (AAA)'; color='#5FBF7A'; }
+  else if(ratio>=4.5){ verdict='Хорошо (AA)'; color='#8FBF5F'; }
+  else if(ratio>=3){ verdict='Только для крупного текста'; color='#E0A857'; }
+  else { verdict='Низкий контраст — текст может быть плохо читаем'; color='#E85D75'; }
+  el.innerHTML='Контраст фон/текст: <b style="color:'+color+'">'+r+':1 — '+verdict+'</b>';
 }
 /* feature 19/23: dark/light theme toggle for the tool chrome itself */
 (function themeInit(){
