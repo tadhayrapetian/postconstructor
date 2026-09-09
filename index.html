@@ -2999,6 +2999,8 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
     <option value="dots">Точки</option>
     <option value="lines">Тонкие линии</option>
     <option value="grid">Клетка</option>
+    <option value="multigrad">Мультиградиент (4 цвета)</option>
+    <option value="sunset">Закат (3 цвета вертикально)</option>
     <option value="paper">Бумажная текстура</option>
     <option value="noise">Шум/зерно</option>
   </select></div>
@@ -3351,6 +3353,8 @@ function applyAppearance(){
   const bgs = document.getElementById('bgStyle').value;
   if(bgs==='gradient') css += '.sl{background:linear-gradient(160deg,var(--bg) 0%,var(--a2) 100%) !important}';
   else if(bgs==='radial') css += '.sl{background:radial-gradient(120% 80% at 50% 15%,var(--a2) 0%,var(--bg) 62%) !important}';
+  else if(bgs==='multigrad') css += '.sl{background:linear-gradient(135deg,var(--bg) 0%,var(--a2) 33%,var(--a3) 66%,var(--a0) 100%) !important}';
+  else if(bgs==='sunset') css += '.sl{background:linear-gradient(180deg,var(--a0) 0%,var(--a1) 45%,var(--bg) 100%) !important}';
   else if(bgs==='dots') css += '.sl{background-color:var(--bg) !important;background-image:radial-gradient(var(--a2) 2.5px,transparent 2.5px) !important;background-size:34px 34px !important}';
   else if(bgs==='lines') css += '.sl{background-color:var(--bg) !important;background-image:repeating-linear-gradient(0deg,var(--a2) 0 1px,transparent 1px 40px) !important}';
   else if(bgs==='grid') css += '.sl{background-color:var(--bg) !important;background-image:repeating-linear-gradient(0deg,var(--a2) 0 1px,transparent 1px 46px),repeating-linear-gradient(90deg,var(--a2) 0 1px,transparent 1px 46px) !important}';
