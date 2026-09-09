@@ -2798,59 +2798,69 @@ var qrcode = function() {
 .tpl-stamp .pg{font-family:'MA';font-weight:600;font-size:24px;color:var(--ink);opacity:.5}
 </style>
 <style>
+:root{
+  --ui-bg:#15130F; --ui-text:#F0EAE0; --ui-panel:#221F19; --ui-input:#171410;
+  --ui-border:#3A362C; --ui-accent:#E0A857; --ui-accent-text:#221A0C; --ui-muted:#B9AF9C;
+}
+html.light-theme{
+  --ui-bg:#F4EFE6; --ui-text:#241F18; --ui-panel:#FFFDF8; --ui-input:#FFFFFF;
+  --ui-border:#DCD3C2; --ui-accent:#B3682D; --ui-accent-text:#FFFFFF; --ui-muted:#6B6152;
+}
 *{box-sizing:border-box}
-body{margin:0;background:#15130F;color:#F0EAE0;font:15px/1.5 -apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+body{margin:0;background:var(--ui-bg);color:var(--ui-text);font:15px/1.5 -apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
   padding:0}
 #appShell{display:flex;gap:20px;align-items:flex-start;padding:16px;max-width:1400px;margin:0 auto}
 #toolCol{flex:1 1 520px;min-width:0;display:flex;flex-direction:column;gap:18px;
   max-height:calc(100vh - 32px);overflow-y:auto;padding-right:6px}
 #toolCol::-webkit-scrollbar{width:8px}
-#toolCol::-webkit-scrollbar-thumb{background:#3A362C;border-radius:4px}
+#toolCol::-webkit-scrollbar-thumb{background:var(--ui-border);border-radius:4px}
 #previewCol{flex:0 0 560px;position:sticky;top:16px;align-self:flex-start;
   max-height:calc(100vh - 32px);overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:14px}
 #previewCol::-webkit-scrollbar{width:8px}
-#previewCol::-webkit-scrollbar-thumb{background:#3A362C;border-radius:4px}
+#previewCol::-webkit-scrollbar-thumb{background:var(--ui-border);border-radius:4px}
 @media (max-width: 1080px){
   #appShell{flex-direction:column;padding:12px}
   #toolCol,#previewCol{flex:1 1 auto;width:100%;max-height:none;position:static;overflow:visible}
 }
-h2{font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#E0A857;margin:0 0 10px}
-.panel{width:100%;max-width:560px;background:#221F19;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px}
-textarea{width:100%;min-height:170px;background:#171410;color:#F0EAE0;border:1px solid #3A362C;border-radius:10px;
+h2{font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ui-accent);margin:0 0 10px}
+.panel{width:100%;max-width:560px;background:var(--ui-panel);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px}
+textarea{width:100%;min-height:170px;background:var(--ui-input);color:var(--ui-text);border:1px solid var(--ui-border);border-radius:10px;
   padding:12px;font:14px/1.5 ui-monospace,Menlo,monospace;resize:vertical}
-input[type=text]{width:100%;background:#171410;color:#F0EAE0;border:1px solid #3A362C;border-radius:10px;padding:10px 12px;font-size:15px}
+input[type=text]{width:100%;background:var(--ui-input);color:var(--ui-text);border:1px solid var(--ui-border);border-radius:10px;padding:10px 12px;font-size:15px}
 .tplgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-select{width:100%;background:#171410;color:#F0EAE0;border:1px solid #3A362C;border-radius:10px;
+select{width:100%;background:var(--ui-input);color:var(--ui-text);border:1px solid var(--ui-border);border-radius:10px;
   padding:12px;font-size:15px;font-weight:600}
-select optgroup{background:#221F19;color:#E0A857;font-size:13px}
-select option{background:#171410;color:#F0EAE0;font-weight:400;padding:6px}
-.tplbtn{background:#171410;border:2px solid #3A362C;border-radius:12px;padding:14px 8px;color:#D8CFC0;
+select optgroup{background:var(--ui-panel);color:var(--ui-accent);font-size:13px}
+select option{background:var(--ui-input);color:var(--ui-text);font-weight:400;padding:6px}
+.tplbtn{background:var(--ui-input);border:2px solid var(--ui-border);border-radius:12px;padding:14px 8px;color:var(--ui-muted);
   font-size:13px;font-weight:600;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px}
-.tplbtn.active{border-color:#E0A857;color:#fff;background:#2E2A20}
+.tplbtn.active{border-color:var(--ui-accent);color:var(--ui-text);background:var(--ui-panel)}
 .tplbtn svg{width:36px;height:44px}
 .row{display:flex;align-items:center;gap:12px}
-.row label{flex:0 0 120px;color:#B9AF9C;font-size:14px}
+.row label{flex:0 0 120px;color:var(--ui-muted);font-size:14px}
 input[type=range]{flex:1}
 .swatches{display:flex;gap:10px;flex-wrap:wrap}
-.swatch{width:44px;height:44px;border-radius:10px;border:2px solid rgba(255,255,255,.15)}
-.btn{background:#E0A857;color:#221A0C;border:0;border-radius:10px;padding:13px 18px;font-size:15px;font-weight:700;cursor:pointer}
-.btn.ghost{background:#3A362C;color:#F0EAE0}
+.swatch{width:44px;height:44px;border-radius:10px;border:2px solid rgba(128,128,128,.3)}
+.btn{background:var(--ui-accent);color:var(--ui-accent-text);border:0;border-radius:10px;padding:13px 18px;font-size:15px;font-weight:700;cursor:pointer}
+.btn.ghost{background:var(--ui-border);color:var(--ui-text)}
 .btn.wide{width:100%}
 .btns{display:flex;gap:10px;flex-wrap:wrap}
 .stage{width:100%;display:flex;justify-content:center;overflow:hidden}
 .wrap{transform-origin:top center}
 .nav{display:flex;align-items:center;gap:16px}
-.nav button{background:#3A362C;color:#F0EAE0;border:0;border-radius:12px;padding:12px 20px;font-size:16px;font-weight:600}
+.nav button{background:var(--ui-border);color:var(--ui-text);border:0;border-radius:12px;padding:12px 20px;font-size:16px;font-weight:600}
 .count{font-size:16px;font-weight:600;min-width:70px;text-align:center}
-.hint{font-size:13px;color:#B9AF9C;max-width:560px;text-align:center}
+.hint{font-size:13px;color:var(--ui-muted);max-width:560px;text-align:center}
 #outimg{max-width:100%;border-radius:8px;display:none}
 .sl{display:none}
 .sl.show{display:block}
-.section{border-top:1px solid #34302688;padding-top:14px;margin-top:4px}
+.section{border-top:1px solid var(--ui-border);padding-top:14px;margin-top:4px}
 </style>
 </head>
 <body>
 <div id="appShell">
+<button id="themeToggle" style="position:fixed;top:14px;right:14px;z-index:50;background:var(--ui-panel);
+  color:var(--ui-text);border:1px solid var(--ui-border);border-radius:999px;padding:10px 16px;cursor:pointer;font-size:14px">🌙 Тёмная</button>
 <div id="toolCol">
 <div id="draftBanner" class="panel" style="display:none;background:#3A2F1A;border:1px solid #E0A857">
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
@@ -3196,6 +3206,24 @@ function renderSwatches(){
     el.appendChild(sw);
   });
 }
+/* feature 19/23: dark/light theme toggle for the tool chrome itself */
+(function themeInit(){
+  const THEME_KEY='postConstructorTheme';
+  const btn=document.getElementById('themeToggle');
+  function apply(light){
+    document.documentElement.classList.toggle('light-theme', light);
+    btn.textContent = light ? '☀️ Светлая' : '🌙 Тёмная';
+  }
+  let saved=null;
+  try{ saved=localStorage.getItem(THEME_KEY); }catch(e){}
+  apply(saved==='light');
+  btn.onclick=()=>{
+    const nowLight=!document.documentElement.classList.contains('light-theme');
+    apply(nowLight);
+    try{ localStorage.setItem(THEME_KEY, nowLight?'light':'dark'); }catch(e){}
+  };
+})();
+
 renderSwatches();
 function renderManualSwatches(){
   const el=document.getElementById('manualSwatches');
