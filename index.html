@@ -1038,6 +1038,10 @@ function applyAppearance(){
   const strokeW = document.getElementById('strokeCtl').value;
   if(strokeW>0) css += '.covttl,.en,.ren,.len,.len2,.cken,.nen,.ten{-webkit-text-stroke:'+strokeW+'px var(--a0);paint-order:stroke fill}';
 
+  /* feature 3/23: text drop shadow */
+  const tsh = document.getElementById('textShadowCtl').value/100;
+  if(tsh>0) css += '.covttl,.en,.ren,.len,.len2,.cken,.nen,.ten{text-shadow:'+(6*tsh)+'px '+(8*tsh)+'px '+(14*tsh)+'px rgba(0,0,0,'+(0.45*tsh)+')}';
+
   // ensure text inside light card surfaces stays readable regardless of --ink
   const inkHex = palette.ink.replace('#','');
   const inkLum = (0.299*parseInt(inkHex.slice(0,2),16) + 0.587*parseInt(inkHex.slice(2,4),16) + 0.114*parseInt(inkHex.slice(4,6),16));
