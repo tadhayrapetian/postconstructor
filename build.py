@@ -2,6 +2,7 @@ import base64, pathlib, json
 
 FONTS = json.load(open('/home/claude/constructor/fonts.json'))
 JSZIP_SRC = pathlib.Path('/home/claude/jszip/node_modules/jszip/dist/jszip.min.js').read_text(encoding='utf-8')
+QR_SRC = pathlib.Path('/home/claude/repo/qrcode_bundle.js').read_text(encoding='utf-8')
 
 FONT_FACES = f"""
 @font-face{{font-family:'Atyan';src:url(data:font/woff2;base64,{FONTS['ATY']}) format('woff2');font-weight:400;font-display:block}}
@@ -532,6 +533,7 @@ def make_html():
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Конструктор постов</title>
 <script>__JSZIP__</script>
+<script>__QRLIB__</script>
 <style id="fontfaces">__FONTFACES__</style>
 <style id="tplcss">__TPLCSS__</style>
 <style>__UICSS__</style>
@@ -700,6 +702,9 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
 
 <div class="panel">
   <h2>5. Брендинг</h2>
+  <div class="row"><label>QR-код</label><input type="text" id="qrText" placeholder="ссылка или текст"></div>
+  <div class="row"><label></label><button class="btn ghost" id="addQrBtn" style="flex:1">➕ Добавить QR на текущий слайд</button></div>
+  <div class="hint" id="qrHint" style="text-align:left;margin:-2px 0 6px 132px"></div>
   <div class="row"><label>Фото слайда</label><button class="btn ghost" id="slidePhotoBtn" style="flex:1">🖼️ Добавить фото на текущий слайд</button></div>
   <div class="hint" id="slidePhotoHint" style="text-align:left;margin:-2px 0 6px 132px">Ставится полупрозрачным фоном именно этого слайда</div>
   <input type="file" id="slidePhotoInput" accept="image/*" style="display:none">
@@ -1674,6 +1679,43 @@ document.addEventListener('pointerdown', e=>{
   document.addEventListener('pointermove',mv); document.addEventListener('pointerup',up);
 });
 
+/* feature 9/23: QR code generator (pure client-side, no external service) */
+function makeQrSvg(text, dark, light){
+  const qr = qrcode(0, 'M');
+  qr.addData(text);
+  qr.make();
+  const n = qr.getModuleCount();
+  const cell = 4;
+  const size = n*cell;
+  let rects='';
+  for(let r=0;r<n;r++){
+    for(let c=0;c<n;c++){
+      if(qr.isDark(r,c)) rects += '<rect x="'+(c*cell)+'" y="'+(r*cell)+'" width="'+cell+'" height="'+cell+'"/>';
+    }
+  }
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+size+' '+size+'" width="100%" height="100%">'+
+    '<rect width="'+size+'" height="'+size+'" fill="'+light+'"/><g fill="'+dark+'">'+rects+'</g></svg>';
+}
+document.getElementById('addQrBtn').onclick=()=>{
+  const hint=document.getElementById('qrHint');
+  if(!built){ hint.textContent='Сначала собери пост.'; return; }
+  const txt=document.getElementById('qrText').value.trim();
+  if(!txt){ hint.textContent='Впиши ссылку или текст для QR.'; return; }
+  const activeSlide=document.querySelector('.sl.show');
+  if(!activeSlide) return;
+  let holder=activeSlide.querySelector('.userQrCode');
+  if(!holder){
+    holder=document.createElement('div');
+    holder.className='userQrCode';
+    holder.style.cssText='position:absolute;right:40px;bottom:110px;width:130px;height:130px;background:#fff;padding:10px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.18);z-index:7';
+    activeSlide.querySelector('.in').appendChild(holder);
+  }
+  try{
+    holder.innerHTML = makeQrSvg(txt, '#000000', '#ffffff');
+    hint.textContent='QR добавлен на слайд '+(cur+1)+'.';
+  }catch(err){ hint.textContent='Не удалось собрать QR (слишком длинный текст?).'; }
+};
+
 /* feature 8/23: custom photo per slide */
 document.getElementById('slidePhotoBtn').onclick=()=>{
   if(!built){ document.getElementById('slidePhotoHint').textContent='Сначала собери пост.'; return; }
@@ -1857,6 +1899,7 @@ document.getElementById('zipAll').onclick=async()=>{
 </script>
 </body></html>"""
     template = template.replace('__JSZIP__', JSZIP_SRC)
+    template = template.replace('__QRLIB__', QR_SRC)
     template = template.replace('__FONTFACES__', FONT_FACES)
     template = template.replace('__TPLCSS__', TEMPLATE_CSS)
     template = template.replace('__UICSS__', UI_CSS)
