@@ -807,6 +807,19 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
   </div>
 </div>
 
+<div class="panel">
+  <h2>Подпись к посту</h2>
+  <textarea id="captionBox" placeholder="Соберётся автоматически из фраз, можно править"></textarea>
+  <div class="row"><label>Символов</label><span id="charCount" style="font-weight:700">0 / 2200</span></div>
+  <div class="row"><label>Свои хэштеги</label><input type="text" id="hashtagInput" placeholder="#անգլերեն #սովորենք — через пробел"></div>
+  <div class="btns">
+    <button class="btn ghost" id="addHashtagsBtn">➕ Добавить в подпись</button>
+    <button class="btn ghost" id="genCaptionBtn">🔄 Пересобрать из фраз</button>
+  </div>
+  <div class="hint">Банк часто используемых:</div>
+  <div class="btns" id="hashtagBank"></div>
+</div>
+
 
 <input type="file" id="projectFileInput" accept=".json" style="display:none">
 
@@ -2047,14 +2060,58 @@ document.getElementById('projectFileInput').onchange=(e)=>{
 };
 
 document.getElementById('copyCaption').onclick=()=>{
-  const d=parseContent();
-  let cap=d.title.replace(/\*\*/g,'')+'\\n\\n';
-  d.phrases.forEach((p,i)=>{ cap+=(i+1)+'. '+p.en+' — '+p.am+'\\n'; });
-  cap+='\\n'+d.handle;
+  const cap=document.getElementById('captionBox').value;
   navigator.clipboard.writeText(cap).then(
     ()=>{document.getElementById('status').textContent='Подпись скопирована.';},
     ()=>{document.getElementById('status').textContent='Не удалось скопировать.';}
   );
+};
+
+/* feature 18/23: caption char counter + hashtag bank */
+function genCaptionText(){
+  const d=parseContent();
+  let cap=d.title.replace(/\*\*/g,'')+'\\n\\n';
+  d.phrases.forEach((p,i)=>{ cap+=(i+1)+'. '+p.en+' — '+p.am+'\\n'; });
+  cap+='\\n'+d.handle;
+  return cap;
+}
+function updateCharCount(){
+  const len=document.getElementById('captionBox').value.length;
+  const el=document.getElementById('charCount');
+  el.textContent=len+' / 2200';
+  el.style.color = len>2200 ? '#E85D75' : (len>1900 ? '#E0A857' : '');
+}
+document.getElementById('genCaptionBtn').onclick=()=>{
+  if(!built){ document.getElementById('status').textContent='Сначала собери пост.'; return; }
+  document.getElementById('captionBox').value=genCaptionText();
+  updateCharCount();
+};
+document.getElementById('captionBox').addEventListener('input', updateCharCount);
+
+const HASHTAG_BANK=['#անգլերեն','#անգլերենսովորենք','#armenian','#learnenglish','#englishlessons',
+  '#հայերեն','#tadhayrapetian','#idioms','#vocabulary','#speakenglish'];
+function renderHashtagBank(){
+  const el=document.getElementById('hashtagBank');
+  el.innerHTML='';
+  HASHTAG_BANK.forEach(tag=>{
+    const b=document.createElement('button');
+    b.className='btn ghost'; b.textContent=tag; b.style.fontSize='13px'; b.style.padding='8px 12px';
+    b.onclick=()=>{
+      const box=document.getElementById('captionBox');
+      box.value = (box.value.trim()+' '+tag).trim();
+      updateCharCount();
+    };
+    el.appendChild(b);
+  });
+}
+renderHashtagBank();
+document.getElementById('addHashtagsBtn').onclick=()=>{
+  const custom=document.getElementById('hashtagInput').value.trim();
+  if(!custom) return;
+  const box=document.getElementById('captionBox');
+  box.value=(box.value.trim()+' '+custom).trim();
+  updateCharCount();
+  document.getElementById('hashtagInput').value='';
 };
 
 document.getElementById('buildBtn').onclick=()=>{
@@ -2067,6 +2124,10 @@ document.getElementById('buildBtn').onclick=()=>{
   const ph=document.getElementById('previewPlaceholder'); if(ph) ph.style.display='none';
   renderPlayer();
   historyStack=[]; historyIndex=-1; pushHistory();
+  if(document.getElementById('captionBox') && !document.getElementById('captionBox').value.trim()){
+    document.getElementById('captionBox').value=genCaptionText();
+    updateCharCount();
+  }
 };
 function rebuildPreview(){
   applyPalette();
