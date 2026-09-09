@@ -3071,6 +3071,12 @@ I'm not gonna lie, that bugs me. | Անկեղծ ասած՝ դա ինձ նյար�
     <span class="count" id="count"></span>
     <button id="next">→</button>
   </div>
+  <div class="btns" style="justify-content:center">
+    <button class="btn ghost" id="dupSlide" title="Дублировать текущий слайд">⧉ Дублировать</button>
+    <button class="btn ghost" id="delSlide" title="Удалить текущий слайд">🗑 Удалить</button>
+    <button class="btn ghost" id="moveSlideLeft" title="Передвинуть влево">⇤</button>
+    <button class="btn ghost" id="moveSlideRight" title="Передвинуть вправо">⇥</button>
+  </div>
   <div class="stage" id="stage"><div class="wrap" id="wrap"></div></div>
   <div class="panel">
     <div class="row"><label>Размер текста</label><input type="range" id="tsize" min="70" max="140" value="100"></div>
@@ -4048,6 +4054,18 @@ document.getElementById('slidePhotoInput').onchange=(e)=>{
     document.getElementById('slidePhotoHint').textContent='Фото добавлено на слайд '+(cur+1)+'.';
   };
   r.readAsDataURL(f);
+};
+
+/* feature 11/23: duplicate slide */
+document.getElementById('dupSlide').onclick=()=>{
+  if(!built) return;
+  const active=document.querySelector('.sl.show');
+  if(!active) return;
+  const clone=active.cloneNode(true);
+  active.insertAdjacentElement('afterend', clone);
+  slides=[...document.querySelectorAll('.sl')];
+  show(cur+1);
+  document.getElementById('status').textContent='Слайд продублирован.';
 };
 
 document.getElementById('shuffleAccents').onclick=()=>{
