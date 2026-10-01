@@ -1,0 +1,14 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": { "v": 1, "at": "2026-10-01T09:52:18Z" },
+  "title": "Post Constructor",
+  "namespace": "PostConstructor",
+  "libraries": [],
+  "sections": {},
+  "groups": [],
+  "assetGroups": {},
+  "blobs": {},
+  "docs": { "readme": "project/README.md", "sections": [] },
+  "lastChange": { "by": "Claude", "at": "2026-10-01T09:52:18Z", "via": "GitHub · tadhayrapetian/postconstructor@85b7bc4", "note": "First sync: chrome + slide tokens, 8 fonts, 9 component cards and cover from build.py/index.html." }
+}

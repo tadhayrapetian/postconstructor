@@ -1,0 +1,32 @@
+<!-- @dsCard height=288 -->
+<style>
+  html,body{margin:0}
+  .cv{position:relative;width:960px;height:288px;background:var(--bg);overflow:hidden}
+  .cv svg{position:absolute;left:0;top:0}
+  .a0{fill:var(--a0)} .a1{fill:var(--a1)} .a2{fill:var(--a2)} .ink{fill:var(--ink)} .paper{fill:var(--paper)}
+  .card{rx:var(--radius-slide-card)} .tile{rx:var(--radius-slide-tile)}
+  .txt{position:absolute;left:40px;bottom:36px;max-width:440px}
+  .name{font-family:MA,sans-serif;font-weight:900;font-size:64px;line-height:.95;color:var(--ink);margin:0}
+  .tag{font-family:MA,sans-serif;font-weight:500;font-size:13px;color:var(--ink);opacity:.75;margin-top:16px}
+</style>
+<div class="cv">
+  <svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+    <!-- blocks: a0 portrait slab 192×288 (radius-slide-card), ink 176×136 (radius-slide-tile), a2 176×136 (radius-slide-tile), a1 pill 128×40 (radius-pill = half height)
+         arrangement: a 4:5 "slide" in a0 bleeding top and bottom at x=520, satellites stacked to the right and bleeding off the right edge
+         pattern: discs and pills, the cover's own three dots (.dots: a0, a1, a2) and the .pill — the brand's shapes are round marks on flat colour
+         scales: gaps 16 (space-ui-lg), dots 18 (cover .dots i), radii radius-slide-card 32, radius-slide-tile 24 -->
+    <rect class="a0 card" x="520" y="-32" width="192" height="352"/>
+    <rect class="ink tile" x="728" y="-24" width="256" height="160"/>
+    <rect class="a2 tile" x="728" y="152" width="256" height="160"/>
+    <rect class="a1" x="552" y="200" width="128" height="40" rx="20"/>
+    <circle class="paper" cx="561" cy="60" r="9"/>
+    <circle class="a1" cx="595" cy="60" r="9"/>
+    <circle class="a2" cx="629" cy="60" r="9"/>
+    <circle class="a0" cx="792" cy="224" r="24"/>
+    <circle class="a1" cx="856" cy="224" r="24"/>
+  </svg>
+  <div class="txt">
+    <p class="name">Post<br>Constructor</p>
+    <div class="tag">Bilingual Instagram carousels, one phrase per slide.</div>
+  </div>
+</div>
