@@ -2,7 +2,21 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2d8cff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Конверт Студия">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="application-name" content="Конверт Студия">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<style id="appShell">
+.app{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+@media (display-mode: standalone){ html,body{overscroll-behavior:none} }
+</style>
 <title>Конверт Студия</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3830,6 +3844,21 @@ if((st.ui.lang||'ru')!=='ru') setTimeout(translateUI,300);
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,100));else setTimeout(init,100);
 })();
+</script>
+<script>
+/* installable app: offline cache and update notice */
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const w = reg.installing; if (!w) return;
+        w.addEventListener('statechange', () => {
+          if (w.state === 'activated' && navigator.serviceWorker.controller && typeof toast === 'function') toast('Приложение обновлено. Новая версия откроется при следующем запуске.');
+        });
+      });
+    }).catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
