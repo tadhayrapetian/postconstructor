@@ -395,14 +395,14 @@ a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
 .dzov .dzlock{position:absolute;right:0;top:0;transform:translate(50%,-50%);font-size:calc(14px * var(--k,1))}
 .dzgd{position:absolute;pointer-events:none;z-index:998}
 .printing .dzov,.printing .dzgd,#printRoot .dzov,#printRoot .dzgd{display:none!important}
-#dzBar{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:4px;padding:6px 8px;border-radius:999px;max-width:calc(100% - 20px);overflow-x:auto;scrollbar-width:none;background:rgb(var(--glass-rgb) / .92);border:1px solid var(--edge2);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+#dzBar{position:relative;z-index:20;display:flex;align-items:center;gap:4px;padding:5px 8px;border-radius:999px;min-height:44px;overflow-x:auto;scrollbar-width:none;background:rgb(var(--glass-rgb) / .9);border:1px solid var(--edge2);box-shadow:inset 0 1px 0 var(--edge);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);flex:none}
 #dzBar::-webkit-scrollbar{display:none}
 #dzBar button{border:0;background:none;min-width:32px;height:32px;padding:0 8px;border-radius:999px;cursor:pointer;color:var(--ink);font-size:13px;white-space:nowrap}
 #dzBar button:hover{background:var(--field-hi)}
 #dzBar button.on{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--accent)}
 #dzBar button.danger{color:var(--danger)}
 #dzBar select,#dzBar input{width:auto;padding:5px 8px;border-radius:999px;font-size:12.5px}
-#dzBar .dzbn{font-size:12px;font-weight:600;color:var(--muted);padding:0 6px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#dzBar .dzbn{flex:none;font-size:12px;font-weight:600;color:var(--muted);padding:0 6px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dzbcols{display:inline-flex;gap:4px;padding:0 4px}
 .dzbcols i{width:20px;height:20px;border-radius:50%;cursor:pointer;box-shadow:inset 0 0 0 1px rgb(0 0 0 / .15)}
 .dzbcols i.on{box-shadow:0 0 0 2px var(--accent),inset 0 0 0 1px rgb(0 0 0 / .15)}
@@ -502,8 +502,30 @@ a.btn{color:inherit;text-decoration:none;display:inline-flex;align-items:center}
 .mflat .mface{box-shadow:0 22px 40px -14px rgba(40,30,20,.5),0 4px 10px rgba(40,30,20,.2)}
 #dzSearch{border-radius:999px;padding:7px 12px}
 
+#dzBar .dzhint{font-size:12.5px;color:var(--muted);padding:0 8px;white-space:nowrap}
+#dzBar>*{flex:none}
+.toast{z-index:100!important}
+.dzgalhd b{flex:1;min-width:0}
+#dzSaveTpl{flex:none}
+.brand .mark{flex:none}
+@media (max-width:1600px){ .app-env .brand>div:not(.mark){display:none} }
+.dzcats{flex-wrap:wrap!important;overflow:visible;padding-bottom:0}
+.dzcats .btn{padding:4px 10px;font-size:12px}
+.dzpair b,.dzpair small{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.app-print .batch-print-hint{display:block!important}
+@media (max-width:900px){
+  .app-print .main{display:flex!important;flex-direction:column}
+  .app-print .rail{order:0}
+  .app-print .work{order:1;position:sticky;top:0;z-index:30;height:58vh;min-height:360px;display:flex;flex-direction:column;gap:6px;background:var(--wall-base);padding-bottom:4px}
+  .app-print .work .area{min-height:0!important;flex:1}
+  .app-print .side{order:2}
+}
+
+@media (max-width:1300px){ #dzBar{flex-wrap:wrap;border-radius:18px;overflow:visible} }
+.dzpair b{font-size:13px;white-space:normal;line-height:1.15}
+.dzpair small{white-space:normal}
+
 .work{position:relative}
-#dzBar{top:62px}
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .pcard{text-align:left;border:1px solid var(--edge2);border-radius:14px;padding:9px 10px;background:rgb(255 255 255 / .14);cursor:pointer;color:var(--ink);font:inherit;display:flex;flex-direction:column;gap:3px}
 .pcard b{font-weight:600;font-size:13px;line-height:1.25}
@@ -1341,6 +1363,7 @@ header.top::-webkit-scrollbar{display:none}
         </section>
 
         <section class="panel" data-panel="batch" hidden>
+          <p class="hint batch-print-hint" style="display:none">В «Типографии» список людей подставляется в метки {имя}, {фамилия} и {№} на бейджах, грамотах, билетах и приглашениях: на каждого своя копия, все раскладываются на листы.</p>
           <label class="chk"><input type="checkbox" id="batchOn" data-k="batchOn">Печатать для каждого из списка</label>
           <label class="f">Вставьте адреса. Блоки через пустую строку (первая строка имя, индекс отдельной строкой) или таблица из Excel: Имя; Адрес; Город; Индекс; Страна. Любой другой столбец с заголовком, например Уровень, Часы, Стол или Цена, станет меткой {уровень}, {часы}.
             <textarea id="batchText" rows="6" placeholder="Петров Иван&#10;ул. Садовая, 5&#10;Москва&#10;101000&#10;&#10;Арамян Ани; пр. Маштоца, 10; Ереван; 0002; Армения"></textarea>
@@ -1872,9 +1895,9 @@ try{ fixShop(); }catch(e){}
 let sel=null, zoom=1, curK=1, activeTab='tpl';
 let hist=[], hi=-1, restoring=false, saveT;
 function save(){ clearTimeout(saveT); saveT=setTimeout(saveNow,250); }
-function saveNow(){ clearTimeout(saveT); saveT=0; const s=JSON.stringify(st); try{ localStorage.setItem(KEY,s); }catch(e){ try{ localStorage.removeItem(KEY); }catch(_){} if(!save.warned){ save.warned=1; toast('Память браузера заполнена. Проект сохраняется в базу браузера и в файл, если он подключён.'); } } queueStore(); if(!restoring && hist[hi]!==s){ hist=hist.slice(0,hi+1); hist.push(s); if(hist.length>60) hist.shift(); hi=hist.length-1; } restoring=false; undoBtns(); }
+function saveNow(){ clearTimeout(saveT); saveT=0; const s=JSON.stringify(st); try{ localStorage.setItem(KEY,s); }catch(e){ try{ localStorage.removeItem(KEY); }catch(_){} if(!save.warned){ save.warned=1; toast('Память браузера заполнена. Проект сохраняется в базу браузера и в файл, если он подключён.'); } } queueStore(); const hs=histIn(s); if(!restoring && hist[hi]!==hs){ hist=hist.slice(0,hi+1); hist.push(hs); if(hist.length>60) hist.shift(); hi=hist.length-1; } restoring=false; undoBtns(); }
 function undoBtns(){ $('#undo').disabled=hi<=0; $('#redo').disabled=hi>=hist.length-1; }
-function travel(d){ if(typeof dzFlush==='function') dzFlush(); if(saveT) saveNow(); const n=hi+d; if(n<0||n>=hist.length) return; hi=n; restoring=true; st=deepMerge(fresh(),JSON.parse(hist[hi])); sel=null; applyUI(); syncUI(); renderAll(); save(); }
+function travel(d){ if(typeof dzFlush==='function') dzFlush(); if(saveT) saveNow(); const n=hi+d; if(n<0||n>=hist.length) return; hi=n; restoring=true; st=deepMerge(fresh(),JSON.parse(histOut(hist[hi]))); sel=null; applyUI(); syncUI(); renderAll(); save(); }
 
 const getPath=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);
 function setPath(o,p,v){ const ks=p.split('.'); let a=o; ks.slice(0,-1).forEach(k=>{ if(a[k]==null||typeof a[k]!=='object') a[k]={}; a=a[k]; }); a[ks.at(-1)]=v; }
@@ -2184,7 +2207,7 @@ function allCmds(){
   [['envelope','Печать прямо на конверт'],['a4','Печать на A4 с метками'],['net','Выкройка конверта'],['labels','Адресные наклейки']].forEach(([v,n])=>add(n,'печать',()=>{ st.print.mode=v; setView('sheet'); syncUI(); update(); }));
   Object.entries(TITLES).forEach(([id,n])=>add('Вкладка: '+n,'вкладка',()=>goTab(id)));
   TPL.forEach(t=>add('Шаблон: '+t.name,'шаблон',()=>applyTpl(t.id)));
-  SIZES.filter(s=>s.id!=='CUSTOM').forEach(s=>add('Размер: '+s.name,'формат',()=>{ st.size=s.id; syncUI(); update(); }));
+  SIZES.filter(s=>s.id!=='CUSTOM').forEach(s=>add('Размер: '+s.name,'формат',()=>{ if(dzOn()){ toast('В «Типографии» размер задаёт изделие во вкладке «Шаблоны»'); return; } st.size=s.id; syncUI(); update(); }));
   PALETTES.forEach((p,i)=>add('Палитра: '+p.n,'стиль',()=>$(`[data-pal="${i}"]`).click()));
   STICKERS.forEach(s=>add('Значок: '+s.n,'элемент',()=>$(`[data-stk="${s.id}"]`).click()));
   WALLS.forEach(w=>add('Обои: '+w.n,'вид',()=>{ st.ui.wall=w.id; applyUI(); save(); }));
@@ -2479,7 +2502,7 @@ function expPages(ids,recs){
   const sheetCls='showlab'+(st.printBg?'':' nobg')+(st.print.mirror?' mir':'')+(st.print.gray?' gray':'');
   ids.forEach(id=>{
     if(id==='doc'){ docPages().forEach((p,i,a)=>out.push({...p,name:'dokument-'+st.doc.type+(a.length>1?'-'+(i+1):'')})); return; }
-    if(id==='sheet'){ sheetPagesFor(recs).forEach((p,i,a)=>out.push({...p,cls:sheetCls,name:'list-pechati'+(a.length>1?'-'+(i+1):'')})); return; }
+    if(id==='sheet'){ sheetPagesFor(st.batchOn&&st.batch.length?recsAll():recs).forEach((p,i,a)=>out.push({...p,cls:sheetCls,name:'list-pechati'+(a.length>1?'-'+(i+1):'')})); return; }
     recs.forEach(r=>{ const sfx=multi?'-'+slug(r):'';
       if(id==='front'||id==='back') out.push({pw:W,ph:H,name:(dzOn()?'izdelie-':'konvert-')+(id==='back'?'oborot':'lico')+sfx,html:`<div class="page" style="width:${W}mm;height:${H}mm">${dzOn()?dzHTML(st.dz,id,{rec:r}):envHTML(t,r,{side:id})}</div>`});
       else if(id==='letter') out.push({...letterPage(t,r),name:'pismo'+sfx});
@@ -2515,19 +2538,22 @@ async function pageCanvasH2C(p,dpi){
       if(cs.transform&&cs.transform!=='none'&&sv.parentNode){ const wr=document.createElement('div'); wr.style.cssText=sv.getAttribute('style')||''; wr.style.width=w+'px'; wr.style.height=h+'px'; if(cs.position==='static') wr.style.display='inline-block'; sv.parentNode.insertBefore(wr,sv); wr.appendChild(sv); sv.setAttribute('style','display:block;overflow:visible'); }
       sv.setAttribute('width',w); sv.setAttribute('height',h); });
     host.querySelectorAll('[style*="background-clip"]').forEach(x=>{ const cs=((x.getAttribute('style').match(/linear-gradient\([^)]*\)/)||[''])[0].match(/#[0-9a-f]{6}/gi)||[]); x.style.background='none'; x.style.webkitBackgroundClip='border-box'; x.style.backgroundClip='border-box'; x.style.webkitTextFillColor='currentColor'; x.style.color=cs[2]||cs[0]||'#b8862d'; });
-    const el=host.firstElementChild, pw=Math.ceil(p.pw*PX), ph=Math.ceil(p.ph*PX); let sc=dpi/96; const maxA=90e6; if(pw*ph*sc*sc>maxA) sc=Math.sqrt(maxA/(pw*ph));
+    await Promise.all([...host.querySelectorAll('img')].map(async im=>{ const f=getComputedStyle(im).filter; if(!f||f==='none') return; try{ await (im.decode?im.decode():0); const cv=document.createElement('canvas'); cv.width=im.naturalWidth; cv.height=im.naturalHeight; const g=cv.getContext('2d'); g.filter=f; g.drawImage(im,0,0); if(g.filter===f){ im.src=cv.toDataURL('image/jpeg',.92); im.style.filter='none'; await (im.decode?im.decode().catch(()=>{}):0); } }catch(_){} }));
+    host.querySelectorAll('img').forEach(im=>{ const cs=getComputedStyle(im); if(!/cover|contain/.test(cs.objectFit)) return; const d=document.createElement('div'); d.style.cssText=im.getAttribute('style')||''; d.style.backgroundImage=`url("${im.src}")`; d.style.backgroundSize=cs.objectFit; d.style.backgroundPosition=cs.objectPosition; d.style.backgroundRepeat='no-repeat'; d.style.objectFit=''; im.replaceWith(d); });
+    const el=host.firstElementChild, pw=p.pw*PX, ph=p.ph*PX; let sc=dpi/96; const maxA=90e6; if(pw*ph*sc*sc>maxA) sc=Math.sqrt(maxA/(pw*ph));
     const keep=n=>n===host||host.contains(n)||n.contains(host)||/^(HEAD|STYLE|LINK|META|TITLE)$/.test(n.tagName)||(n.parentElement&&n.parentElement.tagName==='HEAD');
-    return await H2C(el,{scale:sc,backgroundColor:'#ffffff',logging:false,useCORS:true,width:pw,height:ph,windowWidth:Math.max(innerWidth,pw+20),windowHeight:Math.max(innerHeight,ph+20),
+    const TW=Math.max(1,Math.round(pw*sc)), TH=Math.max(1,Math.round(ph*sc)); el.style.transformOrigin='0 0'; el.style.transform=`scale(${TW/(pw*sc)},${TH/(ph*sc)})`;
+    return await H2C(el,{scale:sc,backgroundColor:'#ffffff',logging:false,useCORS:true,width:TW/sc,height:TH/sc,windowWidth:Math.max(innerWidth,pw+20),windowHeight:Math.max(innerHeight,ph+20),
       ignoreElements:n=>!keep(n), onclone:d=>{ const h=d.getElementById('h2cHost'); if(h) h.style.opacity='1'; }});
   } finally { host.remove(); }
 }
 async function pageCanvas(p,dpi){
   if(dpi==='ig') dpi=1080/(p.pw/25.4);
   if(usedFonts(p.html).some(f=>f!=='Montserrat Armenian')&&!(await canFetchFonts())){ try{ return await pageCanvasH2C(p,dpi); }catch(e){} }
-  const pw=Math.ceil(p.pw*PX), ph=Math.ceil(p.ph*PX); const img=new Image(); img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(await pageSVG(p));
-  try{ await img.decode(); }catch(e){ await new Promise(r=>setTimeout(r,500)); }
+  const pw=p.pw*PX, ph=p.ph*PX; const img=new Image(); img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(await pageSVG(p));
+  try{ await img.decode(); }catch(e){ await new Promise(r=>setTimeout(r,500)); } await new Promise(r=>setTimeout(r,450));
   let sc=dpi/96; const maxA=90e6; if(pw*ph*sc*sc>maxA) sc=Math.sqrt(maxA/(pw*ph));
-  const cv=document.createElement('canvas'); cv.width=Math.round(pw*sc); cv.height=Math.round(ph*sc); const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); g.scale(sc,sc); g.drawImage(img,0,0,pw,ph); return cv;
+  const cv=document.createElement('canvas'); cv.width=Math.round(pw*sc); cv.height=Math.round(ph*sc); const g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); g.drawImage(img,0,0,Math.ceil(pw)*sc,Math.ceil(ph)*sc); return cv;
 }
 const cvBlob=(cv,type,q)=>new Promise((res,rej)=>{ try{ cv.toBlob(b=>b?res(b):rej(new Error('blob')),type,q); }catch(e){ rej(e); } });
 function loadLib(src,test){ return new Promise((res,rej)=>{ if(test()) return res(test()); const s=document.createElement('script'); s.src=src; s.onload=()=>test()?res(test()):rej(new Error('lib')); s.onerror=()=>rej(new Error('lib')); document.head.appendChild(s); }); }
@@ -3355,13 +3381,14 @@ async function applyRestore(mode){ const B=pendingRestore; pendingRestore=null; 
 function fixShop(){ const D=fresh(); st.shop=deepMerge(D.shop,st.shop&&typeof st.shop==='object'?st.shop:{}); const PR=st.shop.prices; ['papers','print','fin'].forEach(k=>{ if(!Array.isArray(PR[k])||!PR[k].length) PR[k]=D.shop.prices[k]; });
   if(!Array.isArray(st.myTpl)) st.myTpl=[]; if(!st.dz||typeof st.dz!=='object') st.dz=D.dz; ['front','back'].forEach(k=>{ if(!Array.isArray(st.dz[k])) st.dz[k]=[]; }); if(!st.dz.fonts) st.dz.fonts={h:'Montserrat',b:'PT Sans'}; if(!st.dz.brand||typeof st.dz.brand!=='object') st.dz.brand={};
   if(!st.shop.fin||typeof st.shop.fin!=='object') st.shop.fin={}; if(!st.ycal||typeof st.ycal!=='object') st.ycal=D.ycal;
+  if(st.dz&&st.dz.job&&typeof st.dz.job==='object') Object.assign(st.shop,JSON.parse(JSON.stringify(st.dz.job)));
   if(!st.shop.prnSeed){ D.printers.forEach(p=>{ if(!st.printers.some(x=>x&&(x.model===p.model||String(x.name).replace(/\s/g,'').toLowerCase()===p.name.replace(/\s/g,'').toLowerCase()))) st.printers.push(p); }); st.shop.prnSeed=true; } }
 const isProd=()=>{ const P=prodById(st.prod); return !!(P&&P.w&&!P.doc&&!P.env&&!P.mode); };
 const SHEETS={A4:{w:210,h:297,n:'A4'},A5:{w:148,h:210,n:'A5'},A3:{w:297,h:420,n:'A3'},'10x15':{w:102,h:152,n:'10 × 15'},'13x18':{w:127,h:178,n:'13 × 18'},letter:{w:216,h:279,n:'Letter'}};
 const PRINTERS={gx4040:{n:'Canon MAXIFY GX4040',m:[5,5,5,5],mp:[3,3.4,5,3.4],bl:false,blS:[],duplex:'auto',maxG:523,flatG:300},g3410:{n:'Canon PIXMA G3410',m:[3,3.4,5,3.4],mp:[3,3.4,5,3.4],bl:true,blS:['A4','10x15','13x18','letter'],duplex:'manual',maxG:275},other:{n:'Другой принтер',m:[5,5,5,5],bl:false,blS:[],duplex:'manual',maxG:300}};
 const sheetKey=sh=>Object.keys(SHEETS).find(k=>SHEETS[k]===sh)||'A4';
-const gsmOf=p=>+(p&&p.g)||+(((p&&p.n)||'').match(/(\d{2,3})\s*г/)||[])[1]||(/фото|photo/i.test((p&&p.n)||'')?230:100);
-const prnBorderless=(sheet)=>{ const pr=PRINTERS[st.shop.printer]||PRINTERS.gx4040; return !!(st.shop.borderless&&pr.bl&&pr.blS.includes(sheetKey(sheet))); };
+const gsmOf=p=>+(((p&&p.n)||'').match(/(\d{2,3})\s*г/)||[])[1]||+(p&&p.g)||(/фото|photo/i.test((p&&p.n)||'')?230:100);
+const prnBorderless=(sheet)=>{ const pr=PRINTERS[st.shop.printer]||PRINTERS.gx4040; const pp=paperById(st.shop.paper); return !!(st.shop.borderless&&pr.bl&&pr.blS.includes(sheetKey(sheet))&&/фото|photo|matte|ph1015|ph1318/i.test(pp.id+' '+pp.n)); };
 const PROD_CATS=[['card','Визитки'],['flyer','Листовки'],['poster','Плакаты'],['post','Открытки'],['invite','Приглашения'],['sticker','Наклейки'],['tag','Бирки и ценники'],['ticket','Билеты'],['diploma','Грамоты'],['cal','Календари'],['menu','Меню'],['booklet','Буклеты'],['form','Бланки'],['photo','Фото'],['env','Конверты'],['teach','Для учителя']];
 const PRODUCTS=[
   {id:'bc90',cat:'card',kind:'card',n:'Визитка 90 × 50',w:90,h:50,sides:2,paper:'p300',ptype:'text'},
@@ -3375,7 +3402,7 @@ const PRODUCTS=[
   {id:'fDL',cat:'flyer',kind:'dl',n:'Флаер 99 × 210',w:99,h:210,paper:'p160',ptype:'graph'},
   {id:'fTabs',cat:'flyer',n:'Объявление с отрывными язычками',doc:'flyer',w:210,h:297,paper:'p80'},
   {id:'psA4',cat:'poster',kind:'flyer',n:'Плакат A4',w:210,h:297,paper:'photo',ptype:'fill'},
-  {id:'psA3',cat:'poster',kind:'flyer',n:'Плакат A3 из 2 листов A4',w:297,h:420,paper:'p160',ptype:'fill'},
+  {id:'psA3',cat:'poster',kind:'flyer',n:'Плакат A3 из листов A4',w:297,h:420,paper:'p160',ptype:'fill'},
   {id:'psA2',cat:'poster',kind:'flyer',n:'Плакат A2 из листов A4',w:420,h:594,paper:'p80',ptype:'fill'},
   {id:'psA1',cat:'poster',kind:'flyer',n:'Плакат A1 из листов A4',w:594,h:841,paper:'p80',ptype:'fill'},
   {id:'pcA6',cat:'post',kind:'post',n:'Открытка A6',w:148,h:105,sides:2,paper:'p250',ptype:'graph'},
@@ -3439,7 +3466,9 @@ const SEEDS={
   tent:(W,H)=>({head:'',texts:[{text:'Сегодня скидка 10%\nWi-Fi: CafeGuest · 12345678',x:W*.08,y:H*.62,w:W*.84,size:11,bold:true,align:'center'},{text:'Сегодня скидка 10%\nWi-Fi: CafeGuest · 12345678',x:W*.08,y:H*.22,w:W*.84,size:11,bold:true,align:'center',flip:true}]}),
   letterhead:(W,H)=>({head:'',texts:[{text:'{отправитель}',x:W*.08,y:12,size:16,bold:true},{text:'Адрес · +374 00 000 000 · email@example.am · сайт',x:W*.08,y:H-14,w:W*.84,size:8,align:'center'}],show:{logo:true}})
 };
-function applyProduct(id,silent){ const P=prodById(id); if(!P) return; st.prod=id; const S=st.shop;
+function applyProduct(id,silent){ const P=prodById(id); if(!P) return;
+  if(P.doc&&st.ui.app==='print'&&dzOn()){ st.doc.type=P.doc; st.docPage=0; setView('doc'); syncUI(); update(); if(!silent) toast(P.n+'. Настройки документа во вкладке «Документы».'); return; }
+  if(P.kind) dzRememberEnv(); st.prod=id; const S=st.shop;
   if(P.paper) S.paper=P.paper; if(P.ptype) S.ptype=P.ptype; S.sides=P.sides||1; S.fin={}; if(P.w){ const L0=layoutFor(P.w,P.h,SHEETS[paperById(S.paper).sheet]||SHEETS.A4); if(!L0.full) S.fin.cut=true; } (P.fin||[]).forEach(f=>{ S.fin[f]=true; });
   if(P.photo&&!P.kind){ if(st.tpl!=='photo'){ S.prevTpl=st.tpl; st.tpl='photo'; } } else if(st.tpl==='photo'&&S.prevTpl){ st.tpl=S.prevTpl; S.prevTpl=''; }
   if(P.doc){ if(st.dz) st.dz.on=false; st.doc.type=P.doc; st.docPage=0; if(st.ui.mode==='simple'){ st.ui.mode='pro'; applyUI(); } setView('doc'); syncUI(); update(); toast(P.n+'. Настройки документа во вкладке «Документы».'); return; }
@@ -3470,29 +3499,31 @@ function bleedHTML(t,rec,side,b){ if(dzOn()) return dzHTML(st.dz,side==='back'?'
 function rotBox(inner,w,h,a){ if(!a) return inner; const tr=a===90?`translateX(${h}mm) rotate(90deg)`:a===180?`translate(${w}mm,${h}mm) rotate(180deg)`:`translateY(${w}mm) rotate(-90deg)`; return `<div style="position:absolute;left:0;top:0;width:${w}mm;height:${h}mm;transform-origin:0 0;transform:${tr}">${inner}</div>`; }
 function markLine(x1,y1,x2,y2){ const w=Math.abs(x2-x1)||.15, h=Math.abs(y2-y1)||.15; return `<div style="position:absolute;left:${r1(Math.min(x1,x2)*10)/10}mm;top:${r1(Math.min(y1,y2)*10)/10}mm;width:${w}mm;height:${h}mm;background:#000"></div>`; }
 function imposeAll(recs){ const items=st.batchOn&&st.batch.length?recs:Array.from({length:Math.max(1,+st.shop.qty||1)},(_,i)=>Object.assign({},recs[0]||currentRec(),{_n:i}));
-  const front=imposePages(items,'front'); if(!(+st.shop.sides===2||st.print.back)) return front; const back=imposePages(items,'back'); if(!st.shop.duplex) return front.concat(back); const out=[]; front.forEach((p,i)=>{ out.push(p); if(back[i]) out.push(back[i]); }); return out; }
+  const front=imposePages(items,'front'); if(!(+st.shop.sides===2||(st.print.back&&!dzOn()))) return front; const back=imposePages(items,'back'); if(!st.shop.duplex) return front.concat(back); const out=[]; front.forEach((p,i)=>{ out.push(p); if(back[i]) out.push(back[i]); }); return out; }
 function imposePages(items,side){ const t=tpl(), {W,H}=dims(), paper=paperById(st.shop.paper), sheet=SHEETS[paper.sheet]||SHEETS.A4, L=layoutFor(W,H,sheet), b=L.b||0, back=side==='back', pages=[];
-  if(L.tile) return tilePages(items[0],side,sheet,L);
+  if(L.tile) return tilePages(items,side,sheet,L);
   const bw=W+2*b, bh=H+2*b, marks=st.shop.marks&&!L.full&&!L.nomk, extra=L.rot?(st.shop.flip!=='short'):(st.shop.flip==='short'), ang=((L.rot?90:0)+(back&&extra?180:0))%360, P=prodById(st.prod);
-  for(let i=0;i<items.length;i+=L.n){ let h=''; const chunk=items.slice(i,i+L.n), xs=new Set(), ys=new Set(); let folds='';
+  const mapPt=(x,y)=>ang===90?[bh-y,x]:ang===180?[bw-x,bh-y]:ang===270?[y,bw-x]:[x,y];
+  for(let i=0;i<items.length;i+=L.n){ let h=''; const chunk=items.slice(i,i+L.n), xs=new Set(), ys=new Set(); let folds='', minX=1e9, minY=1e9, maxX=-1e9, maxY=-1e9;
     chunk.forEach((r,j)=>{ const c=j%L.cols, rr=Math.floor(j/L.cols); let x=L.ox+c*(L.iw+L.g), y=L.oy+rr*(L.ih+L.g);
       if(back){ if(st.shop.flip==='short') y=sheet.h-y-L.ih; else x=sheet.w-x-L.iw; }
+      minX=Math.min(minX,x); minY=Math.min(minY,y); maxX=Math.max(maxX,x+L.iw); maxY=Math.max(maxY,y+L.ih);
       h+=`<div style="position:absolute;left:${r1(x)}mm;top:${r1(y)}mm;width:${r1(L.iw)}mm;height:${r1(L.ih)}mm;overflow:hidden">${rotBox(bleedHTML(t,r,side,b),bw,bh,ang)}</div>`;
-      const tw=L.rot?H:W, th=L.rot?W:H; if(P&&P.round&&marks) h+=`<div style="position:absolute;left:${r1(x+b)}mm;top:${r1(y+b)}mm;width:${r1(tw)}mm;height:${r1(th)}mm;border:.12mm solid #9a9a9a;border-radius:50%;box-sizing:border-box"></div>`; xs.add(r1(x+b)); xs.add(r1(x+b+tw)); ys.add(r1(y+b)); ys.add(r1(y+b+th));
-      if(P&&P.folds&&!L.rot) P.folds.forEach(f=>{ if(P.foldH) ys.add('f'+r1(y+b+f)); else xs.add('f'+r1(x+b+f)); }); });
-    if(marks){ const top=L.oy-.8, bot=L.oy+L.gh+.8, lef=L.ox-.8, rig=L.ox+L.gw+.8, len=3.6;
+      const tw=L.rot?H:W, th=L.rot?W:H; if(P&&P.round&&st.shop.marks) h+=`<div style="position:absolute;left:${r1(x+b)}mm;top:${r1(y+b)}mm;width:${r1(tw)}mm;height:${r1(th)}mm;border:.12mm solid #9a9a9a;border-radius:50%;box-sizing:border-box"></div>`; xs.add(r1(x+b)); xs.add(r1(x+b+tw)); ys.add(r1(y+b)); ys.add(r1(y+b+th));
+      if(P&&P.folds) P.folds.forEach(f=>{ const a=P.foldH?mapPt(0,b+f):mapPt(b+f,0), z=P.foldH?mapPt(bw,b+f):mapPt(b+f,bh); if(Math.abs(a[0]-z[0])<.01) xs.add('f'+r1(x+a[0])); else ys.add('f'+r1(y+a[1])); }); });
+    if(marks){ const top=minY-.8, bot=maxY+.8, lef=minX-.8, rig=maxX+.8, len=3.6;
       xs.forEach(v=>{ const fold=String(v)[0]==='f', x=parseFloat(String(v).replace('f','')); if(fold){ folds+=`<div style="position:absolute;left:${x}mm;top:${r1(top-len)}mm;height:${len}mm;border-left:.2mm dashed #000"></div><div style="position:absolute;left:${x}mm;top:${r1(bot)}mm;height:${len}mm;border-left:.2mm dashed #000"></div>`; return; } h+=markLine(x,top-len,x,top)+markLine(x,bot,x,bot+len); });
       ys.forEach(v=>{ const fold=String(v)[0]==='f', y=parseFloat(String(v).replace('f','')); if(fold){ folds+=`<div style="position:absolute;top:${y}mm;left:${r1(lef-len)}mm;width:${len}mm;border-top:.2mm dashed #000"></div><div style="position:absolute;top:${y}mm;left:${r1(rig)}mm;width:${len}mm;border-top:.2mm dashed #000"></div>`; return; } h+=markLine(lef-len,y,lef,y)+markLine(rig,y,rig+len,y); }); }
-    pages.push({pw:sheet.w,ph:sheet.h,paper:sheet.n+(back?', оборот':''),html:`<div class="page" style="width:${sheet.w}mm;height:${sheet.h}mm">${h}${folds}</div>`}); }
+    pages.push({pw:sheet.w,ph:sheet.h,paper:sheet.n+(back?', оборот':''),html:`<div class="page" style="width:${sheet.w}mm;height:${sheet.h}mm">${dzOffsetWrap(h+folds)}</div>`}); }
   return pages; }
-function tilePages(rec,side,sheet,L){ const t=tpl(), A=L.A, inner=bleedHTML(t,rec,side,L.b), tw=A.w, th=A.h, ov=L.ov, pages=[], n=L.tiles, P=prodById(st.prod), name=P?P.n:'Плакат';
-  const copies=st.batchOn&&st.batch.length?1:Math.max(1,+st.shop.qty||1);
-  for(let q=0;q<copies;q++) for(let r=0;r<L.rows;r++) for(let c=0;c<L.cols;c++){ const k=r*L.cols+c+1, sx=c*(tw-ov), sy=r*(th-ov), vw=Math.min(tw,L.bw-sx), vh=Math.min(th,L.bh-sy);
-    let h=`<div style="position:absolute;left:${r1(A.x)}mm;top:${r1(A.y)}mm;width:${r1(vw)}mm;height:${r1(vh)}mm;overflow:hidden"><div style="position:absolute;left:${r1(-sx)}mm;top:${r1(-sy)}mm">${inner}</div></div>`;
-    if(c<L.cols-1) h+=`<div style="position:absolute;left:${r1(A.x+tw-ov)}mm;top:${r1(A.y-4)}mm;height:${r1(vh+8)}mm;border-left:.25mm dashed #e00"></div>`;
-    if(r<L.rows-1) h+=`<div style="position:absolute;top:${r1(A.y+th-ov)}mm;left:${r1(A.x-4)}mm;width:${r1(vw+8)}mm;border-top:.25mm dashed #e00"></div>`;
-    h+=`<div style="position:absolute;left:${r1(A.x)}mm;top:${r1(A.y-4.6)}mm;font:6.5pt/1 'PT Sans',Arial,sans-serif;color:#555;white-space:nowrap">${esc(name)} · лист ${k} из ${n} · ряд ${r+1}, столбец ${c+1}. Красный пунктир: сюда заходит соседний лист, клейте по нему.</div>`;
-    pages.push({pw:sheet.w,ph:sheet.h,paper:sheet.n+', склейка',html:`<div class="page" style="width:${sheet.w}mm;height:${sheet.h}mm">${h}</div>`}); }
+function tilePages(items,side,sheet,L){ const t=tpl(), A=L.A, tw=A.w, th=A.h, ov=L.ov, pages=[], n=L.tiles, P=prodById(st.prod), name=P?P.n:'Плакат', list=Array.isArray(items)?items:[items];
+  list.forEach((rec,qi)=>{ const inner=bleedHTML(t,rec,side,L.b);
+    for(let r=0;r<L.rows;r++) for(let c=0;c<L.cols;c++){ const k=r*L.cols+c+1, sx=c*(tw-ov), sy=r*(th-ov), vw=Math.min(tw,L.bw-sx), vh=Math.min(th,L.bh-sy);
+      let h=`<div style="position:absolute;left:${r1(A.x)}mm;top:${r1(A.y)}mm;width:${r1(vw)}mm;height:${r1(vh)}mm;overflow:hidden"><div style="position:absolute;left:${r1(-sx)}mm;top:${r1(-sy)}mm">${inner}</div></div>`;
+      if(c<L.cols-1) h+=`<div style="position:absolute;left:${r1(A.x+tw-ov)}mm;top:${r1(A.y-4)}mm;height:${r1(vh+8)}mm;border-left:.25mm dashed #e00"></div>`;
+      if(r<L.rows-1) h+=`<div style="position:absolute;top:${r1(A.y+th-ov)}mm;left:${r1(A.x-4)}mm;width:${r1(vw+8)}mm;border-top:.25mm dashed #e00"></div>`;
+      h+=`<div style="position:absolute;left:${r1(A.x)}mm;top:${r1(A.y-4.6)}mm;font:6.5pt/1 'PT Sans',Arial,sans-serif;color:#555;white-space:nowrap">${esc(name)}${list.length>1?` · экземпляр ${qi+1}`:''} · лист ${k} из ${n} · ряд ${r+1}, столбец ${c+1}. Красный пунктир: сюда заходит соседний лист, клейте по нему.</div>`;
+      pages.push({pw:sheet.w,ph:sheet.h,paper:sheet.n+', склейка',html:`<div class="page" style="width:${sheet.w}mm;height:${sheet.h}mm">${dzOffsetWrap(h)}</div>`}); } });
   return pages; }
 function prodGuides(W,H){ const P=prodById(st.prod); if(!P) return ''; const s=Math.max(0,+st.shop.safe||0); let g=`<div class="guide" style="position:absolute;left:${s}mm;top:${s}mm;width:${Math.max(0,W-2*s)}mm;height:${Math.max(0,H-2*s)}mm;border:.25mm dashed #16a34a;${P.round?'border-radius:50%;':''}pointer-events:none;z-index:40"></div>`;
   if(P.round) g+=`<div class="guide" style="position:absolute;inset:0;width:${W}mm;height:${H}mm;border:.3mm solid #e11d48;border-radius:50%;pointer-events:none;z-index:40"></div>`;
@@ -3513,9 +3544,10 @@ function preflight(){ const out=[], S=st.shop, {W,H}=dims(), t=tpl(), o=ovOf(t.i
   if(st.logo&&showOf(t,o,'logo')&&!dzOn()){ const d=imgDim(st.logo); if(d&&d.w&&d.h) dpi(st.logo,st.logoH*d.w/d.h,'Логотип'); }
   if(st.pic.data&&!dzOn()) dpi(st.pic.data,t.id==='photo'?W:st.pic.w,'Картинка');
   st.drawings.forEach((x,i)=>{ if(!dzOn()) dpi(x.data,x.w,'Рисунок '+(i+1)); });
-  if(dzOn()){ ['front','back'].forEach(sd=>(st.dz[sd]||[]).forEach(de=>{ if(de.t==='img'){ const s2=de.k==='logo'?(st.dz.brand||{}).logo:de.src; if(s2) dpi(s2,de.w*Math.max(1,+de.z||1),dzLabel(de)+(sd==='back'?' (оборот)':'')); else if(de.k!=='logo') add('warn',`${dzLabel(de)}${sd==='back'?' на обороте':''}: рамка пустая. Загрузите фото, иначе напечатается цветная заглушка.`); } })); }
+  if(dzOn()){ ['front','back'].forEach(sd=>(st.dz[sd]||[]).forEach(de=>{ if(de.t==='img'){ const s2=de.k==='logo'?(st.dz.brand||{}).logo:de.src; if(s2) dzDpiCheck(add,s2,de,dzLabel(de)+(sd==='back'?' (оборот)':'')); else if(de.k==='logo') add('info',`Место для логотипа${sd==='back'?' на обороте':''} пустое: загрузите логотип в «Данные клиента». Пустое место не печатается.`); else if(de.k!=='logo') add('warn',`${dzLabel(de)}${sd==='back'?' на обороте':''}: рамка пустая. Загрузите фото, иначе напечатается цветная заглушка.`); } })); }
   dzPrinterChecks(add);
-  const env=$('#inner .env.live')||$('#inner .dz.live .dzc'); if(env&&['front','back'].includes(st.view)){ const E=env.getBoundingClientRect(), u=E.width/W, safe=+S.safe||0; let near=0;
+  if(dzOn()) dzTrimChecks(add);
+  const env=dzOn()?null:$('#inner .env.live'); if(env&&['front','back'].includes(st.view)){ const E=env.getBoundingClientRect(), u=E.width/W, safe=+S.safe||0; let near=0;
     $$('#inner .env.live .blk, #inner .dz.live .dzel').forEach(bk=>{ if(bk.dataset.id){ const de=dzFind(bk.dataset.id); if(!de||['rect','ellipse','shape','line','cal'].includes(de.t)||(de.t==='img'&&dzEdgeTouch(de))) return; } const r=bk.getBoundingClientRect(); if(!r.width) return; const m=Math.min((r.left-E.left)/u,(r.top-E.top)/u,(E.right-r.right)/u,(E.bottom-r.bottom)/u); if(m<-.3) add('bad',`${bk.dataset.b?blkName(bk.dataset.b):dzLabel(dzFind(bk.dataset.id))} выходит за край реза на ${r1(-m)} мм.`); else if(m<safe-.2){ near++; add('warn',`${bk.dataset.b?blkName(bk.dataset.b):dzLabel(dzFind(bk.dataset.id))}: ${r1(Math.max(0,m))} мм до края реза, нужно не меньше ${safe} мм.`); } });
     let minPt=99; $$('#inner .env.live .blk *, #inner .dz.live .dzel .dztx').forEach(el=>{ if(![...el.childNodes].some(n=>n.nodeType===3&&n.nodeValue.trim())) return; const pt=parseFloat(getComputedStyle(el).fontSize)*.75; if(pt&&pt<minPt) minPt=pt; }); if(minPt<5) add('warn',`Самый мелкий текст ${r1(minPt)} pt. Мельче 5–6 pt плохо читается после печати.`);
     if(!near) add('ok','Тексты не заходят в зону реза'); }
@@ -3524,14 +3556,14 @@ function preflight(){ const out=[], S=st.shop, {W,H}=dims(), t=tpl(), o=ovOf(t.i
   if(dzOn()) dzEls('front').concat(st.dz.back||[]).forEach(de=>{ if(de.t==='qr'&&Math.min(de.w,de.h)<15) add('warn',`QR-код ${r1(Math.min(de.w,de.h))} мм. Меньше 15 мм телефон может не прочитать.`); });
   else if(st.qr.text.trim()&&showOf(t,o,'qr')&&+st.qr.size<15) add('warn',`QR-код ${st.qr.size} мм. Меньше 15 мм телефон может не прочитать.`);
   const paper=paperById(S.paper), sheet=SHEETS[paper.sheet]||SHEETS.A4, L=layoutFor(W,H,sheet);
-  if(L.tile) add('info',`Изделие больше листа ${sheet.n}: печать по частям на ${L.tiles} листах с нахлёстом 10 мм для склейки.`); else if(L.full) add('info',S.borderless?'Изделие размером с лист: в окне печати выберите бумагу «без полей».':`Изделие размером с лист: принтер оставит белые поля 3–5 мм. Для печати в край включите «Печать без полей».`); else add('ok',`На листе ${sheet.n} помещается ${L.n} шт.${L.nomk?' Для меток реза места нет, они не печатаются.':''}`);
-  const pr=PRINTERS[S.printer]||PRINTERS.gx4040; if(S.borderless&&!/photo|matte|ph1015|ph1318/.test(paper.id)) add('info','Печать без полей у Canon лучше всего получается на фотобумаге.');
-    const miss=(dzOn()?[...new Set([st.dz.fonts.h,st.dz.fonts.b,...dzEls('front').concat(st.dz.back||[]).filter(x=>x.t==='text'&&x.font&&!['h','b'].includes(x.font)).map(x=>x.font)])]:usedFonts(envHTML(t,currentRec(),{}))).filter(f=>{ try{ return !document.fonts.check(`16px "${f}"`); }catch(_){ return false; } }); if(miss.length) add('warn','Шрифты ещё не загрузились: '+miss.join(', ')+'. Подождите или подключите интернет.');
+  if(L.tile) add('info',`Изделие больше листа ${sheet.n}: печать по частям на ${L.tiles} листах с нахлёстом 10 мм для склейки.`); else if(L.full) add('info',prnBorderless(sheet)?'Изделие размером с лист: в окне печати выберите бумагу «без полей».':`Изделие размером с лист: принтер оставит белые поля 3–5 мм. Для печати в край включите «Печать без полей».`); else add('ok',`На листе ${sheet.n} помещается ${L.n} шт.${L.nomk?' Для меток реза места нет, они не печатаются.':''}`);
+  const pr=PRINTERS[S.printer]||PRINTERS.gx4040; 
+    const miss=(dzOn()?[...new Set([st.dz.fonts.h,st.dz.fonts.b,...dzEls('front').concat(st.dz.back||[]).filter(x=>x.t==='text'&&x.font&&!['h','b'].includes(x.font)).map(x=>x.font)])]:usedFonts(envHTML(t,currentRec(),{}))).filter(f=>{ try{ return !document.fonts.check(`16px "${f}"`,'АаБб'); }catch(_){ return false; } }); if(miss.length) add('warn','Шрифты ещё не загрузились: '+miss.join(', ')+'. Подождите или подключите интернет.');
   return out; }
 function runPreflight(manual){ const el=$('#shPre'); if(!el) return; if(!['front','back'].includes(st.view)){ if(!manual) return; setView('front'); renderPreview(); } shopPre=true; el.innerHTML=preflight().map(([l,m])=>`<div class="pf ${l}"><i>${l==='ok'?'✓':l==='info'?'i':'!'}</i><span>${esc(m)}</span></div>`).join(''); }
 function curSize(){ const P=prodById(st.prod); if(P&&P.doc&&P.w) return {W:P.w,H:P.h}; return dims(); }
 function quote(opt){ const S=Object.assign({},st.shop,opt||{}), PR=st.shop.prices, sz=opt&&opt.W?{W:opt.W,H:opt.H}:curSize(), paper=PR.papers.find(p=>p.id===S.paper)||PR.papers[0], sheet=SHEETS[paper.sheet]||SHEETS.A4;
-  const L=layoutFor(sz.W,sz.H,sheet), qty=Math.max(1,+S.qty||1), per=L.tile?0:L.n, sheets=(L.tile?qty*L.tiles:Math.ceil(qty/per))+Math.max(0,+S.spare||0), sides=+S.sides===2?2:1, prints=sheets*sides, k=Math.max(.3,sheet.w*sheet.h/(210*297));
+  const L=layoutFor(sz.W,sz.H,sheet), qty=Math.max(1,(opt&&opt.qty)?+opt.qty:(dzOn()&&st.batchOn&&st.batch.length?st.batch.length:(+S.qty||1))), per=L.tile?0:L.n, sheets=(L.tile?qty*L.tiles:Math.ceil(qty/per))+Math.max(0,+S.spare||0), sides=+S.sides===2?2:1, prints=sheets*sides, k=Math.max(.3,sheet.w*sheet.h/(210*297));
   const pt=PR.print.find(p=>p.id===S.ptype)||PR.print[0], rows=[], R=(n,c,p)=>{ rows.push({n,c,p}); };
   R(`Бумага: ${paper.n}, ${sheets} л.`,sheets*paper.c,sheets*paper.p);
   R(`Печать: ${pt.n}, ${prints} отп.`,prints*pt.c*k,prints*pt.p*k);
@@ -3540,7 +3572,7 @@ function quote(opt){ const S=Object.assign({},st.shop,opt||{}), PR=st.shop.price
   let sub=rows.reduce((s,r)=>s+r.p,0); if(S.urgent) sub*=1+(+PR.urgent||0)/100; sub*=1-clamp(+S.disc||0,0,100)/100;
   const total=Math.max(+PR.min||0,round10(sub)), cost=rows.reduce((s,r)=>s+r.c,0);
   return {rows,total,cost,profit:total-cost,each:total/qty,qty,sheets,prints,per,L,sheet,paper,pt,sides}; }
-function quoteText(q){ const P=prodById(st.prod), {W,H}=curSize(); return `${P?P.n:'Изделие '+r1(W)+' × '+r1(H)+' мм'}, ${q.qty} шт., ${q.sides===2?'две стороны':'одна сторона'}\n${q.rows.map(r=>`${r.n}: ${money(r.p)}`).join('\n')}${st.shop.urgent?'\nСрочно: +'+st.shop.prices.urgent+'%':''}${+st.shop.disc?'\nСкидка: '+st.shop.disc+'%':''}\nИтого: ${money(q.total)} (${money(q.each)} за шт.)`; }
+function quoteText(q){ const P=prodById(st.prod), {W,H}=curSize(); return `${P?P.n:'Изделие '+r1(W)+' × '+r1(H)+' мм'}, ${q.qty} шт., ${q.sides===2?'две стороны':'одна сторона'}\n${q.rows.map(r=>`${r.n}: ${money(r.p)}`).join('\n')}${st.shop.urgent?'\nСрочно: +'+st.shop.prices.urgent+'%':''}${+st.shop.disc?'\nСкидка: '+clamp(+st.shop.disc||0,0,100)+'%':''}\nИтого: ${money(q.total)} (${money(q.each)} за шт.)`; }
 let shopCat='', shopCatProd='';
 function renderShop(skipPrices){ if(!$('#prodGrid')) return; const S=st.shop, PR=S.prices, P=prodById(st.prod); if(P&&P.id!==shopCatProd){ shopCat=P.cat; shopCatProd=P.id; } if(!shopCat) shopCat='card';
   $('#prodCats').innerHTML=PROD_CATS.map(([id,n])=>`<button class="btn sm${shopCat===id?' primary':''}" data-pcat="${id}">${esc(n)}</button>`).join('');
@@ -3550,10 +3582,10 @@ function renderShop(skipPrices){ if(!$('#prodGrid')) return; const S=st.shop, PR
   const pt=$('#shPtype'); pt.innerHTML=PR.print.map(p=>`<option value="${esc(p.id)}">${esc(p.n)}</option>`).join(''); pt.value=S.ptype;
   $('#shFin').innerHTML=PR.fin.map(f=>`<label class="chk"><input type="checkbox" data-fin="${esc(f.id)}"${S.fin&&S.fin[f.id]?' checked':''}>${esc(f.n)}</label>`).join('');
   const {W,H}=curSize(), paper=paperById(S.paper), sheet=SHEETS[paper.sheet]||SHEETS.A4, L=layoutFor(W,H,sheet), pr=PRINTERS[S.printer]||PRINTERS.gx4040;
-  $('#shLayout').textContent=L.tile?`${r1(W)} × ${r1(H)} мм больше листа ${sheet.n}: печать по частям на ${L.tiles} листах (${L.cols} × ${L.rows}) с нахлёстом 10 мм.`:L.full?`${r1(W)} × ${r1(H)} мм — это размер листа ${sheet.n}: печатается один на лист, без меток реза и вылетов.${S.borderless&&pr.bl?' В окне печати выберите размер бумаги «без полей».':` Принтер оставит белые поля ${pr.m.join(' / ')} мм. Чтобы печатать в край, включите «Печать без полей» здесь и в окне печати (лучше на фотобумаге), или держите текст дальше 5 мм от края.`}`:`${r1(W)} × ${r1(H)} мм: на листе ${sheet.n} помещается ${L.n} шт. (${L.cols} × ${L.rows}${L.rot?', повёрнуты':''}). ${S.borderless&&pr.bl?'Печать без полей.':`Поля принтера ${pr.n}: ${pr.m.join(' / ')} мм.`}`;
+  $('#shLayout').textContent=L.tile?`${r1(W)} × ${r1(H)} мм больше листа ${sheet.n}: печать по частям на ${L.tiles} листах (${L.cols} × ${L.rows}) с нахлёстом 10 мм.`:L.full?`${r1(W)} × ${r1(H)} мм — это размер листа ${sheet.n}: печатается один на лист, без меток реза и вылетов.${S.borderless&&pr.bl?' В окне печати выберите размер бумаги «без полей».':` Принтер оставит белые поля ${pr.m.join(' / ')} мм. Чтобы печатать в край, включите «Печать без полей» здесь и в окне печати (лучше на фотобумаге), или держите текст дальше 5 мм от края.`}`:`${r1(W)} × ${r1(H)} мм: на листе ${sheet.n} помещается ${L.n} шт. (${L.cols} × ${L.rows}${L.rot?', повёрнуты':''}). ${S.borderless&&pr.bl?'Печать без полей.':`Поля принтера ${pr.n}: ${printArea(sheet,false).m.join(' / ')} мм.`}`;
   renderQuote();
   if(!$('#shPrices').hidden&&!skipPrices) renderPrices(); if(shopPre) runPreflight(); }
-function renderQuote(){ const S=st.shop, PR=S.prices, el=$('#shQuote'); if(!el) return; const q=quote(); el.innerHTML=q.rows.map(r=>`<div class="qrow"><span>${esc(r.n)}</span><span>${money(r.p)}</span></div>`).join('')+(S.urgent?`<div class="qrow"><span>Срочно</span><span>+${PR.urgent}%</span></div>`:'')+(+S.disc?`<div class="qrow"><span>Скидка</span><span>−${S.disc}%</span></div>`:'')+`<div class="qrow tot"><span>Итого</span><span>${money(q.total)}</span></div><div class="qrow"><span>За штуку</span><span>${money(q.each)}</span></div><div class="qrow"><span>Себестоимость · прибыль</span><span>${money(q.cost)} · ${money(q.profit)}</span></div>`; }
+function renderQuote(){ const S=st.shop, PR=S.prices, el=$('#shQuote'); if(!el) return; const q=quote(); el.innerHTML=q.rows.map(r=>`<div class="qrow"><span>${esc(r.n)}</span><span>${money(r.p)}</span></div>`).join('')+(S.urgent?`<div class="qrow"><span>Срочно</span><span>+${PR.urgent}%</span></div>`:'')+(+S.disc?`<div class="qrow"><span>Скидка</span><span>−${clamp(+S.disc||0,0,100)}%</span></div>`:'')+`<div class="qrow tot"><span>Итого</span><span>${money(q.total)}</span></div><div class="qrow"><span>За штуку</span><span>${money(q.each)}</span></div><div class="qrow"><span>Себестоимость · прибыль</span><span>${money(q.cost)} · ${money(q.profit)}</span></div>`; }
 function renderPrices(){ const PR=st.shop.prices, inp=(g,i,f,v,type='number',w='')=>`<input type="${type}" data-pp="${g}" data-i="${i}" data-f="${f}" value="${esc(v)}"${type==='number'?' min="0" step="1"':''} style="${w}">`;
   const sheetSel=(i,v)=>`<select data-pp="papers" data-i="${i}" data-f="sheet">${Object.entries(SHEETS).map(([k,s])=>`<option value="${k}"${k===v?' selected':''}>${esc(s.n)}</option>`).join('')}</select>`;
   $('#shPrices').innerHTML=`<h3 style="margin:6px 0">Бумага: себестоимость и цена за лист</h3><div class="pphd" style="grid-template-columns:1.1fr 1fr 1fr 34px"><span>Лист</span><span>Себест.</span><span>Цена</span><span></span></div>${PR.papers.map((p,i)=>`<div class="pprow" style="grid-template-columns:1.1fr 1fr 1fr 34px"><div style="grid-column:1/-1">${inp('papers',i,'n',p.n,'text')}</div>${sheetSel(i,p.sheet)}${inp('papers',i,'c',p.c)}${inp('papers',i,'p',p.p)}<button class="btn sm danger" data-ppdel="papers" data-i="${i}" aria-label="Удалить">✕</button></div>`).join('')}<button class="btn sm" data-ppadd="papers">+ Бумага</button>
@@ -3671,7 +3703,7 @@ function dzScaleEl(e,sx,sy){ const n=JSON.parse(JSON.stringify(e)); const s=Math
   if(e.keep||['icon','qr'].includes(e.t)||(e.t==='ellipse'&&Math.abs(e.w-e.h)<.01)){ const cx=n.x+n.w/2, cy=n.y+n.h/2, m=Math.min(n.w,n.h); n.w=n.h=m; n.x=cx-m/2; n.y=cy-m/2; }
   if(e.size) n.size=+(e.size*s).toFixed(2); if(e.sw) n.sw=+(e.sw*s).toFixed(2); if(e.r) n.r=+(e.r*s).toFixed(2); return n; }
 function dzFromTpl(T,W,H,pal){ const sx=W/T.w, sy=H/T.h, side=a=>(a||[]).map(e=>Object.assign(dzScaleEl(e,sx,sy),{id:dzId()}));
-  return {on:true,tid:T.id,kind:T.kind,w:W,h:H,dark:!!T.dark,pal:dzPal(pal||T.pal),palSrc:null,fonts:Object.assign({h:'Montserrat',b:'PT Sans'},T.fonts),bg:T.bg||'bg',bgBack:T.bgBack||T.bg||'bg',front:side(T.front),back:side(T.back),sides:T.back&&T.back.length?2:1}; }
+  const d={on:true,tid:T.id,kind:T.kind,w:W,h:H,dark:!!T.dark,pal:dzPal(pal||T.pal),palSrc:null,fonts:Object.assign({h:'Montserrat',b:'PT Sans'},T.fonts),bg:T.bg||'bg',bgBack:T.bgBack||T.bg||'bg',front:side(T.front),back:side(T.back),sides:T.back&&T.back.length?2:1}; ['bgImg','bgImgBack','bgImgOp'].forEach(k=>{ if(T[k]!=null) d[k]=T[k]; }); return d; }
 function dzFit(){ const d=st.dz, {W,H}=dims(); if(!d||!d.w||(Math.abs(d.w-W)<.05&&Math.abs(d.h-H)<.05)) return; const sx=W/d.w, sy=H/d.h; ['front','back'].forEach(k=>{ d[k]=(d[k]||[]).map(e=>Object.assign(dzScaleEl(e,sx,sy),{id:e.id})); }); d.w=W; d.h=H; }
 function dzBlank(W,H){ return {on:true,tid:'blank',kind:'',w:W,h:H,dark:false,pal:dzPal(DZ_PALETTES[0]?dzRoles(DZ_PALETTES[0][1],false):{}),fonts:{h:'Montserrat',b:'PT Sans'},bg:'bg',bgBack:'bg',front:[],back:[],sides:1}; }
 
@@ -3696,7 +3728,7 @@ function dzElHTML(e,doc,pal,opt){ if(e.hide) return ''; const w=Math.max(.2,+e.w
       const outline=e.outline?`-webkit-text-stroke:${e.outline}mm ${dzCol(e.ocolor||'ink',pal)};`:''; const bg=e.fill?`background:${dzCol(e.fill,pal)};padding:${e.pad??1.5}mm;border-radius:${e.r||0}mm;`:'';
       inner=`<div class="dzt" style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:${va};${bg}"><div class="dztx" style="font-family:${dzFont(e.font,doc)};font-size:${+e.size||10}pt;font-weight:${e.weight||400};${e.italic?'font-style:italic;':''}color:${dzCol(e.color||'ink',pal)};text-align:${e.align||'left'};line-height:${e.lh||1.2};letter-spacing:${e.ls||0}em;${e.upper?'text-transform:uppercase;':''}white-space:pre-wrap;overflow-wrap:break-word;${sh}${outline}${e.under?'text-decoration:underline;':''}">${esc(dzText(e,opt))}</div></div>`; break; }
     case 'img': { const src=dzImgSrc(e,opt); if(src){ const z=Math.max(1,+e.z||1); inner=`<div style="position:absolute;inset:0;overflow:hidden;${rad}${stroke}"><img src="${src}" alt="" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:${e.fit||'cover'};object-position:${e.px??50}% ${e.py??50}%;${z>1?`transform:scale(${z});transform-origin:${e.px??50}% ${e.py??50}%;`:''}${e.filter&&e.filter!=='none'?`filter:${e.filter};`:''}"></div>`; }
-      else{ const m=Math.min(w,h); inner=`<div class="dzslot" style="position:absolute;inset:0;overflow:hidden;${rad}${stroke}background:${e.k==='logo'?dzRgba(dzCol('mute',pal),.12):`linear-gradient(135deg,${dzCol('soft',pal)},${dzRgba(dzCol('acc',pal),.35)})`}"><div class="guide" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:${r1x(m*.04)}mm;color:${dzCol('ink',pal)};opacity:.6;font:600 ${r1x(clamp(m/9,4,14))}pt 'Golos Text',sans-serif;text-align:center"><svg viewBox="0 0 24 24" width="${r1x(clamp(m*.22,3,30))}mm" height="${r1x(clamp(m*.22,3,30))}mm" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${e.k==='logo'?DZ_ICONS.sparkles[1]:DZ_ICONS.camera[1]}</svg>${m>14?(e.k==='logo'?'Логотип':'Ваше фото'):''}</div></div>`; } break; }
+      else{ const m=Math.min(w,h); inner=`<div class="dzslot guide" style="position:absolute;inset:0;overflow:hidden;${rad}${stroke}background:${e.k==='logo'?dzRgba(dzCol('mute',pal),.12):`linear-gradient(135deg,${dzCol('soft',pal)},${dzRgba(dzCol('acc',pal),.35)})`}"><div class="guide" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:${r1x(m*.04)}mm;color:${dzCol('ink',pal)};opacity:.6;font:600 ${r1x(clamp(m/9,4,14))}pt 'Golos Text',sans-serif;text-align:center"><svg viewBox="0 0 24 24" width="${r1x(clamp(m*.22,3,30))}mm" height="${r1x(clamp(m*.22,3,30))}mm" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${e.k==='logo'?DZ_ICONS.sparkles[1]:DZ_ICONS.camera[1]}</svg>${m>14?(e.k==='logo'?'Логотип':'Ваше фото'):''}</div></div>`; } break; }
     case 'icon': inner=`<svg viewBox="0 0 24 24" width="100%" height="100%" style="position:absolute;inset:0" fill="${e.fill?dzCol(e.fill,pal):'none'}" stroke="${dzCol(e.color||'acc',pal)}" stroke-width="${e.sw||2}" stroke-linecap="round" stroke-linejoin="round">${(DZ_ICONS[e.icon]||DZ_ICONS.star)[1]}</svg>`; break;
     case 'qr': inner=`<div style="position:absolute;inset:0;color:${dzCol(e.color||'ink',pal)};${e.fill?`background:${dzCol(e.fill,pal)};padding:${r1x(Math.min(w,h)*.06)}mm;`:''}">${qrSVG(tok(e.data||'https://example.am',opt.rec||currentRec()),r1x(Math.min(w,h)*(e.fill?.88:1)))}</div>`; break;
     case 'bar': inner=`<div style="position:absolute;inset:0;color:${dzCol(e.color||'ink',pal)};">${barSVG(tok(e.data||'4600000000000',opt.rec||currentRec()),r1x(h)).replace(/width="[^"]*" height="[^"]*"/,'width="100%" height="100%" preserveAspectRatio="none"')}</div>`; break;
@@ -3704,17 +3736,17 @@ function dzElHTML(e,doc,pal,opt){ if(e.hide) return ''; const w=Math.max(.2,+e.w
   }
   return `<div class="dzel" data-id="${esc(e.id||'')}" data-t="${e.t}"${e.lock?' data-lock="1"':''} style="${css}">${inner}</div>`; }
 const r1x=v=>Math.round((+v||0)*100)/100; let dzGid=0;
-function dzEdge(e,W,H,b){ if(!b||e.rot||!['rect','ellipse','shape','img'].includes(e.t)) return e; const n=Object.assign({},e), t=.4; let x=+e.x, y=+e.y, w=+e.w, h=+e.h;
-  if(Math.abs(x)<=t){ x-=b; w+=b; } if(Math.abs(x+w-W)<=t||Math.abs((+e.x)+(+e.w)-W)<=t){ w+=b; } if(Math.abs(y)<=t){ y-=b; h+=b; } if(Math.abs((+e.y)+(+e.h)-H)<=t){ h+=b; }
-  n.x=x; n.y=y; n.w=w; n.h=h; return n; }
+function dzEdge(e,W,H,b){ if(!b||!['rect','img'].includes(e.t)||+e.r||e.mask) return [e]; const ro=((+e.rot||0)%360+360)%360; if(ro!==0&&ro!==180) return [e]; const t=.4; const x=+e.x,y=+e.y,w=+e.w,h=+e.h;
+  const L=x<=t, T=y<=t, Rr=x+w>=W-t, B=y+h>=H-t; if(!(L||T||Rr||B)) return [e]; let nx=x,ny=y,nr=x+w,nb=y+h; if(L) nx=Math.min(x,-b); if(T) ny=Math.min(y,-b); if(Rr) nr=Math.max(nr,W+b); if(B) nb=Math.max(nb,H+b);
+  const n=Object.assign({},e,{x:nx,y:ny,w:nr-nx,h:nb-ny}); if(e.t==='img'){ return [Object.assign(n,{id:(e.id||'')+'-bleed',stroke:'',sw:0}),e]; } return [n]; }
 function dzHTML(doc,side,opt){ opt=opt||{}; doc=doc||st.dz; const W=doc.w, H=doc.h, b=+opt.bleed||0, pal=dzPal(opt.pal||doc.pal), bgv=side==='back'?(doc.bgBack||doc.bg):doc.bg;
   const brand=opt.brand||(st.dz&&st.dz.brand)||{}, o2=Object.assign({},opt,{brand}); const els=(side==='back'?doc.back:doc.front)||[];
   let h=`<div class="dz${opt.live?' live':''}" data-side="${side}" style="position:relative;width:${r1x(W+2*b)}mm;height:${r1x(H+2*b)}mm;overflow:hidden;background:${dzCol(bgv||'bg',pal)};-webkit-print-color-adjust:exact;print-color-adjust:exact;color:${pal.ink}">`;
-  const bimg=side==='back'?doc.bgImgBack:doc.bgImg; if(bimg) h+=`<img src="${bimg}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;${doc.bgImgOp!=null?`opacity:${doc.bgImgOp};`:''}">`;
+  const bimg=side==='back'?doc.bgImgBack:doc.bgImg; if(bimg){ const op=doc.bgImgOp!=null?`opacity:${doc.bgImgOp};`:''; h+=`<img src="${bimg}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;${op}">`; if(b) h+=`<img src="${bimg}" alt="" style="position:absolute;left:${r1x(b)}mm;top:${r1x(b)}mm;width:${r1x(W)}mm;height:${r1x(H)}mm;object-fit:cover;${op}">`; }
   h+=`<div class="dzc" style="position:absolute;left:${r1x(b)}mm;top:${r1x(b)}mm;width:${r1x(W)}mm;height:${r1x(H)}mm">`;
-  els.forEach(e=>{ h+=dzElHTML(dzEdge(e,W,H,b),doc,pal,o2); }); return h+'</div></div>'; }
-function dzThumb(T,boxW,pal,brand){ const {w,h}=T, k=boxW/(w*PX); const doc={w,h,pal:dzPal(pal||T.pal),fonts:Object.assign({h:'Montserrat',b:'PT Sans'},T.fonts),bg:T.bg||'bg',front:T.front||[],back:T.back||[]};
-  return `<div class="thumb" style="width:${boxW}px;height:${Math.round(h*PX*k)}px"><div class="tin" style="transform:scale(${k})">${dzHTML(doc,'front',{brand:brand||{}})}</div></div>`; }
+  els.forEach(e=>{ dzEdge(e,W,H,b).forEach(x=>{ h+=dzElHTML(x,doc,pal,o2); }); }); return h+'</div></div>'; }
+function dzThumb(T,boxW,pal,brand){ const P=prodById(st.prod), {W:PW,H:PH}=P&&P.kind?dims():{W:T.w,H:T.h}; const doc=dzFromTpl(T,PW,PH,pal); const w=doc.w, h=doc.h, k=boxW/(w*PX); const rnd=P&&P.round?'border-radius:50%;':'';
+  return `<div class="thumb" style="width:${boxW}px;height:${Math.round(h*PX*k)}px;${rnd}"><div class="tin" style="transform:scale(${k})">${dzHTML(doc,'front',{brand:brand||{}})}</div></div>`; }
 
 /* ---------- applying ---------- */
 const DZ_NEAR={cardsq:['square','card'],dl:['flyer'],square:['cardsq','post'],invite:['post','ticket'],ticket:['invite'],round:['square','cardsq'],label:['price','card'],menu:['flyer','diploma'],badge:['card'],letterhead:['diploma'],idphoto:['photo'],price:['label','card'],pocket:['flyer'],calendar:['flyer'],photo:['flyer'],tent:['flyer'],diplomaH:['booklet'],booklet:['diplomaH'],post:['invite','square'],flyer:['diploma','menu'],diploma:['flyer'],card:['badge','price'],tag:['dl']};
@@ -3809,7 +3841,7 @@ function dzKey(ev){ if(!dzOn()) return; if(dzEditing){ if(ev.key==='Escape'){ ev
 function dzPasteClip(){ if(!dzClip||!['front','back'].includes(st.view)) return false; const n=JSON.parse(JSON.stringify(dzClip)); n.id=dzId(); n.x+=4; n.y+=4; dzEls().push(n); dzClip=JSON.parse(JSON.stringify(n)); dzSel=n.id; update(); return true; }
 
 /* ---------- photos ---------- */
-function dzReadImage(file,max){ return new Promise((res,rej)=>{ if(!file||!/^image\//.test(file.type)) return rej(new Error('type')); const fr=new FileReader(); fr.onerror=rej; fr.onload=()=>{ const im=new Image(); im.onerror=rej; im.onload=()=>{ const M=max||3200, s=Math.min(1,M/Math.max(im.naturalWidth,im.naturalHeight)); if(s>=1&&file.size<2.5e6){ res(fr.result); return; } const cv=document.createElement('canvas'); cv.width=Math.round(im.naturalWidth*s); cv.height=Math.round(im.naturalHeight*s); const g=cv.getContext('2d'); g.drawImage(im,0,0,cv.width,cv.height); const png=/png|gif|svg/.test(file.type); res(cv.toDataURL(png?'image/png':'image/jpeg',.92)); }; im.src=fr.result; }; fr.readAsDataURL(file); }); }
+function dzReadImage(file,max){ return new Promise((res,rej)=>{ if(!file||!/^image\//.test(file.type)) return rej(new Error('type')); const fr=new FileReader(); fr.onerror=rej; fr.onload=()=>{ const im=new Image(); im.onerror=rej; im.onload=()=>{ const M=max||3200, s=Math.min(1,M/Math.max(im.naturalWidth,im.naturalHeight)); if(s>=1&&file.size<1.2e6){ res(fr.result); return; } const cv=document.createElement('canvas'); cv.width=Math.round(im.naturalWidth*s); cv.height=Math.round(im.naturalHeight*s); const g=cv.getContext('2d'); g.drawImage(im,0,0,cv.width,cv.height); const png=/png|gif|svg/.test(file.type); res(cv.toDataURL(png?'image/png':'image/jpeg',.88)); }; im.src=fr.result; }; fr.readAsDataURL(file); }); }
 function dzPickFile(cb){ const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.onchange=()=>{ const f=i.files&&i.files[0]; if(f) cb(f); }; i.click(); }
 function dzSetPhoto(e,file){ dzReadImage(file).then(src=>{ if(e.k==='logo'){ st.dz.brand=st.dz.brand||{}; st.dz.brand.logo=src; } else { e.src=src; } update(); toast('Фото на месте. Двигать кадр: ползунки «Кадр» в панели «Макет».'); }).catch(()=>toast('Не удалось открыть картинку')); }
 function dzExtract(src){ return new Promise(res=>{ const im=new Image(); im.onload=()=>{ const N=72, cv=document.createElement('canvas'); cv.width=N; cv.height=N; const g=cv.getContext('2d'); g.drawImage(im,0,0,N,N); let px; try{ px=g.getImageData(0,0,N,N).data; }catch(_){ res([]); return; }
@@ -3827,13 +3859,13 @@ function renderDzGallery(){ const box=$('#dzGal'); if(!box) return; const P=prod
   if(!kind){ box.innerHTML='<p class="hint">Сначала выберите изделие выше. Для конвертов и готовых документов шаблоны во вкладках «Конверты» и «Документы».</p>'; return; }
   const all=dzTplFor(kind), tags=[...new Set(all.flatMap(t=>t.tags||[]))].slice(0,14);
   $('#dzTags').innerHTML=tags.length>1?['',...tags].map(t=>`<button class="btn sm${dzTag===t?' primary':''}" data-dztag="${esc(t)}">${t?esc(t):'Все'}</button>`).join(''):'';
-  const q=(($('#dzSearch')||{}).value||'').trim().toLowerCase(); const list=all.filter(t=>(!dzTag||(t.tags||[]).includes(dzTag))&&(!q||(t.name+' '+(t.tags||[]).join(' ')+' '+(t.front||[]).filter(e=>e.t==='text').map(e=>e.text).join(' ')).toLowerCase().includes(q))); const bw=Math.max(120,Math.floor((box.clientWidth||300)/2)-22);
+  const yo=x=>String(x).toLowerCase().replace(/ё/g,'е'); const q=yo((($('#dzSearch')||{}).value||'').trim()); const list=all.filter(t=>(!dzTag||(t.tags||[]).includes(dzTag))&&(!q||yo(t.name+' '+(t.tags||[]).join(' ')+' '+(t.front||[]).filter(e=>e.t==='text').map(e=>e.text).join(' ')).includes(q))); const bw=Math.max(120,Math.floor((box.clientWidth||300)/2)-22);
   if(!list.length&&q){ box.innerHTML=`<p class="dzempty">Ничего не нашлось по «${esc(q)}». Попробуйте другое слово.</p>`; return; }
   box.innerHTML=`<button class="tcard dzblank" data-dzblank="1"><div class="thumb" style="width:${bw}px;height:${Math.round(bw*Math.min(1.5,(st.dz&&st.dz.h||50)/(st.dz&&st.dz.w||90)))}px;display:grid;place-items:center;background:repeating-linear-gradient(45deg,transparent 0 8px,rgb(120 120 128 / .08) 8px 16px)"><b style="font-size:22px;color:var(--muted)">+</b></div><span>Пустой макет</span></button>`+
     list.map(t=>{ const pal=d.galPal&&d.palSrc?dzRoles(d.palSrc,!!t.dark):null; return `<button class="tcard${d.tid===t.id?' on':''}" data-dztpl="${esc(t.id)}" title="${esc(t.name)}">${dzThumb(t,bw,pal,d.brand)}<span>${esc(t.name)}${t.mine?' <small class="tag">мой</small>':''}</span>${t.mine?`<b class="x btn sm icon" data-dzdeltpl="${esc(t.id)}" title="Удалить мой шаблон">✕</b>`:''}</button>`; }).join(''); }
 function renderDzPalettes(){ const box=$('#dzPals'); if(!box) return; const d=st.dz||{};
   box.innerHTML=DZ_PALETTES.map(([n,c],i)=>`<button class="dzpal${d.palName===n?' on':''}" data-dzpal="${i}" title="${esc(n)}"><span>${c.map(x=>`<i style="background:${x}"></i>`).join('')}</span><small>${esc(n)}</small></button>`).join('');
-  const ph=$('#dzPhotoCols'); if(ph) ph.innerHTML=dzPhotoCols.length?`<div class="dzpal on" data-dzphoto="1"><span>${dzPhotoCols.map(x=>`<i style="background:${x}"></i>`).join('')}</span><small>Из вашего фото</small></div><div class="flexw">${[0,1,2,3].map(v=>{ const pal=dzRoles(v%2?[...dzPhotoCols].reverse():dzPhotoCols,v>1); return `<button class="btn sm" data-dzphv="${v}">${dzSwatches(pal)}${v>1?'Тёмный':'Светлый'} ${v%2?'Б':'А'}</button>`; }).join('')}</div>`:'';
+  const ph=$('#dzPhotoCols'); if(ph) ph.innerHTML=dzPhotoCols.length?`<div class="dzpal on" data-dzphoto="1"><span>${dzPhotoCols.map(x=>`<i style="background:${x}"></i>`).join('')}</span><small>Из вашего фото</small></div><div class="flexw">${[0,1,2,3].map(v=>{ const pal=dzPhotoVariant(v); return `<button class="btn sm" data-dzphv="${v}">${dzSwatches(pal)}${v>1?'Тёмный':'Светлый'} ${v%2?'Б':'А'}</button>`; }).join('')}</div>`:'';
   const dp=$('#dzPhotoDrop'); if(dp) dp.classList.toggle('has',!!dzPhoto), dp.style.backgroundImage=dzPhoto?`url(${dzPhoto})`:'';
   const gp=$('#dzGalPal'); if(gp) gp.checked=!!d.galPal; }
 function renderDzBrand(){ const box=$('#dzBrand'); if(!box||!st.dz) return; const B=st.dz.brand||(st.dz.brand={});
@@ -3861,15 +3893,15 @@ function renderDzInsp(){ const box=$('#dzInsp'); if(!box||!st.dz) return; const 
   box.innerHTML=h; }
 function dzKeepFocus(box,fn){ const a=document.activeElement; const key=a&&box&&box.contains(a)?(a.dataset.dzf||a.dataset.dzbrand||a.id||''):''; const pos=key&&a.selectionStart!=null?[a.selectionStart,a.selectionEnd]:null; fn(); if(!key) return; const n=box.querySelector(`[data-dzf="${key}"],[data-dzbrand="${key}"]`)||document.getElementById(key); if(n&&n!==a){ n.focus(); if(pos) try{ n.setSelectionRange(pos[0],pos[1]); }catch(_){} } }
 function renderDzPanel(){ if(!$('#dzAdd')||!st.dz) return; const d=st.dz; $('#dzHFont').innerHTML=dzFontOpts(d.fonts.h); $('#dzBFont').innerHTML=dzFontOpts(d.fonts.b);
-  $('#dzPairs').innerHTML=DZ_PAIRS.map(([a,b],i)=>`<button class="dzpair${d.fonts.h===a&&d.fonts.b===b?' on':''}" data-dzpair="${i}"><b style="font-family:${FONTS[a]||a}">${esc(a)}</b><small style="font-family:${FONTS[b]||b}">${esc(b)}</small></button>`).join('');
+  $('#dzPairs').innerHTML=DZ_PAIRS.map(([a,b],i)=>`<button class="dzpair${d.fonts.h===a&&d.fonts.b===b?' on':''}" data-dzpair="${i}" title="${esc(a+' + '+b)}"><b style="font-family:${FONTS[a]||a}">${esc(a)}</b><small style="font-family:${FONTS[b]||b}">${esc(b)}</small></button>`).join('');
   $('#dzBgRow').innerHTML=dzColorRow('dzbg',typeof (dzSideOf()==='back'?d.bgBack:d.bg)==='string'?(dzSideOf()==='back'?d.bgBack:d.bg):'bg');
   $('#dzSides').innerHTML=`<button class="btn sm${(d.sides||1)===1?' primary':''}" data-dzsides="1">Одна сторона</button><button class="btn sm${d.sides===2?' primary':''}" data-dzsides="2">Две стороны</button>${d.sides===2?`<button class="btn sm" data-dzside="${dzSideOf()==='back'?'front':'back'}">${dzSideOf()==='back'?'← К лицу':'К обороту →'}</button>`:''}`;
   $('#dzSideNow').textContent=dzSideOf()==='back'?'Сейчас: оборот':'Сейчас: лицевая сторона';
   renderDzLayers(); dzKeepFocus($('#dzInsp'),renderDzInsp); }
-function renderDzShop(){ renderDzGallery(); renderDzPalettes(); renderDzBrand(); }
+function renderDzShop(){ renderDzGallery(); renderDzPalettes(); dzKeepFocus($('#dzBrand'),renderDzBrand); const vb=$('#dzVarBox'); if(vb&&vb.open) dzVariants(); }
 
 /* ---------- floating bar over the stage ---------- */
-function dzBar(){ const bar=$('#dzBar'); if(!bar) return; const ae=document.activeElement; if(ae&&bar.contains(ae)&&/INPUT|SELECT/.test(ae.tagName)&&!bar.hidden&&dzSel&&bar.dataset.sel===dzSel) return; bar.dataset.sel=dzSel||''; const e=dzOn()&&['front','back'].includes(st.view)&&dzSel&&dzFind(dzSel); if(!e){ bar.hidden=true; return; } bar.hidden=false; const p=dzPal(st.dz.pal);
+function dzBar(){ const bar=$('#dzBar'); if(!bar) return; const ae=document.activeElement; if(ae&&bar.contains(ae)&&/INPUT|SELECT/.test(ae.tagName)&&!bar.hidden&&dzSel&&bar.dataset.sel===dzSel) return; bar.dataset.sel=dzSel||''; const live=dzOn()&&['front','back'].includes(st.view); const e=live&&dzSel&&dzFind(dzSel); if(!live){ bar.hidden=true; return; } bar.hidden=false; if(!e){ bar.innerHTML='<span class="dzhint">Нажмите на текст, фото или фигуру на макете, чтобы изменить. Двойной щелчок по тексту — правка прямо на месте. Перетащите фото на рамку.</span>'; return; } const p=dzPal(st.dz.pal);
   let h=`<span class="dzbn">${esc(dzLabel(e))}</span>`;
   if(e.t==='text') h+=`<select data-dzf="font" title="Шрифт" style="max-width:150px"><option value="h"${e.font==='h'?' selected':''}>${esc(st.dz.fonts.h)}</option><option value="b"${!e.font||e.font==='b'?' selected':''}>${esc(st.dz.fonts.b)}</option>${dzFontOpts(e.font)}</select><button data-dzsz="-1" title="Меньше">A−</button><input type="number" data-dzf="size" value="${+e.size||10}" step="0.5" style="width:58px" title="Размер, pt"><button data-dzsz="1" title="Больше">A+</button><button data-dztog="weight" class="${+e.weight>=600?'on':''}" title="Жирный"><b>Ж</b></button><button data-dztog="italic" class="${e.italic?'on':''}" title="Курсив"><i>К</i></button><button data-dzalign="${{left:'center',center:'right',right:'left'}[e.align||'left']}" title="Выравнивание">${{left:'⇤',center:'↔',right:'⇥'}[e.align||'left']}</button>`;
   const ck=e.t==='text'||e.t==='icon'||e.t==='qr'||e.t==='bar'?'color':e.t==='line'?'stroke':'fill'; if(e.t!=='img'&&e.t!=='cal') h+=`<span class="dzbcols">${['ink','acc','acc2','soft','bg'].map(k=>`<i data-dzbc="${ck}:${k}" style="background:${p[k]}" class="${e[ck]===k?'on':''}"></i>`).join('')}</span>`;
@@ -3888,15 +3920,30 @@ function dzPrnSVG(model,on){ const c=on?'var(--accent)':'#8e8e93'; return `<svg 
 function dzPrnCards(){ const cur=st.shop.printer||'gx4040'; return Object.entries(PRINTERS).map(([id,p])=>{ const I=DZ_PRN_INFO[id]||{n:p.n,sub:'',feat:[]}, prof=st.printers.find(x=>x.model===id); const on=id===cur;
   return `<button class="prncard${on?' on':''}" data-dzprn="${id}">${dzPrnSVG(id,on)}<div><b>${esc(I.n)}</b><small>${esc(I.sub)}</small><ul>${[`Поля: ${p.m[0]} / ${p.m[1]} / ${p.m[2]} / ${p.m[3]} мм`,...I.feat].map(f=>`<li>${esc(f)}</li>`).join('')}${prof&&(+prof.dx||+prof.dy||+prof.rotate)?`<li>Поправка: X ${prof.dx}, Y ${prof.dy} мм</li>`:''}</ul>${on?'<span class="pill ready">Выбран</span>':'<span class="pill done">Выбрать</span>'}</div></button>`; }).join(''); }
 function dzRenderPrinters(){ const a=$('#prnCards'); if(a) a.innerHTML=dzPrnCards(); const b=$('#mPrnCards'); if(b) b.innerHTML=dzPrnCards(); const chip=$('#hPrinterName'); if(chip){ const I=DZ_PRN_INFO[st.shop.printer]||{n:'Принтер'}; chip.textContent=I.n.replace('Canon ','').replace('MAXIFY ','').replace('PIXMA ',''); } }
-function dzChoosePrinter(id){ st.shop.printer=id; const prof=st.printers.find(x=>x.model===id); if(prof){ st.print.prn=prof.name; Object.assign(st.print,{dx:+prof.dx||0,dy:+prof.dy||0,rotate:+prof.rotate||0}); } dzRenderPrinters(); update(); toast(((DZ_PRN_INFO[id]||{}).n||'Принтер')+': выбран. В окне печати выберите этот же принтер.'); }
+function dzChoosePrinter(id){ st.shop.printer=id; setTimeout(()=>{ try{ syncUI(); }catch(_){} },0); const prof=st.printers.find(x=>x.model===id); if(prof){ st.print.prn=prof.name; Object.assign(st.print,{dx:+prof.dx||0,dy:+prof.dy||0,rotate:+prof.rotate||0}); } dzRenderPrinters(); update(); toast(((DZ_PRN_INFO[id]||{}).n||'Принтер')+': выбран. В окне печати выберите этот же принтер.'); }
 
 /* ---------- mode ---------- */
+function dzHasDesign(d){ return !!(d&&((d.front||[]).length||(d.back||[]).length||d.bgImg||d.bgImgBack||(d.bg&&d.bg!=='bg'))); }
+function dzRememberEnv(){ if(dzOn()||st.prod) return; st.envMem={size:st.size,custom:Object.assign({},st.custom),mode:st.print.mode,back:!!st.print.back}; }
+function dzRestorePrint(){ const d=st.dz, P=d&&prodById(d.prod); if(!(P&&P.kind&&dzHasDesign(d))) return false; st.prod=P.id; const sz=SIZES.find(s=>s.id!=='CUSTOM'&&Math.abs(s.w-d.w)<.5&&Math.abs(s.h-d.h)<.5); if(sz) st.size=sz.id; else { st.size='CUSTOM'; st.custom={w:d.w,h:d.h}; }
+  d.on=true; st.print.mode='impose'; if(d.job) Object.assign(st.shop,d.job); if(!['front','back','sheet','doc'].includes(st.view)) setView('front'); return true; }
+const DZ_JOB=['paper','ptype','fin','qty','spare','hours','disc','urgent'];
+function dzJob(){ const j={}; DZ_JOB.forEach(k=>{ j[k]=JSON.parse(JSON.stringify(st.shop[k]??null)); }); return j; }
+function dzSync(){ if(dzSync.busy) return; dzSync.busy=true; try{ const pr=st.ui.app==='print';
+    if(pr&&!dzOn()&&!dzRestorePrint()){ dzSync.busy=false; applyProduct('bc90',true); return; }
+    if(!pr&&st.dz&&st.dz.on) st.dz.on=false;
+    if(document.documentElement.classList.contains('app-print')!==pr) dzApplyMode();
+    if(dzOn()){ st.shop.sides=st.dz.sides===2?2:1; st.shop.disc=clamp(+st.shop.disc||0,0,100); st.dz.job=dzJob(); if(st.prod&&st.dz.prod!==st.prod&&(prodById(st.prod)||{}).kind) st.dz.prod=st.prod; }
+  } finally { dzSync.busy=false; } }
 function dzApplyMode(){ const pr=st.ui.app==='print'; document.documentElement.classList.toggle('app-print',pr); document.documentElement.classList.toggle('app-env',!pr); $$('#appSeg button').forEach(b=>b.classList.toggle('on',b.dataset.app===(pr?'print':'env')));
   const sub=$('.brand small'); if(sub) sub.textContent=pr?'типография: макеты, печать, заказы':'печать конвертов и наклеек'; const bt=$('#rail [data-tab="batch"]'); if(bt&&bt.lastChild&&bt.lastChild.nodeType===3) bt.lastChild.nodeValue=pr?'Данные':'Рассылка';
-  const cur=$('.rbtn.on'); if(cur&&getComputedStyle(cur).display==='none'){ const f=$(pr?'.rbtn[data-tab="shop"]':'.rbtn[data-tab="tpl"]'); if(f) f.click(); } dzRenderPrinters(); }
-function dzSetMode(m){ if(st.ui.app===m) return; st.ui.app=m; if(m==='print'){ if(!st.prod||!isProd()){ const lp=st.shop.lastProd&&prodById(st.shop.lastProd); applyProduct(lp&&lp.kind?lp.id:'bc90',true); } else { st.dz.on=true; st.print.mode='impose'; } }
-  else { if(st.dz) st.dz.on=false; if(st.prod) st.shop.lastProd=st.prod; st.prod=''; st.print.mode='envelope'; if(st.ui.envSize) st.size=st.ui.envSize; else st.size='DL'; setView('front'); }
+  TITLES.batch=pr?'Данные для печати':'Рассылка'; if(activeTab==='batch') $('#sideTitle').textContent=TITLES.batch;
+  const cur=$('.rbtn.on'); if(cur&&getComputedStyle(cur).display==='none'){ const f=$(pr?'.rbtn[data-tab="shop"]':'.rbtn[data-tab="tpl"]'); if(f) f.click(); } else { try{ moveLens(); }catch(_){} } dzRenderPrinters(); }
+function dzSetMode(m){ if(st.ui.app===m){ dzApplyMode(); return; }
+  if(m==='print'){ dzRememberEnv(); st.ui.app='print'; if(!dzRestorePrint()){ applyProduct('bc90',true); return; } }
+  else { if(dzOn()) st.dz.job=dzJob(); st.ui.app='env'; if(st.dz) st.dz.on=false; st.prod=''; const E=st.envMem; if(E){ st.size=E.size||'DL'; if(E.custom) st.custom=Object.assign({},E.custom); st.print.mode=E.mode&&E.mode!=='impose'?E.mode:'envelope'; st.print.back=!!E.back; } else { st.size='DL'; st.print.mode='envelope'; } setView('front'); }
   dzApplyMode(); syncUI(); update(); }
+function dzPhotoVariant(v){ const pal=dzRoles(dzPhotoCols,v>1); if(v%2){ const a=pal.acc; pal.acc=pal.acc2; pal.acc2=a; pal.soft=dzMix(pal.bg,pal.acc,v>1?.22:.14); } return pal; }
 
 DZ_KINDS.idphoto={n:'Фото на документы',w:35,h:45};
 Object.assign(DZ_PRN_INFO,{
@@ -3906,12 +3953,13 @@ Object.assign(DZ_PRN_INFO,{
 function dzChip(){ const chip=$('#hPrinterName'); if(!chip) return; const I=DZ_PRN_INFO[st.shop.printer]||{n:'Принтер'}; chip.textContent=I.n.replace(/^Canon (MAXIFY |PIXMA )?/,''); }
 function dzEdgeTouch(e){ const W=st.dz.w,H=st.dz.h,t=.5; return e.x<=t||e.y<=t||e.x+e.w>=W-t||e.y+e.h>=H-t; }
 function dzUseProduct(P,silent){ const S=st.shop, {W,H}=dims(); st.ui.app='print'; st.print.mode='impose'; const cur=st.dz;
-  const same=cur&&cur.kind===P.kind&&(cur.front||[]).length;
+  const same=cur&&cur.kind===P.kind&&dzHasDesign(cur);
   if(same){ cur.on=true; dzFit(); }
   else{ const T=dzTplFor(P.kind)[0], old=cur||{}; const pal=old.galPal&&old.palSrc&&T?dzRoles(old.palSrc,!!T.dark):null; const d=T?dzFromTpl(T,W,H,pal):dzBlank(W,H); d.kind=P.kind; d.brand=old.brand||{}; d.palSrc=old.palSrc||null; d.palName=old.palName||''; d.galPal=!!old.galPal; st.dz=d; }
-  S.sides=st.dz.sides||1; dzSel=null; dzTag=''; dzApplyMode(); setView('front'); syncUI(); update();
+  st.dz.prod=P.id; st.dz.job=dzJob(); S.sides=st.dz.sides||1; dzSel=null; dzTag=''; dzApplyMode(); setView('front'); syncUI(); update();
   if(!silent){ const L=layoutFor(W,H,SHEETS[paperById(S.paper).sheet]||SHEETS.A4); toast(P.n+': '+layoutShort(L)+'. Ниже шаблоны; двойной щелчок по тексту — правка прямо на макете.'); } }
 function dzPrinterChecks(add){ const S=st.shop, pr=PRINTERS[S.printer]||PRINTERS.gx4040, p=paperById(S.paper), g=gsmOf(p), sheet=SHEETS[p.sheet]||SHEETS.A4, key=sheetKey(sheet), name=(DZ_PRN_INFO[S.printer]||{n:pr.n}).n;
+  if(S.printer!=='other'&&(sheet.w>216.5||sheet.h>356)) add('bad',`${name} печатает листы не больше A4 и Letter. Лист «${sheet.n}» в него не войдёт: выберите бумагу A4 или печатайте плакат по частям.`);
   if(S.printer==='g3410'&&g>pr.maxG) add('bad',`${name} не протянет «${p.n}» (${g} г/м²): максимум около 275 г/м², и то фотобумага Canon. Печатайте на GX4040 через задний плоский лоток или возьмите бумагу тоньше.`);
   if(S.printer==='gx4040'&&g>=pr.flatG) add('info',`«${p.n}» (${g} г/м²) на GX4040: только задний плоский лоток, по одному листу${key==='A4'?'':', и только A4, B5 или Letter'}. Выпрямите лист перед загрузкой.`);
   else if(S.printer==='gx4040'&&g>105) add('info',`${g} г/м²: подавайте из заднего лотка. Кассета берёт только обычную бумагу 64–105 г/м².`);
@@ -3921,19 +3969,20 @@ function dzPrinterChecks(add){ const S=st.shop, pr=PRINTERS[S.printer]||PRINTERS
   if(S.borderless&&!pr.bl) add('warn',`${name} не печатает без полей (поля ${pr.m.join(' / ')} мм). Снимите галочку «Печать без полей» или печатайте на G3410.`);
   else if(S.borderless&&pr.bl&&!pr.blS.includes(key)) add('warn',`Без полей ${name} печатает только на A4, Letter, 10 × 15 и 13 × 18. Для листа ${sheet.n} будут поля.`);
   else if(S.borderless&&pr.bl&&!/фото|photo|matte|ph1015|ph1318/i.test(p.id+' '+p.n)) add('info','Без полей Canon печатает лучше всего на фотобумаге. На обычной бумаге края могут быть бледнее.'); }
-const _dzGal=renderDzGallery; renderDzGallery=function(){ const box=$('#dzGal'); if(!box) return; const d=st.dz||{}, P=prodById(st.prod); const sig=JSON.stringify([(($('#dzSearch')||{}).value||''),P&&P.kind,d.galPal?d.palSrc:0,d.brand,d.tid,dzTag,(st.myTpl||[]).length,box.clientWidth,d.w,d.h]); if(box.dataset.sig===sig&&box.children.length) return; box.dataset.sig=sig; _dzGal(); };
+const _dzGal=renderDzGallery; renderDzGallery=function(){ const box=$('#dzGal'); if(!box) return; const d=st.dz||{}, P=prodById(st.prod); const sig=JSON.stringify([(($('#dzSearch')||{}).value||''),P&&P.kind,P&&P.id,d.galPal?d.palSrc:0,d.brand,dzTag,(st.myTpl||[]).map(t=>t.id).join(),box.clientWidth,d.w,d.h]); if(box.dataset.sig!==sig||!box.children.length){ box.dataset.sig=sig; _dzGal(); } box.querySelectorAll('[data-dztpl]').forEach(b=>b.classList.toggle('on',b.dataset.dztpl===d.tid)); };
 function dzProdNow(){ const now=$('#prodNow'), P=prodById(st.prod); if(!now) return; if(!dzOn()||!P||!P.kind){ return; } const S=st.shop, {W,H}=dims(), paper=paperById(S.paper), sheet=SHEETS[paper.sheet]||SHEETS.A4, L=layoutFor(W,H,sheet);
   now.hidden=false; now.className='dznow'; now.innerHTML=`<span><b>${esc(P.n)}</b> · ${r1(W)} × ${r1(H)} мм · ${esc(layoutShort(L))} ${esc(sheet.n)}</span><span class="spacer"></span><button class="btn sm" id="shSheet2">Лист печати</button>`; }
 function dzProdChips(){ const g=$('#prodGrid'); if(!g||st.ui.app!=='print') return; const cat=shopCat||'card', S=st.shop; g.innerHTML=PRODUCTS.filter(p=>p.cat===cat).map(p=>{ let info=''; if(p.w&&!p.doc&&!p.mode){ const L=layoutFor(p.w,p.h,SHEETS[paperById(p.paper||S.paper).sheet]||SHEETS.A4); info=layoutShort(L); } else if(p.env) info='режим «Конверты»'; else if(p.doc) info='документ'; else if(p.mode) info='по списку'; return `<button class="btn${p.id===st.prod?' primary':''}" data-prod="${p.id}" title="${esc(info)}">${esc(p.n)}${info&&p.kind?`<small>${esc(info)}</small>`:''}</button>`; }).join(''); }
 const _rs=renderShop; renderShop=function(skip){ _rs(skip); dzProdChips(); dzProdNow(); };
 /* ---------- mockup ---------- */
 let mockMode='table', mockRot={x:0,y:0};
-function dzMockHTML(){ const d=st.dz, W=d.w, H=d.h, L=Math.max(W,H), px=Math.min(340,Math.max(200,360*(L/90)>340?340:300)), k=px/(L*PX), w=Math.round(W*PX*k), h=Math.round(H*PX*k);
-  const face=s=>`<div class="mface" style="width:${w}px;height:${h}px"><div style="transform:scale(${k});transform-origin:0 0;position:absolute;left:0;top:0">${dzHTML(d,s,{})}</div></div>`; const two=d.sides===2&&(d.back||[]).length;
-  const tilt=`rotateX(${52+mockRot.x}deg) rotateZ(${-28+mockRot.y}deg)`;
+function dzMockHTML(){ const d=st.dz, W=d.w, H=d.h, L=Math.max(W,H), sc=$('#mockScene'), SW=(sc&&sc.clientWidth)||800, SH=(sc&&sc.clientHeight)||500, two=d.sides===2&&(d.back||[]).length, P=prodById(st.prod), rnd=P&&P.round?'border-radius:50%;':'';
+  const base=Math.min(two?Math.min(SW*.34,SH*.5):Math.min(SW*.5,SH*.72),340), k=base/(L*PX), w=Math.round(W*PX*k), h=Math.round(H*PX*k);
+  const face=s=>`<div class="mface" style="width:${w}px;height:${h}px;${rnd}"><div style="transform:scale(${k});transform-origin:0 0;position:absolute;left:0;top:0">${dzHTML(d,s,{})}</div></div>`;
+  const tilt=`rotateX(${52+mockRot.x}deg) rotateZ(${-28+mockRot.y}deg)`, ox=two?Math.round(w*.5):0, oy=two?Math.round(h*.62):0, ctr=two?`margin-left:${-Math.round(ox/2)}px;margin-top:${-Math.round(oy/2)}px;`:'';
   if(mockMode==='flat') return `<div class="mflat">${face('front')}${two?face('back'):''}</div>`;
-  if(mockMode==='stack') return `<div class="m3d" style="width:${w}px;height:${h}px;transform:${tilt}">${[4,3,2,1].map(i=>`<div class="mlayer" style="transform:translateZ(${i*-1.4}px) rotateZ(${i*2.2-4}deg) translate(${i*3}px,${i*-2}px)">${face(i===1&&two?'front':'front')}</div>`).join('')}${two?`<div class="mlayer" style="transform:translate(${Math.round(w*.62)}px,${Math.round(h*.9)}px) rotateZ(14deg)">${face('back')}</div>`:''}<div class="mlayer top">${face('front')}</div></div>`;
-  return `<div class="m3d" style="width:${w}px;height:${h}px;transform:${tilt}">${two?`<div class="mlayer" style="transform:translate(${Math.round(w*.55)}px,${Math.round(h*.75)}px) rotateZ(12deg)">${face('back')}</div>`:''}<div class="mlayer top">${face('front')}</div></div>`; }
+  if(mockMode==='stack') return `<div class="m3d" style="width:${w}px;height:${h}px;${ctr}transform:${tilt}">${[4,3,2,1].map(i=>`<div class="mlayer" style="transform:translateZ(${i*-1.4}px) rotateZ(${i*2.2-4}deg) translate(${i*3}px,${i*-2}px)">${face('front')}</div>`).join('')}${two?`<div class="mlayer" style="transform:translate(${ox}px,${oy}px) rotateZ(14deg)">${face('back')}</div>`:''}<div class="mlayer top">${face('front')}</div></div>`;
+  return `<div class="m3d" style="width:${w}px;height:${h}px;${ctr}transform:${tilt}">${two?`<div class="mlayer" style="transform:translate(${ox}px,${oy}px) rotateZ(12deg)">${face('back')}</div>`:''}<div class="mlayer top">${face('front')}</div></div>`; }
 function dzMock(){ const sc=$('#mockScene'); if(!sc||!dzOn()) return; sc.innerHTML=dzMockHTML(); $$('#mockSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mock===mockMode)); }
 /* ---------- proof sheet for client approval ---------- */
 function dzProofPages(){ const d=st.dz; if(!d||!(d.front||[]).length) return [sheet('<div style="padding:24mm;font-size:14pt;line-height:1.5">Сначала сделайте макет в режиме «Типография»: выберите изделие и шаблон.</div>')];
@@ -3951,6 +4000,20 @@ function dzProofPages(){ const d=st.dz; if(!d||!(d.front||[]).length) return [sh
   return [sheet(html)]; }
 function dzBrandToClient(){ const B=st.dz.brand||{}; const name=(B.company||B.name||'').trim(); if(!name){ toast('Впишите компанию или имя клиента'); return; } let c=st.clients.find(x=>x.name===name); if(!c){ c={name,phone:'',contact:'',note:''}; st.clients.push(c); } c.phone=B.phone||c.phone; c.contact=B.email||B.social||c.contact; c.brand=JSON.parse(JSON.stringify(B)); save(); renderDzBrand(); toast('Данные сохранены в карточку клиента «'+name+'»'); }
 const _dzMergeShop=mergeShop; mergeShop=function(s){ _dzMergeShop(s); if(!Array.isArray(st.myTpl)) st.myTpl=[]; (s&&s.myTpl||[]).forEach(t=>{ if(t&&t.id&&Array.isArray(t.front)&&!st.myTpl.some(x=>x.id===t.id)) st.myTpl.push(t); }); };
+/* ---------- print helpers ---------- */
+function dzOffsetWrap(x){ const dx=+st.print.dx||0, dy=+st.print.dy||0, rot=+st.print.rotate===180; if(!dx&&!dy&&!rot) return x; return `<div style="position:absolute;inset:0;transform:${rot?'rotate(180deg) ':''}translate(${dx}mm,${dy}mm);transform-origin:50% 50%">${x}</div>`; }
+function dzDpiCheck(add,src,e,name){ const d=imgDim(src); if(!d||!d.w||!d.h) return; const z=Math.max(1,+e.z||1), fit=e.fit||(e.k==='logo'?'contain':'cover'); const mmpp=(fit==='contain'?Math.min(e.w/d.w,e.h/d.h):Math.max(e.w/d.w,e.h/d.h))*z, v=Math.round(25.4/mmpp);
+  if(v<150) add(v<100?'bad':'warn',`${name}: ${v} dpi. Для печати нужно 200–300 dpi, иначе будет размыто. Возьмите фото крупнее или уменьшите рамку.`); else add('ok',`${name}: ${v} dpi`); }
+function dzTrimChecks(add){ const d=st.dz, W=d.w, H=d.h, safe=+st.shop.safe||0, P=prodById(st.prod); const host=document.createElement('div'); host.style.cssText='position:fixed;left:-20000px;top:0;visibility:hidden;pointer-events:none;width:max-content'; document.body.appendChild(host); let issues=0, minPt=99;
+  try{ ['front','back'].forEach(side=>{ if(side==='back'&&!(d.sides===2&&(d.back||[]).length)) return; host.innerHTML=dzHTML(d,side,{}); const root=host.querySelector('.dzc'); if(!root) return; const R=root.getBoundingClientRect(), u=R.width/W; if(!u) return; const sfx=side==='back'?' (оборот)':'';
+      host.querySelectorAll('.dzel').forEach(n=>{ const e=(d[side]||[]).find(x=>x.id===n.dataset.id); if(!e||e.hide||!['text','icon','qr','bar'].includes(e.t)) return; let r; if(e.t==='text'){ const tx=n.querySelector('.dztx'); if(!tx||!tx.textContent.trim()) return; const rg=document.createRange(); rg.selectNodeContents(tx); r=rg.getBoundingClientRect(); const pt=parseFloat(getComputedStyle(tx).fontSize)*.75; if(pt&&pt<minPt) minPt=pt; } else r=n.getBoundingClientRect(); if(!r.width) return;
+        const m=Math.min((r.left-R.left)/u,(r.top-R.top)/u,(R.right-r.right)/u,(R.bottom-r.bottom)/u); if(m<-.3){ issues++; add('bad',`${dzLabel(e)}${sfx} выходит за край реза на ${r1(-m)} мм.`); } else if(m<safe-.2&&!(P&&P.round)){ issues++; add('warn',`${dzLabel(e)}${sfx}: ${r1(Math.max(0,m))} мм до края реза, нужно не меньше ${safe} мм.`); } }); }); }
+  finally{ host.remove(); }
+  if(minPt<5) add('warn',`Самый мелкий текст ${r1(minPt)} pt. Мельче 5–6 pt плохо читается после печати.`);
+  if(!issues) add('ok','Тексты и значки не заходят в зону реза ни на лице, ни на обороте'); }
+/* undo history keeps big pictures once instead of in every step */
+function histIn(s){ const M=window.__dzImgs||(window.__dzImgs=new Map()); return s.replace(/"data:image\/[a-z+.-]+;base64,[A-Za-z0-9+/=]{20000,}"/g,m=>{ let h=2166136261; for(let i=0;i<m.length;i+=97){ h^=m.charCodeAt(i); h=Math.imul(h,16777619); } const k='@@img'+m.length.toString(36)+'_'+(h>>>0).toString(36); if(!M.has(k)) M.set(k,m); return '"'+k+'"'; }); }
+function histOut(s){ const M=window.__dzImgs||new Map(); return s.replace(/"@@img[0-9a-z]+_[0-9a-z]+"/g,m=>M.get(m.slice(1,-1))||'""'); }
 
 /* ---------- teacher materials ---------- */
 let docN=1;
@@ -4387,7 +4450,7 @@ function applyUI(){
   if(u.mode==='simple'){ const cur=$('.rbtn.on'); if(cur&&cur.classList.contains('adv')) $('.rbtn[data-tab="tpl"]').click(); if(['letter','card','all','doc'].includes(st.view)){ setView('front'); renderPreview(); } }
   uiMarks(); setTimeout(moveLens,50); translateUI();
 }
-function renderAll(){ labels(); renderPreview(); scheduleGallery(); renderMagic(); render3D(); if(['shop','prep','calc'].includes(activeTab)) renderShop(); if(activeTab==='shop') renderDzShop(); if(activeTab==='dz') renderDzPanel(); if(activeTab==='prep'||!$('#mPrn').hidden) dzRenderPrinters(); else dzChip(); if(activeTab==='orders') renderOrders(); else renderTicketSel(); }
+function renderAll(){ if(typeof dzSync==='function') dzSync(); labels(); renderPreview(); scheduleGallery(); renderMagic(); render3D(); if(['shop','prep','calc'].includes(activeTab)) renderShop(); if(activeTab==='shop') renderDzShop(); if(activeTab==='dz') renderDzPanel(); if(activeTab==='prep'||!$('#mPrn').hidden) dzRenderPrinters(); else dzChip(); if(activeTab==='orders') renderOrders(); else renderTicketSel(); }
 function update(){ save(); renderAll(); renderTokens(); }
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove('show'),2600); }
 function moveLens(){ const b=$('.rbtn.on'), l=$('#lens'); if(!b||!l) return; l.style.top=b.offsetTop+'px'; l.style.height=b.offsetHeight+'px'; }
@@ -4507,7 +4570,7 @@ addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); installEvt=e; $(
 addEventListener('appinstalled',()=>{ installEvt=null; $('#installBtn').hidden=true; toast('Приложение установлено'); });
 $('#installBtn').onclick=async()=>{ if(!installEvt) return; installEvt.prompt(); try{ await installEvt.userChoice; }catch(_){} installEvt=null; $('#installBtn').hidden=true; };
 if(standalone()){ $('#installState').textContent='Вы работаете в приложении. Оно открывается в своём окне и работает без интернета.'; $('#installLink').hidden=true; }
-$('#restoreFile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=async()=>{ try{ const d=JSON.parse(r.result); if(d&&d.kind==='konvert-backup') await restoreAll(d); else if(d&&d.sender&&d.tpl){ st=deepMerge(fresh(),d); sel=null; st.fonts.forEach(registerFont); refreshFontSelects(); applyUI(); syncUI(); update(); toast('Это файл одного проекта. Он открыт.'); } else toast('Это не резервная копия Конверт Студии'); }catch(err){ toast('Не удалось прочитать файл копии'); } }; r.readAsText(f); e.target.value=''; });
+$('#restoreFile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=async()=>{ try{ const d=JSON.parse(r.result); if(d&&d.kind==='konvert-backup') await restoreAll(d); else if(d&&d.sender&&d.tpl){ { const sh=sharedOf(); st=deepMerge(fresh(),d); const fsh={}; SHARED.forEach(k=>{ fsh[k]=st[k]; }); Object.assign(st,sh); mergeShared(fsh); fixShop(); } sel=null; st.fonts.forEach(registerFont); refreshFontSelects(); applyUI(); syncUI(); update(); toast('Это файл одного проекта. Он открыт.'); } else toast('Это не резервная копия Конверт Студии'); }catch(err){ toast('Не удалось прочитать файл копии'); } }; r.readAsText(f); e.target.value=''; });
 $('#undo').onclick=()=>travel(-1); $('#redo').onclick=()=>travel(1);
 
 function readImg(file,max){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onerror=rej; r.onload=()=>{ const url=r.result; if(file.type==='image/svg+xml') return res(url); const im=new Image(); im.onload=()=>{ const k=Math.min(1,max/Math.max(im.width,im.height)); if(k===1&&url.length<600000) return res(url); const cv=document.createElement('canvas'); cv.width=Math.round(im.width*k); cv.height=Math.round(im.height*k); cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height); res(cv.toDataURL(file.type==='image/jpeg'?'image/jpeg':'image/png',.9)); }; im.onerror=()=>res(url); im.src=url; }; r.readAsDataURL(file); }); }
@@ -4567,7 +4630,8 @@ window.addEventListener('resize',()=>{ renderPreview(); scheduleGallery(); moveL
 
 /* print */
 async function printNow(test){
-  const t=tpl(), recs=recsAll(), copies=Math.max(1,Math.min(500,+st.print.copies||1)); const P=[]; const add=p=>P.push(p);
+  if(!test&&dzOn()&&st.view==='doc'){ printPages(docPages()); return; }
+  const t=tpl(), recs=recsAll(), copies=dzOn()?1:Math.max(1,Math.min(500,+st.print.copies||1)); const P=[]; const add=p=>P.push(p);
   if(test) add(testPage());
   else{
     const all=[]; recs.forEach(r=>{ for(let k=0;k<copies;k++) all.push(r); }); const m=st.print.mode;
@@ -4579,10 +4643,10 @@ async function printNow(test){
     if(m==='net'&&st.net.liner&&P.length) add({html:linerPage(t,P[0].pw,P[0].ph),pw:P[0].pw,ph:P[0].ph});
     if(st.print.letter&&!dzOn()) recs.forEach(r=>add(letterPage(t,r)));
     if(st.print.card&&!dzOn()) recs.forEach(r=>{ add(cardPage(t,r,'front')); add(cardPage(t,r,'back')); });
-    logSent(recs,t);
+    if(!dzOn()) logSent(recs,t);
   }
   const sizes=[]; const html=P.map(p=>{ const key=r1(p.pw)+'x'+r1(p.ph); let i=sizes.indexOf(key); if(i<0){ sizes.push(key); i=sizes.length-1; } return p.html.replace('class="page" style="','class="page" style="page:ps'+i+';'); }).join('');
-  const root=$('#printRoot'); root.className='printing '+(st.printBg?'':'nobg')+(st.print.mirror&&!test?' mir':'')+(st.print.gray?' gray':''); root.innerHTML=html;
+  const root=$('#printRoot'); root.className='printing '+(st.printBg||dzOn()?'':'nobg')+(st.print.mirror&&!test&&!dzOn()?' mir':'')+(st.print.gray&&!dzOn()?' gray':''); root.innerHTML=html;
   const [w0,h0]=sizes[0].split('x'); $('#pageStyle').textContent=`@page{size:${w0}mm ${h0}mm;margin:0}`+sizes.map((k,i)=>{ const [w,h]=k.split('x'); return `@page ps${i}{size:${w}mm ${h}mm;margin:0}`; }).join('');
   try{ await document.fonts.ready; }catch(_){}
   await Promise.all([...root.querySelectorAll('img')].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r;})));
@@ -4593,7 +4657,7 @@ window.addEventListener('afterprint',()=>{ $('#printRoot').innerHTML=''; });
 
 /* project */
 $('#btnExport').onclick=()=>{ if(download('konvert-proekt.json',JSON.stringify(st),'application/json')) toast('Файл проекта сохранён'); };
-$('#projFile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); if(d&&d.kind==='konvert-backup'){ restoreAll(d).catch(()=>toast('Не удалось восстановить копию')); return; } if(!d||typeof d!=='object'||Array.isArray(d)||!d.sender||!d.tpl){ toast('Это не файл проекта Конверт Студии'); return; } st=deepMerge(fresh(),d); sel=null; st.fonts.forEach(registerFont); refreshFontSelects(); applyUI(); syncUI(); update(); toast('Проект открыт'); }catch(err){ toast('Это не файл проекта Конверт Студии'); } }; r.readAsText(f); e.target.value=''; });
+$('#projFile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); if(d&&d.kind==='konvert-backup'){ restoreAll(d).catch(()=>toast('Не удалось восстановить копию')); return; } if(!d||typeof d!=='object'||Array.isArray(d)||!d.sender||!d.tpl){ toast('Это не файл проекта Конверт Студии'); return; } { const sh=sharedOf(); st=deepMerge(fresh(),d); const fsh={}; SHARED.forEach(k=>{ fsh[k]=st[k]; }); Object.assign(st,sh); mergeShared(fsh); fixShop(); } sel=null; st.fonts.forEach(registerFont); refreshFontSelects(); applyUI(); syncUI(); update(); toast('Проект открыт'); }catch(err){ toast('Это не файл проекта Конверт Студии'); } }; r.readAsText(f); e.target.value=''; });
 armed($('#btnReset'),'Сброс',()=>{ const keep=Object.assign(sharedOf(),{presets:JSON.parse(JSON.stringify(st.presets))}); st=Object.assign(fresh(),keep); sel=null; applyUI(); syncUI(); update(); toast('Макет сброшен. Адресная книга, шрифты, принтеры, журнал, свои стили и штампы сохранены.'); });
 
 /* magic events */
@@ -4769,12 +4833,12 @@ $('#area').addEventListener('drop',e=>{ if(!dzOn()) return; const f=e.dataTransf
 $('#area').style.position='relative';
 document.addEventListener('click',e=>{ let b;
   if((b=e.target.closest('#appSeg [data-app]'))){ dzSetMode(b.dataset.app); return; }
-  if((b=e.target.closest('[data-dztpl]'))){ if(e.target.closest('[data-dzdeltpl]')) return; const T=dzTplFor((prodById(st.prod)||{}).kind).find(t=>t.id===b.dataset.dztpl); if(T){ dzApplyTpl(T); toast(`«${T.name}». Двойной щелчок по тексту — правка прямо на макете.`); } return; }
-  if((b=e.target.closest('[data-dzdeltpl]'))){ st.myTpl=(st.myTpl||[]).filter(t=>t.id!==b.dataset.dzdeltpl); update(); return; }
+  if((b=e.target.closest('[data-dzdeltpl]'))){ st.myTpl=(st.myTpl||[]).filter(t=>t.id!==b.dataset.dzdeltpl); update(); toast('Шаблон удалён'); return; }
+  if((b=e.target.closest('[data-dztpl]'))){ const T=dzTplFor((prodById(st.prod)||{}).kind).find(t=>t.id===b.dataset.dztpl); if(T){ dzApplyTpl(T); toast(`«${T.name}». Двойной щелчок по тексту — правка прямо на макете.`); } return; }
   if((b=e.target.closest('[data-dzblank]'))){ const {W,H}=dims(); const d=dzBlank(W,H); const o=st.dz||{}; d.brand=o.brand||{}; d.palSrc=o.palSrc||null; if(o.palSrc) d.pal=dzRoles(o.palSrc,false); d.kind=(prodById(st.prod)||{}).kind||''; st.dz=d; dzSel=null; setView('front'); update(); goTab('dz'); return; }
   if((b=e.target.closest('[data-dztag]'))){ dzTag=b.dataset.dztag; renderDzGallery(); return; }
   if((b=e.target.closest('[data-dzpal]'))){ const [n,c]=DZ_PALETTES[+b.dataset.dzpal]; dzSetPalette(c,n); return; }
-  if((b=e.target.closest('[data-dzphv]'))){ const v=+b.dataset.dzphv, cols=v%2?[...dzPhotoCols].reverse():dzPhotoCols; st.dz.palSrc=dzPhotoCols.slice(); st.dz.palName='Из фото'; st.dz.dark=v>1; st.dz.pal=dzRoles(cols,v>1); update(); return; }
+  if((b=e.target.closest('[data-dzphv]'))){ const v=+b.dataset.dzphv; st.dz.palSrc=dzPhotoCols.slice(); st.dz.palName='Из фото'; st.dz.dark=v>1; st.dz.pal=dzPhotoVariant(v); update(); return; }
   if((b=e.target.closest('[data-dzvar]'))){ const d=st.dz; d.pal=dzRoles(DZ_PALETTES[+b.dataset.pi][1],b.dataset.dark==='1'); d.dark=b.dataset.dark==='1'; d.palSrc=DZ_PALETTES[+b.dataset.pi][1].slice(); d.palName=DZ_PALETTES[+b.dataset.pi][0]; d.fonts={h:b.dataset.h,b:b.dataset.b}; update(); dzVariants(); return; }
   if((b=e.target.closest('[data-dzadd]'))){ const t=b.dataset.dzadd; if(!dzOn()){ toast('Сначала выберите изделие во вкладке «Шаблоны»'); return; } dzAdd(t); if(t==='img') toast('Нажмите на рамку на макете, чтобы загрузить фото, или перетащите фото прямо на неё.'); return; }
   if((b=e.target.closest('[data-dzvis]'))){ const el=dzFind(b.dataset.dzvis); if(el){ el.hide=!el.hide; if(el.hide&&dzSel===el.id) dzSel=null; update(); } return; }
@@ -4806,6 +4870,8 @@ document.addEventListener('click',e=>{ let b;
   if((b=e.target.closest('[data-dzside]'))){ setView(b.dataset.dzside); update(); return; }
   if((b=e.target.closest('[data-dzprn]'))){ dzChoosePrinter(b.dataset.dzprn); return; }
   if(e.target.id==='dzBrandSave'){ dzBrandToClient(); return; }
+  if(e.target.id==='dzLogoBtn'){ dzPickFile(f=>dzReadImage(f,1600).then(src=>{ st.dz.brand=st.dz.brand||{}; st.dz.brand.logo=src; update(); renderDzBrand(); toast('Логотип встал во все шаблоны с местом для логотипа'); }).catch(()=>toast('Не удалось открыть картинку'))); return; }
+  if(e.target.id==='dzLogoDel'){ if(st.dz.brand) delete st.dz.brand.logo; update(); renderDzBrand(); return; }
   if(e.target.id==='dzProof'){ st.doc.type='proof'; st.docPage=0; setView('doc'); syncUI(); update(); toast('Макет на согласование: распечатайте или сохраните в PDF через «Экспорт».'); return; }
 });
 document.addEventListener('input',e=>{ const t=e.target; if(t.dataset.dzbrand){ st.dz.brand=st.dz.brand||{}; st.dz.brand[t.dataset.dzbrand]=t.value; save(); renderPreview(); clearTimeout(renderDzGallery.t); renderDzGallery.t=setTimeout(renderDzGallery,350); return; }
@@ -4824,7 +4890,7 @@ document.addEventListener('change',e=>{ const t=e.target;
   if(t.matches('[data-dzbg-custom]')){ st.dz[dzSideOf()==='back'?'bgBack':'bg']=t.value; update(); return; }
   if(t.id==='dzHFont'){ st.dz.fonts.h=t.value; update(); return; } if(t.id==='dzBFont'){ st.dz.fonts.b=t.value; update(); return; }
   if(t.id==='dzGalPal'){ st.dz.galPal=t.checked; if(t.checked&&!st.dz.palSrc){ toast('Сначала выберите палитру или загрузите фото'); } save(); renderDzGallery(); return; }
-  if(t.id==='dzBrandCli'){ const c=st.clients[+t.value]; if(c&&c.brand){ st.dz.brand=JSON.parse(JSON.stringify(c.brand)); update(); renderDzBrand(); return; } if(c){ const B=st.dz.brand=st.dz.brand||{}; B.company=B.company||c.name; if(c.phone) B.phone=c.phone; if(c.contact&&/@/.test(c.contact)) B.email=c.contact; else if(c.contact) B.social=c.contact; update(); } return; }
+  if(t.id==='dzBrandCli'){ const c=st.clients[+t.value]; if(c){ const B=c.brand?JSON.parse(JSON.stringify(c.brand)):{}; B.company=B.company||c.name; if(c.phone) B.phone=c.phone; if(c.contact){ if(/@/.test(c.contact)) B.email=c.contact; else B.social=c.contact; } st.dz.brand=B; update(); renderDzBrand(); toast('Данные клиента «'+c.name+'» подставлены'); } return; }
   if(t.id==='dzPhotoFile'){ const f=t.files&&t.files[0]; if(f) dzLoadPalettePhoto(f); t.value=''; return; }
 });
 function dzLoadPalettePhoto(f){ dzReadImage(f,1600).then(src=>{ dzPhoto=src; return dzExtract(src); }).then(cols=>{ if(!cols.length){ toast('Не удалось взять цвета из этого фото'); return; } dzPhotoCols=cols; $('#dzPhotoActs').hidden=false; st.dz.palSrc=cols.slice(); st.dz.palName='Из фото'; st.dz.pal=dzRoles(cols,!!st.dz.dark); st.dz.galPal=true; update(); toast('Цвета взяты из фото: макет и все шаблоны перекрашены.'); }).catch(()=>toast('Не удалось открыть фото')); }
@@ -4836,7 +4902,7 @@ $('#dzBgImgDel').onclick=()=>{ delete st.dz[dzSideOf()==='back'?'bgImgBack':'bgI
 $('#dzBgGrad').onclick=()=>{ const k=dzSideOf()==='back'?'bgBack':'bg'; st.dz[k]=typeof st.dz[k]==='object'?'bg':{g:'linear',a:150,s:[['soft',0],['bg',55],['soft',100]]}; update(); };
 $('#dzCopyFront').onclick=()=>{ st.dz.back=JSON.parse(JSON.stringify(st.dz.front)).map(e=>Object.assign(e,{id:dzId()})); st.dz.bgBack=st.dz.bg; if(st.dz.bgImg) st.dz.bgImgBack=st.dz.bgImg; else delete st.dz.bgImgBack; st.dz.sides=2; st.shop.sides=2; setView('back'); syncUI(); update(); };
 $('#dzClearSide').onclick=e=>{ const b=e.currentTarget; if(!b.dataset.armed){ b.dataset.armed='1'; b.textContent='Точно очистить?'; setTimeout(()=>{ delete b.dataset.armed; b.textContent='Очистить сторону'; },3000); return; } st.dz[dzSideOf()]=[]; dzSel=null; update(); };
-$('#dzSaveTpl').onclick=()=>{ if(!dzOn()) return; const d=st.dz, P=prodById(st.prod); const name=(d.front.find(e=>e.t==='text')||{}).text||'Мой шаблон'; const T={id:'my'+Date.now().toString(36),mine:true,kind:d.kind||(P&&P.kind)||'card',name:name.split('\n')[0].slice(0,24),tags:['мои'],w:d.w,h:d.h,dark:!!d.dark,pal:d.pal,fonts:d.fonts,bg:d.bg,bgBack:d.bgBack,front:JSON.parse(JSON.stringify(d.front)),back:JSON.parse(JSON.stringify(d.back))}; st.myTpl=st.myTpl||[]; st.myTpl.unshift(T); update(); toast('Сохранено в «Мои шаблоны»: он первый в галерее этого изделия.'); };
+$('#dzSaveTpl').onclick=()=>{ if(!dzOn()) return; const d=st.dz, P=prodById(st.prod); const name=(d.front.find(e=>e.t==='text')||{}).text||'Мой шаблон'; const T={id:'my'+Date.now().toString(36),mine:true,kind:d.kind||(P&&P.kind)||'card',name:name.split('\n')[0].slice(0,24),tags:['мои'],w:d.w,h:d.h,dark:!!d.dark,pal:d.pal,fonts:d.fonts,bg:JSON.parse(JSON.stringify(d.bg)),bgBack:JSON.parse(JSON.stringify(d.bgBack||d.bg)),front:JSON.parse(JSON.stringify(d.front)),back:JSON.parse(JSON.stringify(d.back))}; T.pal=JSON.parse(JSON.stringify(d.pal)); T.fonts=JSON.parse(JSON.stringify(d.fonts)); ['bgImg','bgImgBack','bgImgOp'].forEach(k=>{ if(d[k]!=null) T[k]=d[k]; }); st.myTpl=st.myTpl||[]; st.myTpl.unshift(T); update(); toast('Сохранено в «Мои шаблоны»: он первый в галерее этого изделия.'); };
 $('#dzVarBox').addEventListener('toggle',()=>{ if($('#dzVarBox').open) dzVariants(); });
 $('#dzPrintGo').onclick=()=>printNow(false);
 $('#dzTestPage').onclick=()=>printNow(true);
@@ -4851,14 +4917,22 @@ $('#mockClose').onclick=()=>{ $('#mMock').hidden=true; };
 $('#mMock').addEventListener('click',e=>{ if(e.target.id==='mMock') $('#mMock').hidden=true; const b=e.target.closest('[data-mock]'); if(b){ mockMode=b.dataset.mock; dzMock(); } });
 (()=>{ const sc=$('#mockScene'); let dr=null; sc.addEventListener('pointerdown',e=>{ dr={x:e.clientX,y:e.clientY,r:{...mockRot}}; try{ sc.setPointerCapture(e.pointerId); }catch(_){} }); sc.addEventListener('pointermove',e=>{ if(!dr) return; mockRot={x:clamp(dr.r.x-(e.clientY-dr.y)*.25,-50,30),y:dr.r.y+(e.clientX-dr.x)*.35}; const m=sc.querySelector('.m3d'); if(m) m.style.transform=`rotateX(${52+mockRot.x}deg) rotateZ(${-28+mockRot.y}deg)`; }); ['pointerup','pointercancel'].forEach(t=>sc.addEventListener(t,()=>{ dr=null; })); })();
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('#mMock').hidden){ $('#mMock').hidden=true; e.stopPropagation(); } },true);
-$('#dzSearch').addEventListener('input',()=>renderDzGallery());
+$('#dzSearch').addEventListener('input',()=>{ clearTimeout(dzSearchT); dzSearchT=setTimeout(renderDzGallery,220); });
+let dzSearchT=0;
+
+/* gallery follows the panel width (rotation, window resize) */
+let dzResizeT=0; addEventListener('resize',()=>{ clearTimeout(dzResizeT); dzResizeT=setTimeout(()=>{ if(activeTab==='shop'&&dzOn()){ renderDzGallery(); const vb=$('#dzVarBox'); if(vb&&vb.open) dzVariants(); } if(!$('#mMock').hidden) dzMock(); },180); });
+/* every tab opens at its top */
+$$('.rbtn').forEach(b=>b.addEventListener('click',()=>{ const ps=$('.panels'); if(ps) ps.scrollTop=0; }));
+/* the quote's «Стороны» and the design's sides are one setting */
+document.addEventListener('input',e=>{ const t=e.target; if(!dzOn()||!t.matches||!t.matches('[data-k="shop.sides"]')) return; const v=+t.value===2?2:1; st.dz.sides=v; if(v===2&&!(st.dz.back||[]).length){ st.dz.back=[{id:dzId(),t:'text',x:st.dz.w*.1,y:st.dz.h*.4,w:st.dz.w*.8,h:st.dz.h*.2,text:'Оборотная сторона',font:'h',size:clamp(Math.min(st.dz.w,st.dz.h)/7,8,40),weight:700,align:'center',color:'ink',va:'m'}]; } if(v===1&&st.view==='back') setView('front'); },true);
 
 /* boot */
 buildStatic(); buildMagic(); applyUI(); syncUI(); renderPreview(); renderGallery(); moveLens(); save();
 if(st.ui.app==='print'&&!dzOn()) applyProduct((st.prod&&prodById(st.prod)&&prodById(st.prod).kind)?st.prod:'bc90',true); dzApplyMode();
 if(document.fonts) document.fonts.ready.then(()=>{ renderPreview(); renderGallery(); moveLens(); });
 (async()=>{ try{ if(!localStorage.getItem(KEY)){ const d=await idb.get('projects',proj.cur); if(d){ loadState(d); } } const h=await idb.get('kv','fh:'+proj.cur); if(h){ $('#fileStat').textContent='Связан файл '+h.name+'. Нажмите «Продолжить сохранять», чтобы разрешить запись.'; } }catch(e){} })();
-if(!st.ui.toured) setTimeout(()=>showTour(0),900);
+setTimeout(()=>{ if(!st.ui.toured) showTour(0); },1400);
 if((st.ui.lang||'ru')!=='ru') setTimeout(translateUI,300);
 </script>
 <style id="all-features-style">
