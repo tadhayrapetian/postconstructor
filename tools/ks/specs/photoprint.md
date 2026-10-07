@@ -1,0 +1,15 @@
+# Module `photoprint` — «Печать фото» и «Коллаж»
+Rail: group `salon` (Фотосалон, created by passport or by you — use the same group id `salon`, groupTitle «Фотосалон», icon camera, before `prep`), two tabs: `seg:'Печать фото'` and `seg:'Коллаж'`, both `screen:true`.
+## Печать фото (mass photo printing, like a photo kiosk)
+- Add many photos at once: picker (multiple), drag-drop of many files, paste, «Из моих фото» (photo library per HOST.md, if present). Show progress while reading; downscale to ≤ 3600 px.
+- Formats: 10×15, 13×18, 15×21, A4 (21×29.7), 9×13, 10×10 (квадрат), Polaroid (88×107 with thick bottom border + optional caption), Instax mini (54×86), Фотополоска 50×150 (4 кадра), plus «Свой». Paper: «Фотобумага 10×15», «13×18», «A4» — small formats are packed onto the chosen paper with cut marks (e.g. 2× 10×15 on A4, 4× Instax on A4).
+- Per photo: copies (stepper), fit mode Заполнить (crop) / Вписать (white fields) / Как есть, crop position (drag inside a crop preview), rotate, «Авто-улучшение» toggle, caption/date stamp optional. Global settings apply to all with per-photo overrides. Auto-rotate to best orientation.
+- Borderless: only on G3410 + photo paper sizes (A4, 10×15, 13×18, Letter) — offer it when available; otherwise white border N mm (default 0 with printable margins respected). Use `KS.printer()`/`printArea` to stay printable on GX4040 (5 mm margins).
+- Low resolution warning per photo (dpi at the chosen format), duplicate detection (same file twice).
+- Summary bar: N фото, M копий, K листов бумаги, цена (editable price table per format in `KS.store('photoprint').prices`, sensible ֏ defaults), buttons «Печать» (KS.print with exact sheet size; images at ≥ 300 dpi), «Добавить в заказ» (newOrder), «В кассу» (`KS.emit('posAdd',{name,price,qty})` if a pos module exists).
+## Коллаж
+- Layout templates (≥ 24): grids 2/3/4/6/9/12, one big + small, strips, mosaic, polaroid scatter, heart, circle-centre, film strip; for paper 10×15, 13×18, 15×21, A4, A3 (portrait/landscape).
+- Drag photos from a strip into cells, drag between cells to swap, pan/zoom inside a cell (wheel/pinch/drag), spacing, outer margin, corner radius, background colour (palette swatches + custom), optional title/caption text with font choice, «Перемешать», «Автозаполнение».
+- Output: «Открыть в Макете» — convert the collage into a design in the app (`st.dz` with `img` elements at exact positions/sizes and text elements; set product size via the app's custom size mechanism — study `applyProduct`/`dzUseProduct`/`dzBlank`), so the user can keep editing and print with the normal pipeline; also direct «Печать» and «Скачать JPG 300 dpi».
+Make the screens beautiful and fast (thumbnails, no full-res re-renders on every change), touch-friendly on iPad.
+Tests: add 12 synthetic photos, set copies, verify sheet packing math and print DOM (page sizes, image boxes in mm), borderless only with G3410, collage cell assignment/swap, «Открыть в Макете» produces a valid design that renders and prints, persistence of the job across tab switches, screenshots light/dark/iPad.
