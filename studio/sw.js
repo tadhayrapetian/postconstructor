@@ -1,5 +1,5 @@
 /* Конверт Студия: offline cache. Bump VERSION on every release so devices pick up the new build. */
-const VERSION = 'konvert-v13';
+const VERSION = 'konvert-v14';
 const EXT = 'konvert-ext';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 const LIBS = [
