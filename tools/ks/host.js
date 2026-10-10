@@ -8,7 +8,7 @@ const KS=(()=>{
   K.mod=(name,info)=>{ K.mods[name]=Object.assign({name},info||{}); };
   /* persistent module data: st.ks[name]; shared by all projects; kept on undo. Call each time, never cache. */
   K.store=(name,def)=>{ if(!st.ks||typeof st.ks!=='object'||Array.isArray(st.ks)) st.ks={}; let s=st.ks[name]; let m=seen.get(st); if(!m){ m={}; seen.set(st,m); }
-    if(!s||typeof s!=='object'){ s=st.ks[name]=JSON.parse(JSON.stringify(def||{})); m[name]=1; return s; }
+    if(!s||typeof s!=='object'){ s=st.ks[name]=JSON.parse(JSON.stringify(def||{})); if(def) m[name]=1; return s; }
     if(def&&!m[name]){ for(const k in def) if(!(k in s)) s[k]=JSON.parse(JSON.stringify(def[k])); m[name]=1; }
     return s; };
   K.save=()=>save(); K.saveNow=()=>saveNow(); K.update=()=>update(); K.toast=m=>toast(m); K.esc=s=>esc(s);

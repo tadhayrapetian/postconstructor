@@ -1,6 +1,6 @@
 /* ---------- KS module host ---------- */
 .app-env .kstool.pOnlyI{display:none!important}
-.ksseg{display:flex;width:100%;margin:2px 0 10px;overflow-x:auto}
+.ksseg{display:flex;flex-wrap:wrap;width:100%;margin:2px 0 10px;border-radius:18px;row-gap:2px}
 .ksseg button{flex:1 0 auto}
 .kssub{display:flex;flex-direction:column;gap:12px}
 .ksscreen{position:absolute;inset:0;z-index:25;border-radius:28px;overflow:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;background:rgb(var(--glass-rgb) / .93)!important;-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px)}
