@@ -64,6 +64,18 @@ async function nGen(prompt,o){ o=o||{}; const key=nKey(); if(!key){ nSettings();
     if(!r.ok) throw new Error(nErr(r.status,j)); const parts=((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]; const p=parts.find(x=>x.inlineData||x.inline_data); if(!p) throw new Error('Gemini не вернул картинку. Попробуйте ещё раз.');
     const d=p.inlineData||p.inline_data; return `data:${d.mimeType||d.mime_type||'image/png'};base64,${d.data}`; };
   const res=await Promise.allSettled(Array.from({length:n},one)); const ok=res.filter(x=>x.status==='fulfilled').map(x=>x.value); if(!ok.length) throw res[0].reason; return ok; }
+
+/* generic image edit with an instruction (bg removal, upscale…) and text-only generation helpers */
+async function nEdit(src,instruction,o){ o=o||{}; const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); } const model=nModel();
+  const img=await nSmall(src,o.max||1536), b64=img.split(',')[1], dims=await KS.imgSize(img);
+  const base={contents:[{role:'user',parts:[{text:instruction},{inline_data:{mime_type:'image/jpeg',data:b64}}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}};
+  const ic={aspectRatio:nRatio(dims.w||3,dims.h||2)}; if(/pro/i.test(model)||o.big) ic.imageSize=o.big?'2K':'2K';
+  let {r,j}=await nCall(key,model,Object.assign({},base,{generationConfig:Object.assign({},base.generationConfig,{imageConfig:ic})})); if(r.status===400&&!/API key/i.test(((j&&j.error&&j.error.message)||''))) ({r,j}=await nCall(key,model,base));
+  if(!r.ok) throw new Error(nErr(r.status,j)); const parts=((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]; const p=parts.find(x=>x.inlineData||x.inline_data); if(!p) throw new Error('Gemini не вернул картинку. Попробуйте ещё раз.');
+  const d=p.inlineData||p.inline_data; return `data:${d.mimeType||d.mime_type||'image/png'};base64,${d.data}`; }
+async function nText(prompt,o){ o=o||{}; const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); } const model=o.model||'gemini-2.5-flash';
+  const {r,j}=await nCall(key,model,{contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:Object.assign({temperature:.9},o.json?{responseMimeType:'application/json'}:{})});
+  if(!r.ok) throw new Error(nErr(r.status,j)); const t=(((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]).map(x=>x.text||'').join(''); if(!t) throw new Error('Gemini ничего не ответил'); return t; }
 const npk=KS.modal({id:'neuroPick',title:'Выберите вариант',wide:true});
 function nPick(src,list){ return new Promise(res=>{ let done=false; const fin=v=>{ if(done) return; done=true; npk.close(); res(v); };
   npk.el.innerHTML=`<p class="hint">Нажмите на понравившийся вариант. Оригинал — для сравнения.</p><div class="npick"><figure><img src="${src}" alt=""><figcaption>Оригинал</figcaption></figure>${list.map((u,i)=>`<button class="npick-v" data-npick="${i}"><img src="${u}" alt=""><span>Вариант ${i+1}</span></button>`).join('')}</div>`;
@@ -102,4 +114,4 @@ function nCtl(){ const o=nOpt(); return `<div class="ks-row"><div class="seg">${
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-npow]'); if(!b) return; nOpt().pow=b.dataset.npow; save(); b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); });
 document.addEventListener('change',e=>{ if(e.target.dataset.nedge){ nOpt().edges=e.target.checked; save(); } if(e.target.dataset.nvar){ nOpt().variants=+e.target.value; save(); } });
 KS.cmd('Нейро-стиль: настройки Gemini','настройки',nSettings);
-KS.neuro={gen:nGen,ctl:nCtl,stylize:nStylize,styles:NSTYLES,settings:nSettings,hasKey:()=>!!nKey()};
+KS.neuro={edit:nEdit,text:nText,gen:nGen,ctl:nCtl,stylize:nStylize,styles:NSTYLES,settings:nSettings,hasKey:()=>!!nKey()};
