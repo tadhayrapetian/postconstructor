@@ -11,8 +11,8 @@
 .pc-th>*{pointer-events:none}
 .pc-wc .ks-drop{cursor:pointer;min-height:90px;display:grid;place-items:center;padding:8px}
 .pc-wc .ks-drop img{max-width:100%;max-height:180px;border-radius:8px;display:block}
-.pc-logos{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.pc-logo{position:relative;height:48px;border:1px solid var(--edge2);border-radius:12px;background:#fff;cursor:pointer;padding:6px}
+.pc-logos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pc-logo{position:relative;height:62px;border:1px solid var(--edge2);border-radius:12px;background:#fff;cursor:pointer;padding:6px}
 .pc-logo svg{position:absolute!important;inset:6px!important;width:calc(100% - 12px)!important;height:calc(100% - 12px)!important}
 .pc-logo.on{outline:2px solid var(--accent);outline-offset:1px}
 .pc-margin{position:absolute;inset:5mm;border:1px dashed rgb(220 60 60 / .55);pointer-events:none;z-index:50}

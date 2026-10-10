@@ -2,7 +2,7 @@
 const PC_TPL=/*PCTPL*/[];
 PC_TPL.forEach(T=>{ if(!DZT.some(x=>x.id===T.id)) DZT.push(T); });
 const PC_CATS=['День рождения','Любовь','Свадьба','Благодарность','Детские','Новый год','Праздники','Природа','Город','Акварель','Минимализм','Фото','Винтаж'];
-const pcS=()=>KS.store('postcard',{ori:'all',cat:'',q:'',paper:'1015',copies:1,logo:{v:'seal',sub:'handmade',color:'acc'},wcPreset:'classic'});
+const pcS=()=>KS.store('postcard',{ori:'all',cat:'',q:'',paper:'1015',copies:1,logo:{v:'monoword',sub:'handmade',color:'ink'},wcPreset:'classic'});
 const pcList=()=>{ const s=pcS(), q=(s.q||'').toLowerCase().replace(/ё/g,'е'); return (st.myTpl||[]).filter(t=>PC_KINDS.includes(t.kind)).concat(DZT.filter(t=>PC_KINDS.includes(t.kind)))
   .filter(t=>s.ori==='all'||(s.ori==='h'?t.kind==='pcH':t.kind==='pcV')).filter(t=>!s.cat||(t.tags||[]).includes(s.cat))
   .filter(t=>!q||((t.name||'')+' '+(t.tags||[]).join(' ')).toLowerCase().replace(/ё/g,'е').includes(q)); };
@@ -24,9 +24,9 @@ function pcPanel(box){ const s=pcS(), lg=s.logo;
   <div class="card pc-wc"><div class="hd">Акварель из фото</div><p class="hint">Загрузите фото — программа превратит его в акварельный рисунок с белыми краями бумаги.</p>
     <div class="ks-drop" id="pcWcDrop">${pcWc&&pcWc.out?`<img src="${pcWc.out}" alt="">`:'Перетащите фото сюда или нажмите'}</div>
     <div class="flexw">${Object.entries(WC_PRESETS).map(([k,p])=>`<button class="btn sm${s.wcPreset===k?' primary':''}" data-pcwcp="${k}">${p.n}</button>`).join('')}</div>
-    ${KS.neuro?`<div class="hd2">Нейро-стиль · Gemini</div><div class="flexw">${KS.neuro.hasKey()?KS.neuro.styles.map(([k,n])=>`<button class="btn sm" data-pcneuro="${k}">${n}</button>`).join('')+'<button class="btn sm" data-pcneuro="set" title="Настройки Gemini">⚙︎</button>':'<button class="btn sm" data-pcneuro="set">Подключить ключ Gemini</button>'}</div>`:''}
+    ${KS.neuro?`<div class="hd2">Нейро-стиль · Gemini</div>${KS.neuro.hasKey()?KS.neuro.ctl():''}<div class="flexw">${KS.neuro.hasKey()?KS.neuro.styles.map(([k,n])=>`<button class="btn sm" data-pcneuro="${k}">${n}</button>`).join('')+'<button class="btn sm" data-pcneuro="set" title="Настройки Gemini">⚙︎</button>':'<button class="btn sm" data-pcneuro="set">Подключить ключ Gemini</button>'}</div>`:''}
     <div class="flexw"><button class="btn sm primary" id="pcWcCard"${pcWc&&pcWc.out?'':' disabled'}>Новая открытка</button><button class="btn sm" id="pcWcSlot"${pcWc&&pcWc.out?'':' disabled'}>В рамку макета</button><button class="btn sm" id="pcWcSave"${pcWc&&pcWc.out?'':' disabled'}>Скачать JPG</button></div></div>
-  <div class="card"><div class="hd">Логотип TH</div><div class="pc-logos">${['seal','ring','serif','script','line'].map(v=>`<button class="pc-logo${lg.v===v?' on':''}" data-pclogo="${v}">${thSVG({v,sub:lg.sub,color:'ink'},dzPal({ink:'#2b2b2b'}))}</button>`).join('')}</div>
+  <div class="card"><div class="hd">Знак tadhayrapetian</div><div class="pc-logos">${['monoword','mono','sig','word','crest'].map(v=>`<button class="pc-logo${lg.v===v?' on':''}" data-pclogo="${v}">${thSVG({v,sub:lg.sub,color:'ink'},dzPal({ink:'#2b2b2b'}))}</button>`).join('')}</div>
     <label class="f">Подпись под знаком<input type="text" id="pcLogoSub" value="${esc(lg.sub||'')}" maxlength="22" placeholder="handmade"></label>
     <div class="flexw"><button class="btn sm" data-pcaddlogo="front">На лицо</button><button class="btn sm" data-pcaddlogo="back">На оборот</button><button class="btn sm" id="pcLogoAll" title="Заменить стиль знака TH во всей открытке">Применить к макету</button></div></div>
   <div class="card"><div class="hd">Печать на GX4040</div><p class="hint">Принтер не печатает 5 мм по краям. В шаблонах края белые, поэтому поле принтера не видно. Если края цветные, нажмите «Белые поля».</p>
@@ -82,13 +82,13 @@ KS.insp({id:'pcwc',title:'Акварель',order:30,when:e=>e.t==='img'&&!!e.sr
   bind(div,e){ div.addEventListener('click',async ev=>{ const b=ev.target.closest('[data-pcinswc]'); if(!b) return; const k=b.dataset.pcinswc;
     if(k==='undo'){ const o=await KS.idb.get('wc:'+e.wcOrig,'files'); if(o){ e.src=o; delete e.wcOrig; update(); } return; }
     b.disabled=true; b.textContent='Рисую…'; try{ if(!e.wcOrig){ const key=KS.uid('w'); await KS.idb.set('wc:'+key,e.src,'files'); e.wcOrig=key; const orig=e.src; e.src=await wcPaint(orig,k); } else { const o=await KS.idb.get('wc:'+e.wcOrig,'files'); e.src=await wcPaint(o||e.src,k); } update(); toast('Готово: акварель «'+WC_PRESETS[k].n+'»'); }catch(err){ toast('Не получилось обработать фото'); } }); }});
-KS.insp({id:'pclogo',title:'Знак TH',order:10,when:e=>e.t==='thlogo',html:e=>`<div class="seg" style="flex-wrap:wrap">${[['seal','Печать'],['ring','Кольцо'],['serif','Без рамки'],['script','Рукопись'],['line','Линия']].map(([v,n])=>`<button data-pcinsv="${v}"${(e.v||'ring')===v?' class="on"':''}>${n}</button>`).join('')}</div><label class="f">Подпись<input type="text" data-pcinssub="1" value="${esc(e.sub||'')}" maxlength="22"></label>${dzColorRow('pcthcol',e.color||'ink')}`,
-  bind(div,e){ div.addEventListener('click',ev=>{ const b=ev.target.closest('[data-pcinsv]'); if(b){ e.v=b.dataset.pcinsv; if(['script'].includes(e.v)) e.h=Math.round(e.w*.6*10)/10; else if(e.v==='line') e.h=Math.round(e.w*.25*10)/10; else e.h=e.w; update(); return; } const c=ev.target.closest('[data-pcthcol]'); if(c){ e.color=c.dataset.pcthcol; KS.changed(true); } });
+KS.insp({id:'pclogo',title:'Знак TH',order:10,when:e=>e.t==='thlogo',html:e=>`<div class="seg" style="flex-wrap:wrap">${[['monoword','Монограмма и имя'],['mono','Монограмма'],['sig','Подпись'],['word','Надпись'],['crest','Медальон']].map(([v,n])=>`<button data-pcinsv="${v}"${(TH_MAP[e.v]||e.v||'mono')===v?' class="on"':''}>${n}</button>`).join('')}</div><label class="f">Подпись<input type="text" data-pcinssub="1" value="${esc(e.sub||'')}" maxlength="22"></label>${dzColorRow('pcthcol',e.color||'ink')}`,
+  bind(div,e){ div.addEventListener('click',ev=>{ const b=ev.target.closest('[data-pcinsv]'); if(b){ e.v=b.dataset.pcinsv; const cx=e.x+e.w/2, cy=e.y+e.h/2, A=e.w*e.h; let r=e.v==='sig'?.6:e.v==='word'?.25:1; let w=Math.sqrt(A/r); if(e.v==='word') w=Math.max(w,e.w); e.w=Math.round(w*10)/10; e.h=Math.round(w*r*10)/10; e.x=Math.round((cx-e.w/2)*10)/10; e.y=Math.round((cy-e.h/2)*10)/10; update(); return; } const c=ev.target.closest('[data-pcthcol]'); if(c){ e.color=c.dataset.pcthcol; KS.changed(true); } });
     div.addEventListener('input',ev=>{ if(ev.target.dataset.pcinssub){ e.sub=ev.target.value; KS.changed(); } }); }});
-function pcAddLogo(sd){ if(!dzOn()){ toast('Откройте открытку или другой макет'); return; } const d=st.dz, L=pcS().logo, w=L.v==='line'?32:L.v==='script'?18:13, h=L.v==='line'?8:L.v==='script'?11:13;
+function pcAddLogo(sd){ if(!dzOn()){ toast('Откройте открытку или другой макет'); return; } const d=st.dz, L=pcS().logo, w=L.v==='word'?40:L.v==='sig'?26:16, h=L.v==='word'?10:L.v==='sig'?15.6:16;
   if(sd!==dzSideOf()){ setView(sd); }
-  const e={id:dzId(),t:'thlogo',x:d.w-w-9,y:d.h-h-9,w,h,v:L.v,sub:L.sub,color:L.color||'acc'}; dzEls(sd).push(e); dzSelect(e.id); update(); toast('Знак TH добавлен'); }
-KS.tool({id:'th',label:'TH',title:'Поставить знак TH на макет',app:'print',run(){ pcAddLogo(dzSideOf()); }});
+  const e={id:dzId(),t:'thlogo',x:d.w-w-9,y:d.h-h-9,w,h,v:L.v,sub:L.sub,color:L.color||'acc'}; dzEls(sd).push(e); dzSelect(e.id); update(); toast('Знак tadhayrapetian добавлен'); }
+KS.tool({id:'th',label:'TH',title:'Поставить знак tadhayrapetian на макет',app:'print',run(){ pcAddLogo(dzSideOf()); }});
 KS.cmd('Открытки 10 × 15','раздел',()=>KS.show('postcard'));
 KS.cmd('Акварель из фото','открытки',()=>{ KS.show('postcard'); setTimeout(()=>{ const d=$('#pcWcDrop'); if(d) d.click(); },100); });
 /* ---- events ---- */
@@ -99,7 +99,7 @@ document.addEventListener('click',e=>{ let b;
   if((b=e.target.closest('[data-pcwcp]'))){ pcS().wcPreset=b.dataset.pcwcp; save(); if(pcWc) pcWcRun(); else pcPanel(b.closest('.kssub')); return; }
   if((b=e.target.closest('#pcWcDrop'))){ KS.pick('image/*').then(f=>{ if(f[0]) pcWcLoad(f[0]); }); return; }
   if((b=e.target.closest('[data-pcneuro]'))){ const k=b.dataset.pcneuro; if(k==='set'){ KS.neuro.settings(); return; } if(!pcWc||!pcWc.src){ toast('Сначала загрузите фото'); return; } const box=b.closest('.kssub'); b.disabled=true; b.textContent='Gemini рисует…';
-    KS.neuro.stylize(pcWc.src,k).then(out=>{ pcWc.out=out; toast('Готово'); }).catch(err=>toast(err.message||'Не получилось')).finally(()=>{ if(box) pcPanel(box); }); return; }
+    KS.neuro.stylize(pcWc.src,k).then(out=>{ if(out){ pcWc.out=out; toast('Готово'); } }).catch(err=>toast(err.message||'Не получилось')).finally(()=>{ if(box) pcPanel(box); }); return; }
   if(e.target.closest('#pcWcCard')){ pcWcCard(); return; }
   if(e.target.closest('#pcWcSlot')){ if(pcWc&&pcWc.out) KS.addImage(pcWc.out,{mode:'auto'}); return; }
   if(e.target.closest('#pcWcSave')){ if(pcWc&&pcWc.out) fetch(pcWc.out).then(r=>r.blob()).then(bl=>KS.download('akvarel.jpg',bl)); return; }

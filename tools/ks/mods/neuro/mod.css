@@ -1,0 +1,6 @@
+.npick{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.npick figure{margin:0;opacity:.75}
+.npick img{width:100%;border-radius:12px;display:block;background:#fff;box-shadow:0 6px 18px -10px rgb(0 0 0 / .4)}
+.npick figcaption,.npick-v span{display:block;text-align:center;font-size:12.5px;color:var(--muted);margin-top:6px}
+.npick-v{border:2px solid transparent;background:none;padding:4px;border-radius:16px;cursor:pointer;color:var(--ink)}
+.npick-v:hover{border-color:var(--accent)}
