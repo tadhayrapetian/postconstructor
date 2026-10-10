@@ -28,6 +28,7 @@ function pcPanel(box){ const s=pcS(), lg=s.logo;
     <div class="flexw"><button class="btn sm primary" id="pcWcCard"${pcWc&&pcWc.out?'':' disabled'}>Новая открытка</button><button class="btn sm" id="pcWcSlot"${pcWc&&pcWc.out?'':' disabled'}>В рамку макета</button><button class="btn sm" id="pcWcSave"${pcWc&&pcWc.out?'':' disabled'}>Скачать JPG</button></div></div>
   <div class="card"><div class="hd">Знак tadhayrapetian</div><div class="pc-logos">${['monoword','mono','sig','word','crest'].map(v=>`<button class="pc-logo${lg.v===v?' on':''}" data-pclogo="${v}">${thSVG({v,sub:lg.sub,color:'ink'},dzPal({ink:'#2b2b2b'}))}</button>`).join('')}</div>
     <label class="f">Подпись под знаком<input type="text" id="pcLogoSub" value="${esc(lg.sub||'')}" maxlength="22" placeholder="handmade"></label>
+    <button class="btn sm primary" data-pclogogen="1" style="align-self:flex-start">Генератор логотипов — любая надпись</button>
     <div class="flexw"><button class="btn sm" data-pcaddlogo="front">На лицо</button><button class="btn sm" data-pcaddlogo="back">На оборот</button><button class="btn sm" id="pcLogoAll" title="Заменить стиль знака TH во всей открытке">Применить к макету</button></div></div>
   <div class="card"><div class="hd">Печать на GX4040</div><p class="hint">Принтер не печатает 5 мм по краям. В шаблонах края белые, поэтому поле принтера не видно. Если края цветные, нажмите «Белые поля».</p>
     <div class="flexw"><button class="btn sm" id="pcWhite">Белые поля 6 мм</button></div>
@@ -106,6 +107,7 @@ document.addEventListener('click',e=>{ let b;
   if((b=e.target.closest('[data-pclogo]'))){ pcS().logo.v=b.dataset.pclogo; save(); pcPanel(b.closest('.kssub')); return; }
   if((b=e.target.closest('[data-pcaddlogo]'))){ pcAddLogo(b.dataset.pcaddlogo); return; }
   if(e.target.closest('#pcLogoAll')){ if(!dzOn()) return; const L=pcS().logo; let n=0; ['front','back'].forEach(sd=>dzEls(sd).forEach(x=>{ if(x.t==='thlogo'){ x.v=L.v; x.sub=L.sub; n++; } })); update(); toast(n?'Знак TH обновлён: '+n:'В макете нет знака TH — добавьте его кнопкой'); return; }
+  if(e.target.closest('[data-pclogogen]')){ if(KS.logo) KS.logo.open(); return; }
   if(e.target.closest('#pcWhite')){ pcWhite(); return; }
   if((b=e.target.closest('[data-pcprint]'))){ pcPrint(b.dataset.pcprint); return; }
 });
