@@ -24,6 +24,7 @@ function pcPanel(box){ const s=pcS(), lg=s.logo;
   <div class="card pc-wc"><div class="hd">Акварель из фото</div><p class="hint">Загрузите фото — программа превратит его в акварельный рисунок с белыми краями бумаги.</p>
     <div class="ks-drop" id="pcWcDrop">${pcWc&&pcWc.out?`<img src="${pcWc.out}" alt="">`:'Перетащите фото сюда или нажмите'}</div>
     <div class="flexw">${Object.entries(WC_PRESETS).map(([k,p])=>`<button class="btn sm${s.wcPreset===k?' primary':''}" data-pcwcp="${k}">${p.n}</button>`).join('')}</div>
+    ${KS.neuro?`<div class="hd2">Нейро-стиль · Gemini</div><div class="flexw">${KS.neuro.hasKey()?KS.neuro.styles.map(([k,n])=>`<button class="btn sm" data-pcneuro="${k}">${n}</button>`).join('')+'<button class="btn sm" data-pcneuro="set" title="Настройки Gemini">⚙︎</button>':'<button class="btn sm" data-pcneuro="set">Подключить ключ Gemini</button>'}</div>`:''}
     <div class="flexw"><button class="btn sm primary" id="pcWcCard"${pcWc&&pcWc.out?'':' disabled'}>Новая открытка</button><button class="btn sm" id="pcWcSlot"${pcWc&&pcWc.out?'':' disabled'}>В рамку макета</button><button class="btn sm" id="pcWcSave"${pcWc&&pcWc.out?'':' disabled'}>Скачать JPG</button></div></div>
   <div class="card"><div class="hd">Логотип TH</div><div class="pc-logos">${['seal','ring','serif','script','line'].map(v=>`<button class="pc-logo${lg.v===v?' on':''}" data-pclogo="${v}">${thSVG({v,sub:lg.sub,color:'ink'},dzPal({ink:'#2b2b2b'}))}</button>`).join('')}</div>
     <label class="f">Подпись под знаком<input type="text" id="pcLogoSub" value="${esc(lg.sub||'')}" maxlength="22" placeholder="handmade"></label>
@@ -61,6 +62,7 @@ function pcWhite(){ if(!isPC()) return; const d=st.dz, W=d.w, H=d.h, m=6, white=
     const bg=dzPal(d.pal).bg; const colored=d.bg!=='white'&&String(d.bg==='bg'?bg:d.bg).toLowerCase()!=='#ffffff';
     if(n||colored) add('warn',`Открытка заходит в край 5 мм${n?` (элементов: ${n})`:''}${colored?', фон цветной до края':''}. GX4040 эти 5 мм не печатает — край выйдет белым неровно. Откройте «Открытки» → «Белые поля 6 мм».`);
     else add('ok','✓Края открытки белые — поле принтера не будет видно'); } }catch(_){ } return r; }; }
+KS.on('neuroKey',()=>{ const b=$('[data-panel="ks-postcard"] .kssub'); if(b) pcPanel(b); });
 KS.on('preview',()=>{ if(!dzOn()||!isPC()) return; const root=$('#inner .dz.live .dzc')||$('#inner .dz.live'); if(!root||root.querySelector('.pc-margin')) return; const m=document.createElement('div'); m.className='pc-margin'; m.innerHTML='<span>поле принтера 5 мм</span>'; root.appendChild(m); });
 /* ---- watercolor ---- */
 async function pcWcLoad(file){ try{ const src=await dzReadImage(file,2400); pcWc={src,out:null}; await pcWcRun(); }catch(e){ toast('Не удалось открыть фото'); } }
@@ -96,6 +98,8 @@ document.addEventListener('click',e=>{ let b;
   if((b=e.target.closest('[data-pccat]'))){ pcS().cat=b.dataset.pccat; save(); pcScreen(pcScr()); return; }
   if((b=e.target.closest('[data-pcwcp]'))){ pcS().wcPreset=b.dataset.pcwcp; save(); if(pcWc) pcWcRun(); else pcPanel(b.closest('.kssub')); return; }
   if((b=e.target.closest('#pcWcDrop'))){ KS.pick('image/*').then(f=>{ if(f[0]) pcWcLoad(f[0]); }); return; }
+  if((b=e.target.closest('[data-pcneuro]'))){ const k=b.dataset.pcneuro; if(k==='set'){ KS.neuro.settings(); return; } if(!pcWc||!pcWc.src){ toast('Сначала загрузите фото'); return; } const box=b.closest('.kssub'); b.disabled=true; b.textContent='Gemini рисует…';
+    KS.neuro.stylize(pcWc.src,k).then(out=>{ pcWc.out=out; toast('Готово'); }).catch(err=>toast(err.message||'Не получилось')).finally(()=>{ if(box) pcPanel(box); }); return; }
   if(e.target.closest('#pcWcCard')){ pcWcCard(); return; }
   if(e.target.closest('#pcWcSlot')){ if(pcWc&&pcWc.out) KS.addImage(pcWc.out,{mode:'auto'}); return; }
   if(e.target.closest('#pcWcSave')){ if(pcWc&&pcWc.out) fetch(pcWc.out).then(r=>r.blob()).then(bl=>KS.download('akvarel.jpg',bl)); return; }
