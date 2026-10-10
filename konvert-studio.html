@@ -2044,6 +2044,23 @@ html.nomotion .sv-card.moved,html.nomotion .item.order.sv-flash{animation:none}
 .npick-v{border:2px solid transparent;background:none;padding:4px;border-radius:16px;cursor:pointer;color:var(--ink)}
 .npick-v:hover{border-color:var(--accent)}
 
+/* ks module: logo */
+.lg-top{display:grid;grid-template-columns:2fr 1.4fr 90px;gap:10px}
+.lg-ini input{text-transform:uppercase;text-align:center}
+.lg-mode{align-self:flex-start}
+.lg-sw{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--edge2);cursor:pointer}
+.lg-sw.on{box-shadow:0 0 0 2px var(--accent)}
+.lg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.lg-card{display:flex;flex-direction:column;gap:8px;align-items:center;border:1px solid var(--edge2);border-radius:18px;background:rgb(255 255 255 / .2);padding:12px;cursor:pointer;color:var(--ink);font:inherit;transition:transform .15s,box-shadow .15s}
+.lg-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px -14px rgb(0 0 0 / .4)}
+.lg-prev{position:relative;display:block;width:100%;max-height:170px;background:#fff;border-radius:12px;padding:10px}
+.lg-prev svg{position:absolute!important;inset:7%!important;width:86%!important;height:86%!important}
+.lg-card b{font-size:13px;font-weight:600}
+.lg-res{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.lg-ri{display:flex;flex-direction:column;gap:8px}
+.lg-ri img{width:100%;border-radius:14px;background:#fff;box-shadow:0 8px 20px -12px rgb(0 0 0 / .4)}
+@media (max-width:700px){ .lg-top{grid-template-columns:1fr} }
+
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .pcard{text-align:left;border:1px solid var(--edge2);border-radius:14px;padding:9px 10px;background:rgb(255 255 255 / .14);cursor:pointer;color:var(--ink);font:inherit;display:flex;flex-direction:column;gap:3px}
 .pcard b{font-weight:600;font-size:13px;line-height:1.25}
@@ -9572,22 +9589,32 @@ if(!PRODUCTS.some(p=>p.id==='pc15h')) PRODUCTS.unshift(
 const isPC=()=>!!(st.dz&&PC_KINDS.includes(st.dz.kind));
 /* Brand mark «tadhayrapetian» / TH. e.v: sig | word | mono | monoword | crest ; old values map onto the new marks */
 const TH_MAP={script:'sig',line:'word',ring:'mono',serif:'mono',seal:'monoword'};
-function thMono(c,x,y,s){ /* TH ligature: Cormorant T whose stem merges with the left stem of H, hairline underline */
-  const k=s/100, serif="'Cormorant Garamond','Playfair Display',Georgia,serif";
-  return `<g transform="translate(${x} ${y}) scale(${k})"><text x="38" y="74" text-anchor="middle" font-family="${serif}" font-size="74" font-weight="500" fill="${c}">T</text><text x="60.5" y="74" text-anchor="middle" font-family="${serif}" font-size="74" font-weight="500" fill="${c}">H</text><path d="M24 82.5 L78 82.5" stroke="${c}" stroke-width=".8"/><path d="M51 79.5 L53.5 82.5 L51 85.5 L48.5 82.5 Z" fill="${c}"/></g>`; }
-function thSVG(e,pal){ const c=dzCol(e.color||'ink',pal), v=TH_MAP[e.v]||e.v||'mono', sub=(e.sub||'');
-  const serif="'Cormorant Garamond','Playfair Display',Georgia,serif", script="'Great Vibes','Pinyon Script','Marck Script',cursive";
+const TH_FONTS={serif:["'Cormorant Garamond','Playfair Display',Georgia,serif",.5,500],didone:["'Playfair Display','Prata',Georgia,serif",.56,400],script:["'Great Vibes','Marck Script',cursive",.42,400],sans:["'Montserrat','Manrope',Arial,sans-serif",.62,400],hand:["'Caveat','Bad Script',cursive",.42,500],slab:["'Forum','Tenor Sans',Georgia,serif",.55,400]};
+function thInits(name){ const w=String(name||'').trim().split(/\s+/).filter(Boolean); if(w.length>1) return (w[0][0]+w[1][0]).toUpperCase(); const t=w[0]||'TH'; return (t.slice(0,2)).toUpperCase(); }
+function thMono(c,x,y,s,ini,ff){ /* two-letter monogram; T+H get the merged-stem ligature */
+  const k=s/100, F=TH_FONTS[ff]||TH_FONTS.serif, L=(ini||'TH').slice(0,2), lig=L==='TH'&&(!ff||ff==='serif'||ff==='didone'||ff==='slab');
+  const xs=L.length<2?[50]:lig?[38,60.5]:[30,70], fs=L.length<2?78:lig?74:62;
+  const letters=[...L].map((ch,i)=>`<text x="${xs[i]}" y="74" text-anchor="middle" font-family="${F[0]}" font-size="${fs}" font-weight="${F[2]}" fill="${c}">${esc(ch)}</text>`).join('');
+  return `<g transform="translate(${x} ${y}) scale(${k})">${letters}<path d="M24 82.5 L78 82.5" stroke="${c}" stroke-width=".8"/><path d="M51 79.5 L53.5 82.5 L51 85.5 L48.5 82.5 Z" fill="${c}"/></g>`; }
+function thFit(txt,size,avail,ls,ratio){ const w=[...txt].length*(size*ratio+ls); return w>avail?size*avail/w:size; }
+function thSVG(e,pal){ const c=dzCol(e.color||'ink',pal), v=TH_MAP[e.v]||e.v||'mono', sub=(e.sub||''), name=(e.txt||'tadhayrapetian').trim()||'tadhayrapetian', ini=(e.ini||'').trim()||(e.txt?thInits(name):'TH');
+  const ff=e.ff||'', FS=TH_FONTS[ff]||TH_FONTS.serif, serif=TH_FONTS.serif[0], script=(TH_FONTS[ff==='hand'?'hand':'script'])[0];
   const F=`fill="${c}" stroke="none"`, svg=(vb,inner)=>`<svg viewBox="${vb}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style="position:absolute;inset:0;overflow:visible">${inner}</svg>`;
-  const capt=(x,y,size)=>sub?`<text x="${x}" y="${y}" text-anchor="middle" font-family="${serif}" font-size="${size}" letter-spacing="${size*.32}" ${F}>${esc(sub.toUpperCase().slice(0,26))}</text>`:'';
-  if(v==='sig') return svg('0 0 200 120',`<text x="100" y="66" text-anchor="middle" font-family="${script}" font-size="40" ${F}>tadhayrapetian</text><path d="M44 80 C 80 72, 128 72, 160 78" fill="none" stroke="${c}" stroke-width=".9" stroke-linecap="round"/>${capt(100,102,9)}`);
-  if(v==='word') return svg('0 0 240 60',`<text x="120" y="31" text-anchor="middle" font-family="${serif}" font-size="21" font-weight="500" letter-spacing="5.2" ${F}>TADHAYRAPETIAN</text><path d="M60 41 L111 41 M129 41 L180 41" stroke="${c}" stroke-width=".6"/><path d="M120 37.5 L123.5 41 L120 44.5 L116.5 41 Z" ${F}/>${capt(120,56,7.5)}`);
-  if(v==='monoword') return svg('0 0 100 100',`<g>${thMono(c,16,2,68)}</g><text x="50" y="80" text-anchor="middle" font-family="${serif}" font-size="9.6" font-weight="500" letter-spacing="2.6" ${F}>TADHAYRAPETIAN</text>${capt(50,94,6.2)}`);
-  if(v==='crest') return svg('0 0 100 100',`<ellipse cx="50" cy="50" rx="34" ry="46" fill="none" stroke="${c}" stroke-width=".7"/><ellipse cx="50" cy="50" rx="31.5" ry="43.5" fill="none" stroke="${c}" stroke-width=".35"/><g>${thMono(c,21,10,58)}</g><text x="50" y="74" text-anchor="middle" font-family="${serif}" font-size="4.7" letter-spacing="1.1" ${F}>TADHAYRAPETIAN</text>${sub?`<text x="50" y="83" text-anchor="middle" font-family="${serif}" font-size="4.6" font-style="italic" ${F}>${esc(sub.slice(0,22))}</text>`:''}`);
-  return svg('0 0 100 100',`<g>${thMono(c,4,0,92)}</g>${capt(50,97,7)}`); }
+  const capt=(x,y,size,avail)=>{ if(!sub) return ''; const t=sub.toUpperCase().slice(0,40), fs=thFit(t,size,avail||180,size*.32,.6); return `<text x="${x}" y="${y}" text-anchor="middle" font-family="${serif}" font-size="${fs.toFixed(2)}" letter-spacing="${(fs*.32).toFixed(2)}" ${F}>${esc(t)}</text>`; };
+  const UP=name.toUpperCase();
+  if(v==='sig'){ const f=ff&&ff!=='script'&&ff!=='hand'?FS:TH_FONTS[ff==='hand'?'hand':'script'], fs=thFit(name,40,180,0,f[1]); return svg('0 0 200 120',`<text x="100" y="66" text-anchor="middle" font-family="${f[0]}" font-size="${fs.toFixed(2)}" font-weight="${f[2]}" ${F}>${esc(name)}</text><path d="M44 80 C 80 72, 128 72, 160 78" fill="none" stroke="${c}" stroke-width=".9" stroke-linecap="round"/>${capt(100,102,9,170)}`); }
+  if(v==='word'){ const fs=thFit(UP,21,226,5.2,FS[1]*1.15), ls=fs*.25; return svg('0 0 240 60',`<text x="120" y="31" text-anchor="middle" font-family="${FS[0]}" font-size="${fs.toFixed(2)}" font-weight="${FS[2]}" letter-spacing="${ls.toFixed(2)}" ${F}>${esc(UP)}</text><path d="M60 41 L111 41 M129 41 L180 41" stroke="${c}" stroke-width=".6"/><path d="M120 37.5 L123.5 41 L120 44.5 L116.5 41 Z" ${F}/>${capt(120,56,7.5,200)}`); }
+  if(v==='monoword'){ const fs=thFit(UP,9.6,92,2.6,FS[1]*1.1); return svg('0 0 100 100',`<g>${thMono(c,16,2,68,ini,ff)}</g><text x="50" y="80" text-anchor="middle" font-family="${FS[0]}" font-size="${fs.toFixed(2)}" font-weight="${FS[2]}" letter-spacing="${(fs*.27).toFixed(2)}" ${F}>${esc(UP)}</text>${capt(50,94,6.2,88)}`); }
+  if(v==='crest'){ const fs=thFit(UP,4.7,46,1.1,FS[1]*1.3); return svg('0 0 100 100',`<ellipse cx="50" cy="50" rx="34" ry="46" fill="none" stroke="${c}" stroke-width=".7"/><ellipse cx="50" cy="50" rx="31.5" ry="43.5" fill="none" stroke="${c}" stroke-width=".35"/><g>${thMono(c,21,10,58,ini,ff)}</g><text x="50" y="74" text-anchor="middle" font-family="${FS[0]}" font-size="${fs.toFixed(2)}" letter-spacing="${(fs*.24).toFixed(2)}" ${F}>${esc(UP)}</text>${sub?`<text x="50" y="83" text-anchor="middle" font-family="${serif}" font-size="4.6" font-style="italic" ${F}>${esc(sub.slice(0,22))}</text>`:''}`); }
+  if(v==='badge'){ const fs=thFit(UP,13,150,3,FS[1]*1.1); return svg('0 0 200 120',`<rect x="6" y="14" width="188" height="92" rx="46" fill="none" stroke="${c}" stroke-width="1.2"/><rect x="11" y="19" width="178" height="82" rx="41" fill="none" stroke="${c}" stroke-width=".5"/><text x="100" y="${sub?62:67}" text-anchor="middle" font-family="${FS[0]}" font-size="${fs.toFixed(2)}" font-weight="${FS[2]}" letter-spacing="${(fs*.22).toFixed(2)}" ${F}>${esc(UP)}</text>${capt(100,82,7,130)}`); }
+  if(v==='stack'){ const w=name.split(/\s+/), l1=w.slice(0,Math.ceil(w.length/2)).join(' '), l2=w.slice(Math.ceil(w.length/2)).join(' '); const f1=thFit(l1,34,180,0,TH_FONTS.script[1]), f2=thFit(l2.toUpperCase(),14,170,4,FS[1]*1.1);
+    return svg('0 0 200 120',`<text x="100" y="${l2?56:66}" text-anchor="middle" font-family="${script}" font-size="${f1.toFixed(2)}" ${F}>${esc(l1)}</text>${l2?`<text x="100" y="84" text-anchor="middle" font-family="${FS[0]}" font-size="${f2.toFixed(2)}" letter-spacing="${(f2*.3).toFixed(2)}" font-weight="${FS[2]}" ${F}>${esc(l2.toUpperCase())}</text>`:''}${capt(100,106,7,150)}`); }
+  return svg('0 0 100 100',`<g>${thMono(c,4,0,92,ini,ff)}</g>${capt(50,97,7,92)}`); }
 { const _el=dzElHTML; dzElHTML=function(e,doc,pal,opt){ if(!e||e.t!=='thlogo') return _el.apply(this,arguments);
     const h=_el.call(this,Object.assign({},e,{t:'icon',icon:'star',fill:'',color:'ink'}),doc,pal,opt); if(!h) return h;
     return h.replace(/<svg[\s\S]*<\/svg>/,thSVG(e,pal)).replace('data-t="icon"','data-t="thlogo"'); }; }
-{ const _lb=dzLabel; dzLabel=function(e){ return e&&e.t==='thlogo'?'Знак tadhayrapetian':_lb.apply(this,arguments); }; }
+{ const _lb=dzLabel; dzLabel=function(e){ return e&&e.t==='thlogo'?(e.txt?'Логотип «'+e.txt+'»':'Знак tadhayrapetian'):_lb.apply(this,arguments); }; }
+KS.thSVG=thSVG;
 
 /* ---- watercolor painting from a photo (canvas, no network) ---- */
 const WC_PRESETS={
@@ -9684,6 +9711,7 @@ function pcPanel(box){ const s=pcS(), lg=s.logo;
     <div class="flexw"><button class="btn sm primary" id="pcWcCard"${pcWc&&pcWc.out?'':' disabled'}>Новая открытка</button><button class="btn sm" id="pcWcSlot"${pcWc&&pcWc.out?'':' disabled'}>В рамку макета</button><button class="btn sm" id="pcWcSave"${pcWc&&pcWc.out?'':' disabled'}>Скачать JPG</button></div></div>
   <div class="card"><div class="hd">Знак tadhayrapetian</div><div class="pc-logos">${['monoword','mono','sig','word','crest'].map(v=>`<button class="pc-logo${lg.v===v?' on':''}" data-pclogo="${v}">${thSVG({v,sub:lg.sub,color:'ink'},dzPal({ink:'#2b2b2b'}))}</button>`).join('')}</div>
     <label class="f">Подпись под знаком<input type="text" id="pcLogoSub" value="${esc(lg.sub||'')}" maxlength="22" placeholder="handmade"></label>
+    <button class="btn sm primary" data-pclogogen="1" style="align-self:flex-start">Генератор логотипов — любая надпись</button>
     <div class="flexw"><button class="btn sm" data-pcaddlogo="front">На лицо</button><button class="btn sm" data-pcaddlogo="back">На оборот</button><button class="btn sm" id="pcLogoAll" title="Заменить стиль знака TH во всей открытке">Применить к макету</button></div></div>
   <div class="card"><div class="hd">Печать на GX4040</div><p class="hint">Принтер не печатает 5 мм по краям. В шаблонах края белые, поэтому поле принтера не видно. Если края цветные, нажмите «Белые поля».</p>
     <div class="flexw"><button class="btn sm" id="pcWhite">Белые поля 6 мм</button></div>
@@ -9762,6 +9790,7 @@ document.addEventListener('click',e=>{ let b;
   if((b=e.target.closest('[data-pclogo]'))){ pcS().logo.v=b.dataset.pclogo; save(); pcPanel(b.closest('.kssub')); return; }
   if((b=e.target.closest('[data-pcaddlogo]'))){ pcAddLogo(b.dataset.pcaddlogo); return; }
   if(e.target.closest('#pcLogoAll')){ if(!dzOn()) return; const L=pcS().logo; let n=0; ['front','back'].forEach(sd=>dzEls(sd).forEach(x=>{ if(x.t==='thlogo'){ x.v=L.v; x.sub=L.sub; n++; } })); update(); toast(n?'Знак TH обновлён: '+n:'В макете нет знака TH — добавьте его кнопкой'); return; }
+  if(e.target.closest('[data-pclogogen]')){ if(KS.logo) KS.logo.open(); return; }
   if(e.target.closest('#pcWhite')){ pcWhite(); return; }
   if((b=e.target.closest('[data-pcprint]'))){ pcPrint(b.dataset.pcprint); return; }
 });
@@ -9870,6 +9899,14 @@ async function nOne(src,styleId,custom,o){ const key=nKey(); if(!key){ nSettings
 async function nStylize(src,styleId,custom,o){ o=Object.assign({},nOpt(),o||{}); const n=Math.max(1,Math.min(4,+o.variants||1));
   const res=await Promise.allSettled(Array.from({length:n},()=>nOne(src,styleId,custom,o))); const ok=res.filter(x=>x.status==='fulfilled').map(x=>x.value);
   if(!ok.length) throw res[0].reason; if(ok.length===1||o.noPick) return ok[0]; return nPick(src,ok); }
+
+/* text → image (logo generation) */
+async function nGen(prompt,o){ o=o||{}; const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); } const model=nModel(), n=Math.max(1,Math.min(4,+o.n||1));
+  const one=async()=>{ const base={contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}}; const ic={aspectRatio:o.aspect||'1:1'}; if(/pro/i.test(model)) ic.imageSize='2K';
+    let {r,j}=await nCall(key,model,Object.assign({},base,{generationConfig:Object.assign({},base.generationConfig,{imageConfig:ic})})); if(r.status===400&&!/API key/i.test(((j&&j.error&&j.error.message)||''))) ({r,j}=await nCall(key,model,base));
+    if(!r.ok) throw new Error(nErr(r.status,j)); const parts=((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]; const p=parts.find(x=>x.inlineData||x.inline_data); if(!p) throw new Error('Gemini не вернул картинку. Попробуйте ещё раз.');
+    const d=p.inlineData||p.inline_data; return `data:${d.mimeType||d.mime_type||'image/png'};base64,${d.data}`; };
+  const res=await Promise.allSettled(Array.from({length:n},one)); const ok=res.filter(x=>x.status==='fulfilled').map(x=>x.value); if(!ok.length) throw res[0].reason; return ok; }
 const npk=KS.modal({id:'neuroPick',title:'Выберите вариант',wide:true});
 function nPick(src,list){ return new Promise(res=>{ let done=false; const fin=v=>{ if(done) return; done=true; npk.close(); res(v); };
   npk.el.innerHTML=`<p class="hint">Нажмите на понравившийся вариант. Оригинал — для сравнения.</p><div class="npick"><figure><img src="${src}" alt=""><figcaption>Оригинал</figcaption></figure>${list.map((u,i)=>`<button class="npick-v" data-npick="${i}"><img src="${u}" alt=""><span>Вариант ${i+1}</span></button>`).join('')}</div>`;
@@ -9908,9 +9945,66 @@ function nCtl(){ const o=nOpt(); return `<div class="ks-row"><div class="seg">${
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-npow]'); if(!b) return; nOpt().pow=b.dataset.npow; save(); b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); });
 document.addEventListener('change',e=>{ if(e.target.dataset.nedge){ nOpt().edges=e.target.checked; save(); } if(e.target.dataset.nvar){ nOpt().variants=+e.target.value; save(); } });
 KS.cmd('Нейро-стиль: настройки Gemini','настройки',nSettings);
-KS.neuro={ctl:nCtl,stylize:nStylize,styles:NSTYLES,settings:nSettings,hasKey:()=>!!nKey()};
+KS.neuro={gen:nGen,ctl:nCtl,stylize:nStylize,styles:NSTYLES,settings:nSettings,hasKey:()=>!!nKey()};
 
 })(); }catch(e){ console.error('[KS] module neuro failed',e); }
+
+/* ===== ks module: logo ===== */
+try{ (function(){ 'use strict';
+KS.mod('logo',{title:'Генератор логотипов'});
+const lgS=()=>KS.store('logo',{txt:'tadhayrapetian',sub:'handmade',ini:'',ff:'serif',color:'#1d1d1f',mode:'vec',what:'',style:'elegant',col:'black',n:2});
+const LG_LAY=[['monoword','Монограмма и имя',1],['mono','Монограмма',1],['sig','Подпись',.6],['word','Надпись',.25],['crest','Медальон',1],['badge','Плашка',.6],['stack','Два шрифта',.6]];
+const LG_FF=[['serif','Классика'],['didone','Дидона'],['slab','Строгий'],['sans','Модерн'],['script','Каллиграфия'],['hand','От руки']];
+const LG_COL=[['#1d1d1f','Чёрный'],['ink','Цвет текста макета'],['acc','Акцент макета'],['#b08d57','Золото'],['#a35a43','Терракота'],['#5f7a63','Шалфей'],['#1f3a5f','Тёмно-синий'],['#8a3a52','Бордо']];
+const LG_AI=[['elegant','Элегантный','an elegant luxury logo with refined serif lettering and a delicate fine-line emblem'],['script','Каллиграфия','a handwritten calligraphy signature logo with graceful flourishes'],['minimal','Минимализм','a minimalist modern logo with a simple geometric symbol and clean sans-serif lettering'],['vintage','Винтажная эмблема','a vintage badge emblem logo with an ornamental frame, banner ribbon and classic lettering'],['botanic','Ботанический','a botanical logo with a hand-drawn line-art flower and leaves wreath around the lettering'],['mono','Монограмма','a monogram logo built from the initials inside a refined frame, with the full name below'],['water','Акварельный','a soft watercolor logo with a painted floral or organic watercolor shape behind elegant lettering'],['gold','Золото','a premium logo with gold-foil textured lettering and emblem on white'],['kids','Игривый','a playful friendly logo with rounded hand-drawn lettering and a cute simple illustration'],['geo','Геометрия','a bold geometric logo mark with strong shapes and confident modern lettering']];
+const LG_AICOL=[['black','Чёрный'],['gold','Золото'],['terracotta','Терракота'],['sage','Шалфей'],['navy','Тёмно-синий'],['pastel','Пастель'],['colorful','Ярко']];
+const m=KS.modal({id:'logogen',title:'Генератор логотипов',full:true});
+let lgRes=[];
+function lgSample(v,ff){ const s=lgS(), e={v,ff,txt:s.txt,sub:s.sub,ini:s.ini,color:s.color}; const pal=dzPal(st.dz&&st.dz.pal); return KS.thSVG(e,pal); }
+function lgRender(){ const s=lgS(), hasKey=!!(KS.neuro&&KS.neuro.hasKey());
+  m.el.innerHTML=`<div class="lg-top"><label class="f grow">Надпись<input type="text" id="lgTxt" value="${esc(s.txt)}" placeholder="Название, имя, бренд" maxlength="40"></label><label class="f">Подпись<input type="text" id="lgSub" value="${esc(s.sub)}" placeholder="handmade, с 2026…" maxlength="40"></label><label class="f lg-ini">Инициалы<input type="text" id="lgIni" value="${esc(s.ini)}" placeholder="авто" maxlength="2"></label></div>
+  <div class="seg lg-mode"><button data-lgmode="vec"${s.mode==='vec'?' class="on"':''}>Векторный · бесплатно</button><button data-lgmode="ai"${s.mode==='ai'?' class="on"':''}>Нейро-логотип · Gemini</button></div>
+  ${s.mode==='vec'?`<div class="flexw"><span class="hd2">Шрифт</span>${LG_FF.map(([k,n])=>`<button class="btn sm${s.ff===k?' primary':''}" data-lgff="${k}">${n}</button>`).join('')}</div>
+   <div class="flexw"><span class="hd2">Цвет</span>${LG_COL.map(([k,n])=>`<button class="lg-sw${s.color===k?' on':''}" data-lgcol="${k}" title="${n}" style="background:${k.startsWith('#')?k:dzCol(k,dzPal(st.dz&&st.dz.pal))}"></button>`).join('')}</div>
+   <p class="hint">Буквы всегда точные и чёткие в печати. Нажмите на вариант — он встанет на макет; потом его можно двигать, менять цвет и надпись в «Макете».</p>
+   <div class="lg-grid">${LG_LAY.map(([v,n,r])=>`<button class="lg-card" data-lgvec="${v}"><span class="lg-prev" style="aspect-ratio:${1/r>2?'4/1':r<1?'5/3':'1/1'};background:${s.color.startsWith('#')?'#fff':dzPal(st.dz&&st.dz.pal).bg}">${lgSample(v,s.ff)}</span><b>${n}</b></button>`).join('')}</div>`
+  :`${hasKey?'':`<div class="ks-empty">Для нейро-логотипа нужен ключ Gemini. <button class="btn sm primary" data-lgkey="1">Подключить ключ</button></div>`}
+   <label class="f">Что изобразить (необязательно)<input type="text" id="lgWhat" value="${esc(s.what)}" placeholder="цветок граната, конверт с сердцем, кисть и краски…"></label>
+   <div class="flexw"><span class="hd2">Стиль</span>${LG_AI.map(([k,n])=>`<button class="btn sm${s.style===k?' primary':''}" data-lgai="${k}">${n}</button>`).join('')}</div>
+   <div class="flexw"><span class="hd2">Цвета</span>${LG_AICOL.map(([k,n])=>`<button class="btn sm${s.col===k?' primary':''}" data-lgaic="${k}">${n}</button>`).join('')}<span class="hd2" style="margin-left:8px">Вариантов</span><select id="lgN">${[1,2,3,4].map(n=>`<option${s.n==n?' selected':''}>${n}</option>`).join('')}</select><button class="btn primary" id="lgGo"${hasKey?'':' disabled'}>Создать логотип</button></div>
+   <p class="hint">Gemini рисует эмблему с вашей надписью. Иногда он ошибается в буквах — тогда нажмите «Создать» ещё раз или возьмите векторный вариант. Каждый вариант оплачивается отдельно.</p>
+   <div class="lg-res">${lgRes.map((u,i)=>`<div class="lg-ri"><img src="${u}" alt=""><div class="flexw"><button class="btn sm primary" data-lgput="${i}" data-clear="1">На макет без фона</button><button class="btn sm" data-lgput="${i}">С белым фоном</button><button class="btn sm" data-lgdl="${i}">PNG</button></div></div>`).join('')}</div>`}`; }
+function lgOpen(){ lgRender(); m.open(); }
+function lgPut(el){ if(!dzOn()){ KS.ensureDesign(); } const d=st.dz, r=el.r, w=Math.min(d.w*.5,r>=1?30:50), h=w*Math.min(1,r); const e=Object.assign({id:dzId(),x:(d.w-w)/2,y:(d.h-h)/2,w,h},el.p); delete e.r; dzEls().push(e); dzSelect(e.id); update(); m.close(); toast('Логотип на макете'); }
+async function lgNoWhite(src){ const im=await new Promise((r,j)=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=j; i.src=src; }); const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight; const g=c.getContext('2d'); g.drawImage(im,0,0); const d=g.getImageData(0,0,c.width,c.height), p=d.data;
+  for(let i=0;i<p.length;i+=4){ const mn=Math.min(p[i],p[i+1],p[i+2]); let a=mn>=246?0:mn<=200?1:(246-mn)/46; if(a<1&&a>0){ for(let k=0;k<3;k++) p[i+k]=Math.max(0,Math.min(255,(p[i+k]-255*(1-a))/a)); } p[i+3]=Math.round(p[i+3]*a); }
+  g.putImageData(d,0,0); return c.toDataURL('image/png'); }
+async function lgGen(){ const s=lgS(); if(!s.txt.trim()){ toast('Впишите надпись'); return; } const st0=LG_AI.find(x=>x[0]===s.style)||LG_AI[0], col={black:'black ink only',gold:'warm metallic gold tones',terracotta:'terracotta and warm brown',sage:'sage green and soft olive',navy:'deep navy blue',pastel:'soft pastel colors',colorful:'a cheerful harmonious color palette'}[s.col]||'black ink';
+  const prompt=`Design ${st0[2]}. The logo text must read exactly "${s.txt.trim()}" — spell every letter exactly as given, no other words${s.sub.trim()?`, plus a small tagline that reads exactly "${s.sub.trim()}"`:''}. ${s.what.trim()?`Symbol/emblem idea: ${s.what.trim()}. `:''}Colors: ${col}. Flat professional vector-style logo, centered, generous empty space around it, on a plain pure white background. No mockup, no paper texture, no shadows, no extra text or letters, no watermark. Print-ready, crisp edges.`;
+  const b=$('#lgGo'); if(b){ b.disabled=true; b.textContent='Gemini рисует…'; }
+  try{ lgRes=await KS.neuro.gen(prompt,{n:s.n,aspect:'1:1'}); toast('Готово: '+lgRes.length+' вар.'); }catch(err){ toast(err.message||'Не получилось'); } lgRender(); }
+m.el.addEventListener('click',async e=>{ const t=e.target, s=lgS(); let b;
+  if((b=t.closest('[data-lgmode]'))){ s.mode=b.dataset.lgmode; save(); lgRender(); return; }
+  if((b=t.closest('[data-lgff]'))){ s.ff=b.dataset.lgff; save(); lgRender(); return; }
+  if((b=t.closest('[data-lgcol]'))){ s.color=b.dataset.lgcol; save(); lgRender(); return; }
+  if((b=t.closest('[data-lgai]'))){ s.style=b.dataset.lgai; save(); lgRender(); return; }
+  if((b=t.closest('[data-lgaic]'))){ s.col=b.dataset.lgaic; save(); lgRender(); return; }
+  if(t.closest('[data-lgkey]')){ KS.neuro.settings(); return; }
+  if(t.closest('#lgGo')){ lgGen(); return; }
+  if((b=t.closest('[data-lgvec]'))){ const L=LG_LAY.find(x=>x[0]===b.dataset.lgvec); lgPut({r:L[2],p:{t:'thlogo',v:L[0],ff:s.ff,txt:s.txt.trim()||'tadhayrapetian',sub:s.sub,ini:s.ini,color:s.color}}); return; }
+  if((b=t.closest('[data-lgput]'))){ let src=lgRes[+b.dataset.lgput]; if(b.dataset.clear) src=await lgNoWhite(src); lgPut({r:1,p:{t:'img',src,fit:'contain'}}); return; }
+  if((b=t.closest('[data-lgdl]'))){ const src=await lgNoWhite(lgRes[+b.dataset.lgdl]); fetch(src).then(r=>r.blob()).then(bl=>KS.download('logo-'+(s.txt||'logo').replace(/[^\wа-яё-]+/gi,'-').slice(0,30)+'.png',bl)); return; } });
+m.el.addEventListener('input',e=>{ const s=lgS(), id=e.target.id; if(id==='lgTxt') s.txt=e.target.value; else if(id==='lgSub') s.sub=e.target.value; else if(id==='lgIni') s.ini=e.target.value.toUpperCase(); else if(id==='lgWhat') s.what=e.target.value; else return; save();
+  if(s.mode==='vec') m.el.querySelectorAll('[data-lgvec]').forEach(c=>{ c.querySelector('.lg-prev').innerHTML=lgSample(c.dataset.lgvec,s.ff); }); });
+m.el.addEventListener('change',e=>{ if(e.target.id==='lgN'){ lgS().n=+e.target.value; save(); } });
+KS.tool({id:'logo',label:'Логотип',title:'Генератор логотипов с любой надписью',app:'print',run:lgOpen});
+KS.cmd('Генератор логотипов','логотип',lgOpen);
+/* inspector: edit text of a vector logo */
+KS.insp({id:'lgtxt',title:'Надпись логотипа',order:9,when:e=>e.t==='thlogo',html:e=>`<div class="row2"><label class="f">Надпись<input type="text" data-lgf="txt" value="${esc(e.txt||'tadhayrapetian')}" maxlength="40"></label><label class="f">Инициалы<input type="text" data-lgf="ini" value="${esc(e.ini||'')}" placeholder="авто" maxlength="2"></label></div><label class="f">Шрифт<select data-lgf="ff">${LG_FF.map(([k,n])=>`<option value="${k}"${(e.ff||'serif')===k?' selected':''}>${n}</option>`).join('')}</select></label><button class="btn sm" data-lgopen="1" style="align-self:flex-start">Другие варианты…</button>`,
+  bind(div,e){ div.addEventListener('input',ev=>{ const k=ev.target.dataset.lgf; if(!k) return; e[k]=k==='ini'?ev.target.value.toUpperCase():ev.target.value; KS.changed(); }); div.addEventListener('change',ev=>{ if(ev.target.dataset.lgf==='ff') KS.changed(true); }); div.addEventListener('click',ev=>{ if(ev.target.closest('[data-lgopen]')){ const s=lgS(); s.txt=e.txt||s.txt; s.sub=e.sub||''; lgOpen(); } }); }});
+KS.logo={open:lgOpen,noWhite:lgNoWhite};
+
+})(); }catch(e){ console.error('[KS] module logo failed',e); }
 
 /* boot */
 buildStatic(); buildMagic(); applyUI(); syncUI(); renderPreview(); renderGallery(); moveLens(); save();
