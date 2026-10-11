@@ -7,7 +7,9 @@ const pcList=()=>{ const s=pcS(), q=(s.q||'').toLowerCase().replace(/ё/g,'е');
   .filter(t=>s.ori==='all'||(s.ori==='h'?t.kind==='pcH':t.kind==='pcV')).filter(t=>!s.cat||(t.tags||[]).includes(s.cat))
   .filter(t=>!q||((t.name||'')+' '+(t.tags||[]).join(' ')).toLowerCase().replace(/ё/g,'е').includes(q)); };
 function pcApply(T){ const pid=T.kind==='pcV'?'pc15v':'pc15h'; if(st.ui.app!=='print') dzSetMode('print'); applyProduct(pid,true); dzApplyTpl(T); st.dz.sides=2; st.shop.sides=2; st.shop.paper='ph1015'; update(); goTab('dz'); toast(`«${T.name}». Двойной щелчок по тексту — правка прямо на открытке.`); }
-let pcWc=null; /* {src, out, preset} */
+let pcWc=null; /* current item {src, out} */
+let pcWcs=[]; /* all loaded photos (up to PCWC_MAX) */
+const PCWC_MAX=10;
 function pcScreen(scr){ const L=pcList(), s=pcS();
   const cnt=n=>n+' '+(n%10===1&&n%100!==11?'шаблон':n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'шаблона':'шаблонов');
   scr.innerHTML=`<div class="pc-head"><div><h2>Открытки 10 × 15</h2><p class="hint">${cnt(L.length)} · белые поля под принтер · логотип TH на обороте</p></div>
@@ -22,10 +24,11 @@ function pcThumbs(scr){ if(pcObs) pcObs.disconnect(); pcObs=new IntersectionObse
 function pcPanel(box){ setTimeout(()=>{ const slot=box.querySelector('.pc-nref'); if(slot&&KS.neuro&&KS.neuro.hasKey()) KS.neuro.refRow('pcnref').then(h=>{ slot.innerHTML=h; }); },0); const s=pcS(), lg=s.logo;
   box.innerHTML=`<div class="card"><div class="hd">Поиск</div><input type="search" id="pcQ" placeholder="Роза, Ереван, свадьба…" value="${esc(s.q||'')}"></div>
   <div class="card pc-wc"><div class="hd">Акварель из фото</div><p class="hint">Загрузите фото — программа превратит его в акварельный рисунок с белыми краями бумаги.</p>
-    <div class="ks-drop" id="pcWcDrop">${pcWc&&pcWc.out?`<img src="${pcWc.out}" alt="">`:'Перетащите фото сюда или нажмите'}</div>
+    <div class="ks-drop" id="pcWcDrop">${pcWc&&(pcWc.out||pcWc.src)?`<img src="${pcWc.out||pcWc.src}" alt="">`:'Перетащите фото сюда или нажмите — можно сразу несколько (до 10)'}</div>
+    ${pcWcs.length?`<div class="pc-wcstrip">${pcWcs.map((it,i)=>`<button class="pc-wci${it===pcWc?' on':''}${it.busy?' busy':''}" data-pcwci="${i}" title="Фото ${i+1}"><img src="${it.out||it.src}" alt="">${it.out?'':'<i>фото</i>'}<span data-pcwcdel="${i}" title="Убрать">×</span></button>`).join('')}${pcWcs.length<PCWC_MAX?'<button class="pc-wci add" data-pcwcadd="1" title="Добавить фото">+</button>':''}</div>${pcWcs.length>1?`<p class="hint">Загружено фото: ${pcWcs.length}. Кнопки стилей обработают <b>все сразу</b>, каждое в одном варианте.</p>`:''}`:''}
     <div class="hd2">Быстрая акварель · бесплатно, без ИИ</div><div class="flexw">${Object.entries(WC_PRESETS).map(([k,p])=>`<button class="btn sm${s.wcPreset===k?' primary':''}" data-pcwcp="${k}">${p.n}</button>`).join('')}</div>
     ${KS.neuro?`<div class="hd2">Как на образце · ИИ (точнее всего)</div><div class="pc-nref"></div><div class="hd2">Нейро-стиль · ИИ, как настоящий художник</div>${KS.neuro.hasKey()?KS.neuro.ctl():''}<div class="flexw">${KS.neuro.hasKey()?KS.neuro.styles.map(([k,n])=>`<button class="btn sm${k.startsWith('pp_')?' pc-ppl':''}" data-pcneuro="${k}">${n.replace('Портрет: ','Люди: ')}</button>`).join('')+'<button class="btn sm" data-pcneuro="set" title="Настройки ИИ">⚙︎</button>':'<button class="btn sm" data-pcneuro="set">Подключить ИИ (Gemini или fal.ai)</button>'}</div>`:''}
-    <div class="flexw"><button class="btn sm primary" id="pcWcCard"${pcWc&&pcWc.out?'':' disabled'}>Новая открытка</button><button class="btn sm" id="pcWcSlot"${pcWc&&pcWc.out?'':' disabled'}>В рамку макета</button><button class="btn sm" id="pcWcSave"${pcWc&&pcWc.out?'':' disabled'}>Скачать JPG</button></div></div>
+    <div class="flexw"><button class="btn sm primary" id="pcWcCard"${pcWc&&pcWc.out?'':' disabled'}>Новая открытка</button><button class="btn sm" id="pcWcSlot"${pcWc&&pcWc.out?'':' disabled'}>В рамку макета</button><button class="btn sm" id="pcWcSave"${pcWc&&pcWc.out?'':' disabled'}>Скачать JPG</button>${pcWcs.length>1?`<button class="btn sm" id="pcWcSaveAll"${pcWcs.some(x=>x.out)?'':' disabled'}>Скачать все (${pcWcs.filter(x=>x.out).length})</button><button class="btn sm" id="pcWcClear">Очистить</button>`:''}</div></div>
   <div class="card"><div class="hd">Знак tadhayrapetian</div><div class="pc-logos">${['monoword','mono','sig','word','crest'].map(v=>`<button class="pc-logo${lg.v===v?' on':''}" data-pclogo="${v}">${thSVG({v,sub:lg.sub,color:'ink'},dzPal({ink:'#2b2b2b'}))}</button>`).join('')}</div>
     <label class="f">Подпись под знаком<input type="text" id="pcLogoSub" value="${esc(lg.sub||'')}" maxlength="22" placeholder="handmade"></label>
     <button class="btn sm primary" data-pclogogen="1" style="align-self:flex-start">Генератор логотипов — любая надпись</button>
@@ -67,8 +70,21 @@ KS.on('neuroRefs',()=>{ const b=$('[data-panel="ks-postcard"] .kssub'); if(b&&b.
 KS.on('neuroKey',()=>{ const b=$('[data-panel="ks-postcard"] .kssub'); if(b) pcPanel(b); });
 KS.on('preview',()=>{ if(!dzOn()||!isPC()) return; const root=$('#inner .dz.live .dzc')||$('#inner .dz.live'); if(!root||root.querySelector('.pc-margin')) return; const m=document.createElement('div'); m.className='pc-margin'; m.innerHTML='<span>поле принтера 5 мм</span>'; root.appendChild(m); });
 /* ---- watercolor ---- */
-async function pcWcLoad(file){ try{ const src=await dzReadImage(file,2400); pcWc={src,out:null}; await pcWcRun(); }catch(e){ toast('Не удалось открыть фото'); } }
-async function pcWcRun(){ if(!pcWc) return; const s=pcS(); toast('Рисую акварель…'); await new Promise(r=>setTimeout(r,30)); pcWc.out=await wcPaint(pcWc.src,s.wcPreset); const b=$('[data-panel="ks-postcard"] .kssub'); if(b) pcPanel(b); toast('Акварель готова'); }
+const pcWcRedraw=()=>{ const b=$('[data-panel="ks-postcard"] .kssub'); if(b) pcPanel(b); };
+async function pcWcLoad(files,add){ files=[].concat(files||[]).filter(f=>f&&/^image\//.test(f.type||'image/')); if(!files.length) return;
+  if(!add) pcWcs=[]; const room=PCWC_MAX-pcWcs.length; if(files.length>room) toast(`Можно до ${PCWC_MAX} фото — взял первые ${Math.max(0,room)}`); files=files.slice(0,Math.max(0,room)); if(!files.length) return;
+  const fresh=[]; for(const f of files){ try{ fresh.push({src:await dzReadImage(f,2400),out:null}); }catch(e){ toast('Не удалось открыть одно из фото'); } }
+  if(!fresh.length) return; pcWcs=pcWcs.concat(fresh); pcWc=fresh[0]; await pcWcRun(fresh); }
+async function pcWcRun(list){ list=list||pcWcs; if(!list.length) return; const s=pcS(); let i=0;
+  for(const it of list){ i++; toast(list.length>1?`Рисую акварель ${i} из ${list.length}…`:'Рисую акварель…'); await new Promise(r=>setTimeout(r,30)); try{ it.out=await wcPaint(it.src,s.wcPreset); }catch(_){ } pcWcRedraw(); }
+  toast(list.length>1?`Готово: ${list.length} акварелей`:'Акварель готова'); }
+/* AI over every loaded photo: one variant each, two requests at a time */
+async function pcWcAI(fn,label){ const list=pcWcs.length?pcWcs:[pcWc]; if(list.length===1){ const it=list[0]; it.busy=1; pcWcRedraw(); try{ const out=await fn(it.src,{}); if(out){ it.out=out; toast('Готово'); } }catch(err){ toast(err.message||'Не получилось'); } it.busy=0; pcWcRedraw(); return; }
+  const price=KS.neuro.price?KS.neuro.price():.04, sum=(price*list.length).toFixed(2).replace('.',',');
+  if(!confirm(`${label} для всех ${list.length} фото?\nЭто ${list.length} запросов к ИИ, примерно $${sum}.`)) return;
+  let done=0, fail=0, next=0; list.forEach(it=>it.busy=1); pcWcRedraw(); toast(`Рисую ${list.length} картин…`);
+  const worker=async()=>{ while(next<list.length){ const it=list[next++]; try{ const out=await fn(it.src,{variants:1,noPick:true}); if(out) it.out=out; done++; }catch(err){ fail++; if(fail===1) toast(err.message||'Одно фото не получилось'); } it.busy=0; pcWcRedraw(); } };
+  await Promise.all([worker(),worker()]); toast(fail?`Готово ${done} из ${list.length}, не получилось: ${fail}`:`Готово: все ${done} картин`); }
 function pcWcCard(){ if(!pcWc||!pcWc.out) return; const s=pcS(), v=s.ori==='v'; const W=v?102:152, H=v?152:102;
   const T={id:'pc-wc-'+Date.now().toString(36),kind:v?'pcV':'pcH',name:'Моя акварель',tags:['Акварель'],w:W,h:H,dark:false,pal:{bg:'#ffffff',ink:'#3b332e',acc:'#9a6b5a',acc2:'#7d9580',soft:'#f4ede6'},fonts:{h:'Cormorant Garamond',b:'Lora'},bg:'white',bgBack:'white',
     front:v?[{t:'img',x:8,y:8,w:86,h:110,src:pcWc.out},{t:'text',x:8,y:123,w:86,h:14,text:'С любовью',font:'h',size:20,color:'ink',align:'center',va:'m',italic:true},{t:'thlogo',x:46,y:138,w:10,h:10,v:'ring',color:'acc'}]
@@ -98,12 +114,17 @@ document.addEventListener('click',e=>{ let b;
   if((b=e.target.closest('[data-pctpl]'))){ const T=DZT.concat(st.myTpl||[]).find(t=>t.id===b.dataset.pctpl); if(T) pcApply(T); return; }
   if((b=e.target.closest('[data-pcori]'))){ pcS().ori=b.dataset.pcori; save(); pcScreen(pcScr()); return; }
   if((b=e.target.closest('[data-pccat]'))){ pcS().cat=b.dataset.pccat; save(); pcScreen(pcScr()); return; }
-  if((b=e.target.closest('[data-pcwcp]'))){ pcS().wcPreset=b.dataset.pcwcp; save(); if(pcWc) pcWcRun(); else pcPanel(b.closest('.kssub')); return; }
-  if((b=e.target.closest('#pcWcDrop'))){ KS.pick('image/*').then(f=>{ if(f[0]) pcWcLoad(f[0]); }); return; }
-  if((b=e.target.closest('[data-pcnref]'))&&!e.target.closest('[data-nrefdel]')){ if(!pcWc||!pcWc.src){ toast('Сначала загрузите фото'); return; } const box=b.closest('.kssub'); b.classList.add('busy'); toast('Рисую в стиле образца…');
-    KS.neuro.stylizeRef(pcWc.src,b.dataset.pcnref).then(out=>{ if(out){ pcWc.out=out; toast('Готово'); } }).catch(err=>toast(err.message||'Не получилось')).finally(()=>{ if(box) pcPanel(box); }); return; }
-  if((b=e.target.closest('[data-pcneuro]'))){ const k=b.dataset.pcneuro; if(k==='set'){ KS.neuro.settings(); return; } if(!pcWc||!pcWc.src){ toast('Сначала загрузите фото'); return; } const box=b.closest('.kssub'); b.disabled=true; b.textContent='Рисую…';
-    KS.neuro.stylize(pcWc.src,k).then(out=>{ if(out){ pcWc.out=out; toast('Готово'); } }).catch(err=>toast(err.message||'Не получилось')).finally(()=>{ if(box) pcPanel(box); }); return; }
+  if((b=e.target.closest('[data-pcwcp]'))){ pcS().wcPreset=b.dataset.pcwcp; save(); if(pcWcs.length) pcWcRun(); else pcPanel(b.closest('.kssub')); return; }
+  if((b=e.target.closest('[data-pcwcdel]'))){ const i=+b.dataset.pcwcdel, it=pcWcs[i]; pcWcs.splice(i,1); if(pcWc===it) pcWc=pcWcs[Math.min(i,pcWcs.length-1)]||null; pcWcRedraw(); return; }
+  if((b=e.target.closest('[data-pcwci]'))){ pcWc=pcWcs[+b.dataset.pcwci]||pcWc; pcWcRedraw(); return; }
+  if(e.target.closest('[data-pcwcadd]')){ KS.pick('image/*',true).then(f=>pcWcLoad(f,true)); return; }
+  if(e.target.closest('#pcWcClear')){ pcWcs=[]; pcWc=null; pcWcRedraw(); return; }
+  if(e.target.closest('#pcWcSaveAll')){ (async()=>{ let n=0; for(const it of pcWcs){ if(!it.out) continue; n++; const bl=await (await fetch(it.out)).blob(); KS.download(`akvarel-${n}.jpg`,bl); await new Promise(r=>setTimeout(r,400)); } })(); return; }
+  if((b=e.target.closest('#pcWcDrop'))){ KS.pick('image/*',true).then(f=>pcWcLoad(f)); return; }
+  if((b=e.target.closest('[data-pcnref]'))&&!e.target.closest('[data-nrefdel]')){ if(!pcWc||!pcWc.src){ toast('Сначала загрузите фото'); return; } const ref=b.dataset.pcnref; b.classList.add('busy'); toast('Рисую в стиле образца…');
+    pcWcAI((src,o)=>KS.neuro.stylizeRef(src,ref,o),'Нарисовать как на образце'); return; }
+  if((b=e.target.closest('[data-pcneuro]'))){ const k=b.dataset.pcneuro; if(k==='set'){ KS.neuro.settings(); return; } if(!pcWc||!pcWc.src){ toast('Сначала загрузите фото'); return; } const nm=b.textContent; b.disabled=true; b.textContent='Рисую…';
+    pcWcAI((src,o)=>KS.neuro.stylize(src,k,'',o),'Нейро-стиль «'+nm+'»').finally(()=>pcWcRedraw()); return; }
   if(e.target.closest('#pcWcCard')){ pcWcCard(); return; }
   if(e.target.closest('#pcWcSlot')){ if(pcWc&&pcWc.out) KS.addImage(pcWc.out,{mode:'auto'}); return; }
   if(e.target.closest('#pcWcSave')){ if(pcWc&&pcWc.out) fetch(pcWc.out).then(r=>r.blob()).then(bl=>KS.download('akvarel.jpg',bl)); return; }
@@ -120,5 +141,5 @@ document.addEventListener('input',e=>{ const t=e.target;
   if(t.id==='pcCopies'){ pcS().copies=Math.max(1,+t.value||1); save(); } });
 function pcQ(){}
 document.addEventListener('change',e=>{ if(e.target.id==='pcPaper'){ pcS().paper=e.target.value; save(); } });
-['dragover','drop'].forEach(t=>document.addEventListener(t,e=>{ const d=e.target.closest&&e.target.closest('#pcWcDrop'); if(!d) return; e.preventDefault(); e.stopPropagation(); if(t==='drop'){ const f=[...(e.dataTransfer.files||[])].find(f=>/^image\//.test(f.type)); if(f) pcWcLoad(f); } },true));
+['dragover','drop'].forEach(t=>document.addEventListener(t,e=>{ const d=e.target.closest&&e.target.closest('#pcWcDrop'); if(!d) return; e.preventDefault(); e.stopPropagation(); if(t==='drop'){ pcWcLoad([...(e.dataTransfer.files||[])]); } },true));
 KS.postcard={print:pcPrint,white:pcWhite,paint:wcPaint,pages:pcPages,apply:pcApply};

@@ -18,3 +18,12 @@
 .pc-margin{position:absolute;inset:5mm;border:1px dashed rgb(220 60 60 / .55);pointer-events:none;z-index:50}
 .pc-margin span{position:absolute;left:2mm;top:-4.2mm;font:600 9px/1 system-ui,sans-serif;color:rgb(200 50 50 / .8);background:rgb(255 255 255 / .8);padding:1px 4px;border-radius:4px;white-space:nowrap}
 .printing .pc-margin,#printRoot .pc-margin{display:none!important}
+.pc-wcstrip{display:flex;flex-wrap:wrap;gap:6px}
+.pc-wci{position:relative;width:58px;height:58px;padding:0;border-radius:10px;overflow:hidden;border:1px solid var(--edge2);background:rgb(255 255 255 / .2);cursor:pointer}
+.pc-wci img{width:100%;height:100%;object-fit:cover;display:block}
+.pc-wci.on{outline:2px solid var(--accent);outline-offset:1px}
+.pc-wci i{position:absolute;left:0;right:0;bottom:0;font-style:normal;font-size:9px;background:rgb(0 0 0 / .45);color:#fff;text-align:center}
+.pc-wci span{position:absolute;top:1px;right:2px;width:16px;height:16px;line-height:15px;border-radius:50%;background:rgb(0 0 0 / .55);color:#fff;font-size:12px;text-align:center}
+.pc-wci.busy::after{content:'';position:absolute;inset:0;background:rgb(255 255 255 / .55) linear-gradient(90deg,transparent,rgb(255 255 255 / .8),transparent) 0 0/200% 100%;animation:pcwcsh 1.2s linear infinite}
+@keyframes pcwcsh{to{background-position:-200% 0}}
+.pc-wci.add{display:grid;place-items:center;font-size:24px;color:var(--muted);border-style:dashed}
