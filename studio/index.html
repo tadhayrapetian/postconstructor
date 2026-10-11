@@ -2,21 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#2d8cff">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Конверт Студия">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="application-name" content="Конверт Студия">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<style id="appShell">
-.app{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
-@media (display-mode: standalone){ html,body{overscroll-behavior:none} }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Конверт Студия</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10252,9 +10238,10 @@ async function nPersist(){ try{ if(navigator.storage&&navigator.storage.persist&
 async function nBackup(){ try{ const g=k=>localStorage.getItem(k)||''; const v={k:g(NK),m:g(NM),fk:g('ks-fal-key'),fe:g('ks-fal-edit'),fg:g('ks-fal-gen'),p:g('ks-ai-provider')}; if(v.k||v.fk) await KS.idb.set('gemini',v); else await KS.idb.del('gemini'); }catch(_){ } }
 (async()=>{ try{ const v=await KS.idb.get('gemini'); let ch=0; if(v){ [['ks-gemini-key','k'],['ks-gemini-model','m'],['ks-fal-key','fk'],['ks-fal-edit','fe'],['ks-fal-gen','fg'],['ks-ai-provider','p']].forEach(([a,b])=>{ if(!localStorage.getItem(a)&&v[b]){ localStorage.setItem(a,v[b]); ch=1; } }); } if(ch) KS.emit('neuroKey'); else nBackup(); }catch(_){ } })();
 /* owner's choice: Gemini 2.5 Flash Image as the working model (switched once) */
-try{ if(!localStorage.getItem('ks-ai-m2')){ localStorage.setItem('ks-gemini-model','gemini-2.5-flash-image'); localStorage.setItem('ks-ai-provider','gemini'); localStorage.setItem('ks-ai-m2','1'); } }catch(_){ }
+try{ if(!localStorage.getItem('ks-ai-m3')){ localStorage.setItem('ks-gemini-model','gemini-3-pro-image-preview'); localStorage.setItem('ks-ai-provider','gemini'); localStorage.setItem('ks-ai-m2','1'); localStorage.setItem('ks-ai-m3','1'); } }catch(_){ }
 const nKey=()=>{ try{ return localStorage.getItem(NK)||''; }catch(_){ return ''; } };
-const nModel=()=>{ try{ return localStorage.getItem(NM)||NMODELS[0][0]; }catch(_){ return NMODELS[0][0]; } };
+const NDEF='gemini-3-pro-image-preview';
+const nModel=()=>{ try{ return localStorage.getItem(NM)||NDEF; }catch(_){ return NDEF; } };
 async function nSmall(src,max){ const im=await new Promise((r,j)=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=j; i.src=src; }); const k=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height); return c.toDataURL('image/jpeg',.9); }
 function nErr(status,body){ const m=(body&&body.error&&body.error.message)||''; if(status===400&&/API key/i.test(m)) return 'Ключ Gemini не подошёл. Проверьте его в настройках «Нейро-стиля».';
   if(status===403) return 'Google не разрешил запрос. Проверьте, что у проекта ключа включена оплата (Billing).'; if(status===404) return 'Модель «'+nModel()+'» не найдена. Выберите другую в настройках.';
@@ -10369,7 +10356,7 @@ function nSettings(){ const k=nKey(), m=nModel(), known=NMODELS.some(x=>x[0]===m
 nm.el.addEventListener('change',e=>{ if(e.target.id==='nModel'){ $('#nOwnBox').hidden=e.target.value!=='__own'; $('#nProWarn').hidden=!/pro/.test(e.target.value); } });
 nm.el.addEventListener('click',async e=>{ const t=e.target; const pb=t.closest('[data-nprov]');
   if(pb){ try{ localStorage.setItem(NP,pb.dataset.nprov); }catch(_){} nm.el.querySelectorAll('[data-nprov]').forEach(x=>x.classList.toggle('on',x===pb)); $('#nGem').hidden=pb.dataset.nprov==='fal'; $('#nFal').hidden=pb.dataset.nprov!=='fal'; return; }
-  const store=()=>{ try{ localStorage.setItem(NK,$('#nKey').value.trim()); const v=$('#nModel').value; localStorage.setItem(NM,v==='__own'?($('#nOwn').value.trim()||NMODELS[0][0]):v); localStorage.setItem(FK,$('#nFKey').value.trim()); localStorage.setItem(FME,$('#nFEdit').value); localStorage.setItem(FMG,$('#nFGen').value); }catch(_){ toast('Браузер не дал сохранить ключ'); } };
+  const store=()=>{ try{ localStorage.setItem(NK,$('#nKey').value.trim()); const v=$('#nModel').value; localStorage.setItem(NM,v==='__own'?($('#nOwn').value.trim()||NDEF):v); localStorage.setItem(FK,$('#nFKey').value.trim()); localStorage.setItem(FME,$('#nFEdit').value); localStorage.setItem(FMG,$('#nFGen').value); }catch(_){ toast('Браузер не дал сохранить ключ'); } };
   if(t.id==='nSave'){ store(); await nBackup(); nPersist(); nm.close(); toast(nHas()?(prov()==='fal'?'fal.ai подключён — ':'Gemini подключён — ')+nSpendLine():'Ключ пустой'); KS.emit('neuroKey'); if(dzSel) renderDzInsp(); }
   if(t.id==='nDel'){ try{ localStorage.removeItem(ls(NP,'gemini')==='fal'?FK:NK); }catch(_){} await nBackup(); nSettings(); toast('Ключ удалён с этого устройства'); }
   if(t.id==='nCheck'){ store(); const s=$('#nStat'); s.textContent='Проверяю…';
@@ -11901,21 +11888,6 @@ if((st.ui.lang||'ru')!=='ru') setTimeout(translateUI,300);
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,100));else setTimeout(init,100);
 })();
-</script>
-<script>
-/* installable app: offline cache and update notice */
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(reg => {
-      reg.addEventListener('updatefound', () => {
-        const w = reg.installing; if (!w) return;
-        w.addEventListener('statechange', () => {
-          if (w.state === 'activated' && navigator.serviceWorker.controller && typeof toast === 'function') toast('Приложение обновлено. Новая версия откроется при следующем запуске.');
-        });
-      });
-    }).catch(() => {});
-  });
-}
 </script>
 </body>
 </html>
