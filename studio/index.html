@@ -10074,7 +10074,7 @@ function pcThumbs(scr){ if(pcObs) pcObs.disconnect(); pcObs=new IntersectionObse
   scr.querySelectorAll('[data-pcth]').forEach(el=>pcObs.observe(el)); }
 function pcPanel(box){ setTimeout(()=>{ const slot=box.querySelector('.pc-nref'); if(slot&&KS.neuro&&KS.neuro.hasKey()) KS.neuro.refRow('pcnref').then(h=>{ slot.innerHTML=h; }); },0); const s=pcS(), lg=s.logo;
   box.innerHTML=`<div class="card"><div class="hd">Поиск</div><input type="search" id="pcQ" placeholder="Роза, Ереван, свадьба…" value="${esc(s.q||'')}"></div>
-  <div class="card pc-wc"><div class="hd">Акварель из фото</div><p class="hint">Загрузите фото — программа превратит его в акварельный рисунок с белыми краями бумаги.</p>
+  <div class="card pc-wc"><div class="hd">Акварель из фото</div><p class="hint">Загрузите фото — получится картина ровно 10 × 15 (по ориентации фото), видна целиком, с белыми краями под принтер.</p>
     <div class="ks-drop" id="pcWcDrop">${pcWc&&(pcWc.out||pcWc.src)?`<img src="${pcWc.out||pcWc.src}" alt="">`:'Перетащите фото сюда или нажмите — можно сразу несколько (до 10)'}</div>
     ${pcWcs.length?`<div class="pc-wcstrip">${pcWcs.map((it,i)=>`<button class="pc-wci${it===pcWc?' on':''}${it.busy?' busy':''}" data-pcwci="${i}" title="Фото ${i+1}"><img src="${it.out||it.src}" alt="">${it.out?'':'<i>фото</i>'}<span data-pcwcdel="${i}" title="Убрать">×</span></button>`).join('')}${pcWcs.length<PCWC_MAX?'<button class="pc-wci add" data-pcwcadd="1" title="Добавить фото">+</button>':''}</div>${pcWcs.length>1?`<p class="hint">Загружено фото: ${pcWcs.length}. Кнопки стилей обработают <b>все сразу</b>, каждое в одном варианте.</p>`:''}`:''}
     <div class="hd2">Быстрая акварель · бесплатно, без ИИ</div><div class="flexw">${Object.entries(WC_PRESETS).map(([k,p])=>`<button class="btn sm${s.wcPreset===k?' primary':''}" data-pcwcp="${k}">${p.n}</button>`).join('')}</div>
@@ -10113,7 +10113,7 @@ function pcWhite(){ if(!isPC()) return; const d=st.dz, W=d.w, H=d.h, m=6, white=
     els.forEach(e=>{ if(e.t==='rect'&&e.x===m&&e.y===m) return; const x2=Math.min(W-m,e.x+e.w), y2=Math.min(H-m,e.y+e.h); e.x=Math.max(m,e.x); e.y=Math.max(m,e.y); e.w=Math.max(2,x2-e.x); e.h=Math.max(2,y2-e.y); }); });
   update(); toast('Края открытки белые: 6 мм с каждой стороны'); }
 { const _pc=dzPrinterChecks; dzPrinterChecks=function(add){ const r=_pc.apply(this,arguments); try{ if(dzOn()&&isPC()){ const d=st.dz, W=d.w, H=d.h; let n=0;
-    ['front','back'].forEach(sd=>dzEls(sd).forEach(e=>{ if(e.hide) return; if(e.x<5||e.y<5||e.x+e.w>W-5||e.y+e.h>H-5) n++; }));
+    ['front','back'].forEach(sd=>dzEls(sd).forEach(e=>{ if(e.hide||e.pcFull) return; /* full-sheet painting already carries its white paper margin */ if(e.x<5||e.y<5||e.x+e.w>W-5||e.y+e.h>H-5) n++; }));
     const bg=dzPal(d.pal).bg; const colored=d.bg!=='white'&&String(d.bg==='bg'?bg:d.bg).toLowerCase()!=='#ffffff';
     if(n||colored) add('warn',`Открытка заходит в край 5 мм${n?` (элементов: ${n})`:''}${colored?', фон цветной до края':''}. GX4040 эти 5 мм не печатает — край выйдет белым неровно. Откройте «Открытки» → «Белые поля 6 мм».`);
     else add('ok','✓Края открытки белые — поле принтера не будет видно'); } }catch(_){ } return r; }; }
@@ -10124,22 +10124,28 @@ KS.on('preview',()=>{ if(!dzOn()||!isPC()) return; const root=$('#inner .dz.live
 const pcWcRedraw=()=>{ const b=$('[data-panel="ks-postcard"] .kssub'); if(b) pcPanel(b); };
 async function pcWcLoad(files,add){ files=[].concat(files||[]).filter(f=>f&&/^image\//.test(f.type||'image/')); if(!files.length) return;
   if(!add) pcWcs=[]; const room=PCWC_MAX-pcWcs.length; if(files.length>room) toast(`Можно до ${PCWC_MAX} фото — взял первые ${Math.max(0,room)}`); files=files.slice(0,Math.max(0,room)); if(!files.length) return;
-  const fresh=[]; for(const f of files){ try{ fresh.push({src:await dzReadImage(f,2400),out:null}); }catch(e){ toast('Не удалось открыть одно из фото'); } }
+  const fresh=[]; for(const f of files){ try{ { const src=await dzReadImage(f,2400), d=await KS.imgSize(src); fresh.push({src,out:null,v:d.h>d.w}); } }catch(e){ toast('Не удалось открыть одно из фото'); } }
   if(!fresh.length) return; pcWcs=pcWcs.concat(fresh); pcWc=fresh[0]; await pcWcRun(fresh); }
 async function pcWcRun(list){ list=list||pcWcs; if(!list.length) return; const s=pcS(); let i=0;
-  for(const it of list){ i++; toast(list.length>1?`Рисую акварель ${i} из ${list.length}…`:'Рисую акварель…'); await new Promise(r=>setTimeout(r,30)); try{ it.out=await wcPaint(it.src,s.wcPreset); }catch(_){ } pcWcRedraw(); }
+  for(const it of list){ i++; toast(list.length>1?`Рисую акварель ${i} из ${list.length}…`:'Рисую акварель…'); await new Promise(r=>setTimeout(r,30)); try{ it.out=await pcFit(await wcPaint(it.src,s.wcPreset),it.v,true); }catch(_){ } pcWcRedraw(); }
   toast(list.length>1?`Готово: ${list.length} акварелей`:'Акварель готова'); }
+/* every result becomes an exact 10×15 sheet (1800×1200 px = 300 dpi), the picture is never cropped:
+   it is fitted whole; without painted paper edges it keeps 6 mm white so the GX4040 border cuts nothing */
+const pcAsp=it=>({aspect:it&&it.v?'2:3':'3:2'});
+async function pcFit(src,v,paper){ const W=v?1200:1800, H=v?1800:1200; const im=await new Promise((r,j)=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=j; i.src=src; });
+  const edges=paper||!!(st.ks&&st.ks.neuro&&st.ks.neuro.edges!==false), m=edges?0:Math.round(6*W/(v?102:152));
+  const k=Math.min((W-2*m)/im.naturalWidth,(H-2*m)/im.naturalHeight), dw=im.naturalWidth*k, dh=im.naturalHeight*k;
+  const c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.imageSmoothingQuality='high'; g.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh); return c.toDataURL('image/jpeg',.93); }
 /* AI over every loaded photo: one variant each, two requests at a time */
-async function pcWcAI(fn,label){ const list=pcWcs.length?pcWcs:[pcWc]; if(list.length===1){ const it=list[0]; it.busy=1; pcWcRedraw(); try{ const out=await fn(it.src,{}); if(out){ it.out=out; toast('Готово'); } }catch(err){ toast(err.message||'Не получилось'); } it.busy=0; pcWcRedraw(); return; }
+async function pcWcAI(fn,label){ const list=pcWcs.length?pcWcs:[pcWc]; if(list.length===1){ const it=list[0]; it.busy=1; pcWcRedraw(); try{ const out=await fn(it.src,pcAsp(it)); if(out){ it.out=await pcFit(out,it.v); toast('Готово'); } }catch(err){ toast(err.message||'Не получилось'); } it.busy=0; pcWcRedraw(); return; }
   const price=KS.neuro.price?KS.neuro.price():.04, sum=(price*list.length).toFixed(2).replace('.',',');
   if(!confirm(`${label} для всех ${list.length} фото?\nЭто ${list.length} запросов к ИИ, примерно $${sum}.`)) return;
   let done=0, fail=0, next=0; list.forEach(it=>it.busy=1); pcWcRedraw(); toast(`Рисую ${list.length} картин…`);
-  const worker=async()=>{ while(next<list.length){ const it=list[next++]; try{ const out=await fn(it.src,{variants:1,noPick:true}); if(out) it.out=out; done++; }catch(err){ fail++; if(fail===1) toast(err.message||'Одно фото не получилось'); } it.busy=0; pcWcRedraw(); } };
+  const worker=async()=>{ while(next<list.length){ const it=list[next++]; try{ const out=await fn(it.src,Object.assign(pcAsp(it),{variants:1,noPick:true})); if(out) it.out=await pcFit(out,it.v); done++; }catch(err){ fail++; if(fail===1) toast(err.message||'Одно фото не получилось'); } it.busy=0; pcWcRedraw(); } };
   await Promise.all([worker(),worker()]); toast(fail?`Готово ${done} из ${list.length}, не получилось: ${fail}`:`Готово: все ${done} картин`); }
-function pcWcCard(){ if(!pcWc||!pcWc.out) return; const s=pcS(), v=s.ori==='v'; const W=v?102:152, H=v?152:102;
+function pcWcCard(){ if(!pcWc||!pcWc.out) return; const v=!!pcWc.v; const W=v?102:152, H=v?152:102;
   const T={id:'pc-wc-'+Date.now().toString(36),kind:v?'pcV':'pcH',name:'Моя акварель',tags:['Акварель'],w:W,h:H,dark:false,pal:{bg:'#ffffff',ink:'#3b332e',acc:'#9a6b5a',acc2:'#7d9580',soft:'#f4ede6'},fonts:{h:'Cormorant Garamond',b:'Lora'},bg:'white',bgBack:'white',
-    front:v?[{t:'img',x:8,y:8,w:86,h:110,src:pcWc.out},{t:'text',x:8,y:123,w:86,h:14,text:'С любовью',font:'h',size:20,color:'ink',align:'center',va:'m',italic:true},{t:'thlogo',x:46,y:138,w:10,h:10,v:'ring',color:'acc'}]
-      :[{t:'img',x:8,y:8,w:98,h:86,src:pcWc.out},{t:'text',x:110,y:30,w:34,h:30,text:'С любовью',font:'h',size:22,color:'ink',align:'center',va:'m',italic:true},{t:'thlogo',x:122,y:78,w:10,h:10,v:'ring',color:'acc'}],
+    front:[{t:'img',x:0,y:0,w:W,h:H,src:pcWc.out,fit:'contain',pcFull:1}],
     back:pcBack(v)};
   pcApply(T); }
 function pcBack(v){ const L=pcS().logo; return v?[{t:'text',x:10,y:12,w:82,h:10,text:'Открытка',font:'h',size:16,color:'ink',italic:true},{t:'line',x:10,y:76,w:82,h:1,stroke:'ink/30',sw:.3},{t:'rect',x:72,y:84,w:20,h:24,fill:'none',stroke:'ink/40',sw:.3,dash:true},
@@ -10276,18 +10282,24 @@ async function nSmall(src,max){ const im=await new Promise((r,j)=>{ const i=new 
 function nErr(status,body){ const m=(body&&body.error&&body.error.message)||''; if(status===400&&/API key/i.test(m)) return 'Ключ Gemini не подошёл. Проверьте его в настройках «Нейро-стиля».';
   if(status===403) return 'Google не разрешил запрос. Проверьте, что у проекта ключа включена оплата (Billing).'; if(status===404) return 'Модель «'+nModel()+'» не найдена. Выберите другую в настройках.';
   if(status===429) return 'Лимит Gemini исчерпан. Подождите минуту или включите оплату у проекта ключа.'; if(status>=500) return 'Сервер Gemini занят. Попробуйте ещё раз через минуту.'; return 'Gemini ответил ошибкой '+status+(m?': '+m.slice(0,140):''); }
+/* o.aspect '3:2'|'2:3': letterbox the photo onto that ratio on white, so the model sees the whole scene and nothing is cropped */
+async function nFrame(src,aspect,max){ const [aw,ah]=aspect.split(':').map(Number), R=aw/ah; const im=await new Promise((r,j)=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=j; i.src=src; });
+  const iw=im.naturalWidth, ih=im.naturalHeight, r=iw/ih; if(Math.abs(Math.log(r/R))<.03) return nSmall(src,max);
+  let W=r>R?iw:ih*R, H=W/R; const k=Math.min(1,max/Math.max(W,H)); W=Math.round(W*k); H=Math.round(H*k); const c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H);
+  const dw=iw*k, dh=ih*k; g.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh); return c.toDataURL('image/jpeg',.9); }
+const nWhole=o=>o.aspect?` The final image must have exactly a ${o.aspect} format (a ${o.aspect==='2:3'?'vertical':'horizontal'} 10×15 postcard). Show the WHOLE scene from the photo: do not crop, cut off or zoom in on anything — every building, person and object that is visible in the photo must stay fully visible inside the image.${o.edges?' Any empty white area around the photo is simply white paper.':' If the photo has empty white bands, continue the scene naturally into them so the painting fills the whole format.'}`:'';
 function nRatio(w,h){ const R=[['1:1',1],['3:2',1.5],['2:3',2/3],['4:3',4/3],['3:4',.75],['5:4',1.25],['4:5',.8],['16:9',16/9],['9:16',9/16]], r=w/h; return R.reduce((a,b)=>Math.abs(Math.log(b[1]/r))<Math.abs(Math.log(a[1]/r))?b:a)[0]; }
 async function nCall(key,model,body){ let r; try{ r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':key},body:JSON.stringify(body)}); }
   catch(e){ throw new Error('Нет связи с Gemini. Проверьте интернет.'); } let j=null; try{ j=await r.json(); }catch(_){} return {r,j}; }
 function nPrompt(styleId,custom,o){
   const S=NSTYLES.find(s=>s[0]===styleId), what=custom&&custom.trim()?custom.trim():(S||NSTYLES[0])[2], pow=(NPOW.find(p=>p[0]===o.pow)||NPOW[1])[2];
-  const prompt=`Use this photo only as a reference and create a hand-made artwork of the same scene: ${what}. ${pow} The result must look like a real physical artwork scanned from paper or canvas — absolutely no photographic noise, sharpness or texture, no HDR look, no photo filter look. Keep the same scene, main shapes, framing and aspect ratio; people keep their likeness and expressions. ${o.edges?'Leave a generous natural margin of clean white paper on all four sides: the painting ends with irregular hand-painted edges inside the sheet and nothing touches the borders. ':''}Do not add any text, letters, signatures, logos, frames or watermarks. Rich, detailed, print quality.`;
+  const prompt=`Use this photo only as a reference and create a hand-made artwork of the same scene: ${what}. ${pow} The result must look like a real physical artwork scanned from paper or canvas — absolutely no photographic noise, sharpness or texture, no HDR look, no photo filter look. Keep the same scene, main shapes, framing and aspect ratio; people keep their likeness and expressions. ${o.edges?'Leave a generous natural margin of clean white paper on all four sides: the painting ends with irregular hand-painted edges inside the sheet and nothing touches the borders. ':''}Do not add any text, letters, signatures, logos, frames or watermarks. Rich, detailed, print quality.${nWhole(o)}`;
   return prompt; }
 async function gOne(src,styleId,custom,o){ const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); }
   const prompt=nPrompt(styleId,custom,o);
-  const img=await nSmall(src,1536), b64=img.split(',')[1], dims=await KS.imgSize(img), model=nModel();
+  const img=o.aspect?await nFrame(src,o.aspect,1536):await nSmall(src,1536), b64=img.split(',')[1], dims=await KS.imgSize(img), model=nModel();
   const base={contents:[{role:'user',parts:[{text:prompt},{inline_data:{mime_type:'image/jpeg',data:b64}}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}};
-  const ic={aspectRatio:nRatio(dims.w||3,dims.h||2)}; if(/pro/i.test(model)) ic.imageSize='2K';
+  const ic={aspectRatio:o.aspect||nRatio(dims.w||3,dims.h||2)}; if(/pro/i.test(model)) ic.imageSize='2K';
   let {r,j}=await nCall(key,model,Object.assign({},base,{generationConfig:Object.assign({},base.generationConfig,{imageConfig:ic})}));
   if(r.status===400&&!/API key/i.test(((j&&j.error&&j.error.message)||''))) ({r,j}=await nCall(key,model,base)); /* older models: no imageConfig */
   if(!r.ok) throw new Error(nErr(r.status,j));
@@ -10337,9 +10349,9 @@ function fErr(status,j){ const m=(j&&(j.detail&&(typeof j.detail==='string'?j.de
 async function fCall(model,body){ const key=fKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ fal.ai'); } let r; try{ r=await fetch('https://fal.run/'+model,{method:'POST',headers:{'Authorization':'Key '+key,'content-type':'application/json'},body:JSON.stringify(body)}); }catch(e){ throw new Error('Нет связи с fal.ai. Проверьте интернет.'); }
   let j=null; try{ j=await r.json(); }catch(_){} if(!r.ok) throw new Error(fErr(r.status,j)); return j||{}; }
 async function fImg(u){ if(!u) throw new Error('fal.ai не вернул картинку'); if(/^data:/.test(u)) return u; const r=await fetch(u); if(!r.ok) throw new Error('Не удалось скачать картинку fal.ai'); const b=await r.blob(); return await new Promise((res,rej)=>{ const f=new FileReader(); f.onload=()=>res(f.result); f.onerror=rej; f.readAsDataURL(b); }); }
-async function fEdit(src,prompt){ const img=await nSmall(src,1536); const j=await fCall(fEditM(),{prompt,image_url:img,num_images:1,output_format:'jpeg',safety_tolerance:'5'}); return fImg(j.images&&j.images[0]&&j.images[0].url); }
+async function fEdit(src,prompt,aspect){ const img=aspect?await nFrame(src,aspect,1536):await nSmall(src,1536); const j=await fCall(fEditM(),Object.assign({prompt,image_url:img,num_images:1,output_format:'jpeg',safety_tolerance:'5'},aspect?{aspect_ratio:aspect}:{})); return fImg(j.images&&j.images[0]&&j.images[0].url); }
 async function fGen(prompt,o){ const n=Math.max(1,Math.min(4,+o.n||1)); const j=await fCall(fGenM(),{prompt,num_images:n,aspect_ratio:o.aspect||'1:1',output_format:'png',image_size:'square_hd'}); const L=(j.images||[]).map(x=>x.url); if(!L.length) throw new Error('fal.ai не вернул картинку'); return Promise.all(L.map(fImg)); }
-async function nOne(src,styleId,custom,o){ const r=prov()==='fal'?await fEdit(src,nPrompt(styleId,custom,o)):await gOne(src,styleId,custom,o); nSpend(1,'edit'); return r; }
+async function nOne(src,styleId,custom,o){ const r=prov()==='fal'?await fEdit(src,nPrompt(styleId,custom,o),o.aspect):await gOne(src,styleId,custom,o); nSpend(1,'edit'); return r; }
 async function nEdit(src,instruction,o){ const r=prov()==='fal'?await fEdit(src,instruction):await gEdit(src,instruction,o); nSpend(1,'edit'); return r; }
 async function nGen(prompt,o){ o=o||{}; const r=prov()==='fal'?await fGen(prompt,o):await gGen(prompt,o); nSpend(r.length,'gen'); return r; }
 
@@ -10349,16 +10361,16 @@ async function nRefs(){ let L=[]; try{ L=(await KS.idb.get('styleRefs'))||[]; }c
 async function nRefAdd(file){ const src=await nSmall(await dzReadImage(file,1600),900); const L=(await KS.idb.get('styleRefs'))||[]; const r={id:KS.uid('r'),name:(file.name||'Образец').replace(/\.[a-z]+$/i,'').slice(0,30),src}; L.unshift(r); await KS.idb.set('styleRefs',L.slice(0,24)); KS.emit('neuroRefs'); return r; }
 async function nRefDel(id){ const L=((await KS.idb.get('styleRefs'))||[]).filter(r=>r.id!==id); await KS.idb.set('styleRefs',L); KS.emit('neuroRefs'); }
 async function gRef(src,refSrc,o){ const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); } const model=nModel();
-  const img=await nSmall(src,1536), ref=await nSmall(refSrc,1024), dims=await KS.imgSize(img), pow=(NPOW.find(p=>p[0]===o.pow)||NPOW[1])[2];
-  const text=`You get two images. IMAGE 1 is a photo. IMAGE 2 is a style reference painting. Repaint IMAGE 1 in exactly the artistic style of IMAGE 2: the same medium and technique, brushwork, level of detail, color palette approach, lighting mood, paper texture and the same kind of edges (if IMAGE 2 fades into white paper with irregular painted edges, do the same). Keep the composition, buildings, landscape, people and their likeness from IMAGE 1. Do NOT copy any objects, mountains or places from IMAGE 2 — only its style. The result must look exactly like a real hand-made painting such as IMAGE 2 and never like a filtered photograph: replace every photographic texture and sharp photo detail with the painting technique of IMAGE 2 (washes, brush strokes, pigment granulation, paper grain). ${pow} No text, letters, signatures or watermarks.`;
+  const img=o.aspect?await nFrame(src,o.aspect,1536):await nSmall(src,1536), ref=await nSmall(refSrc,1024), dims=await KS.imgSize(img), pow=(NPOW.find(p=>p[0]===o.pow)||NPOW[1])[2];
+  const text=`You get two images. IMAGE 1 is a photo. IMAGE 2 is a style reference painting. Repaint IMAGE 1 in exactly the artistic style of IMAGE 2: the same medium and technique, brushwork, level of detail, color palette approach, lighting mood, paper texture and the same kind of edges (if IMAGE 2 fades into white paper with irregular painted edges, do the same). Keep the composition, buildings, landscape, people and their likeness from IMAGE 1. Do NOT copy any objects, mountains or places from IMAGE 2 — only its style. The result must look exactly like a real hand-made painting such as IMAGE 2 and never like a filtered photograph: replace every photographic texture and sharp photo detail with the painting technique of IMAGE 2 (washes, brush strokes, pigment granulation, paper grain). ${pow} No text, letters, signatures or watermarks.${nWhole(o)}`;
   const base={contents:[{role:'user',parts:[{text},{text:'IMAGE 1 (photo):'},{inline_data:{mime_type:'image/jpeg',data:img.split(',')[1]}},{text:'IMAGE 2 (style reference):'},{inline_data:{mime_type:'image/jpeg',data:ref.split(',')[1]}}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}};
-  const ic={aspectRatio:nRatio(dims.w||3,dims.h||2)}; if(/pro/i.test(model)) ic.imageSize='2K';
+  const ic={aspectRatio:o.aspect||nRatio(dims.w||3,dims.h||2)}; if(/pro/i.test(model)) ic.imageSize='2K';
   let {r,j}=await nCall(key,model,Object.assign({},base,{generationConfig:Object.assign({},base.generationConfig,{imageConfig:ic})})); if(r.status===400&&!/API key/i.test(((j&&j.error&&j.error.message)||''))) ({r,j}=await nCall(key,model,base));
   if(!r.ok) throw new Error(nErr(r.status,j)); const parts=((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]; const p=parts.find(x=>x.inlineData||x.inline_data);
   if(!p){ const why=(j&&j.candidates&&j.candidates[0]&&j.candidates[0].finishReason)||''; throw new Error(/SAFETY|PROHIBITED/.test(why)?'Gemini отказался обрабатывать это фото по своим правилам.':'Gemini не вернул картинку. Попробуйте ещё раз.'); }
   const d=p.inlineData||p.inline_data; return `data:${d.mimeType||d.mime_type||'image/png'};base64,${d.data}`; }
 async function nStylizeRef(src,refId,o){ o=Object.assign({},nOpt(),o||{}); const R=(await nRefs()).find(r=>r.id===refId); if(!R) throw new Error('Образец не найден');
-  const one=async()=>{ let out; if(prov()==='fal'){ out=await fEdit(src,nPrompt('wccity','',o)); toast('fal.ai не умеет работать с образцом — нарисовал по описанию «Акварель-скетч». Для точного стиля выберите Gemini.'); } else out=await gRef(src,R.src,o); nSpend(1,'edit'); return out; };
+  const one=async()=>{ let out; if(prov()==='fal'){ out=await fEdit(src,nPrompt('wccity','',o),o.aspect); toast('fal.ai не умеет работать с образцом — нарисовал по описанию «Акварель-скетч». Для точного стиля выберите Gemini.'); } else out=await gRef(src,R.src,o); nSpend(1,'edit'); return out; };
   const n=Math.max(1,Math.min(4,+o.variants||1)); const res=await Promise.allSettled(Array.from({length:n},one)); const ok=res.filter(x=>x.status==='fulfilled').map(x=>x.value); if(!ok.length) throw res[0].reason; return ok.length===1||o.noPick?ok[0]:nPick(src,ok); }
 async function nRefRow(attr){ const L=await nRefs(); return `<div class="nrefs">${L.map(r=>`<button class="nref" data-${attr}="${r.id}" title="${esc(r.name)}"><img src="${r.src}" alt=""><span>${esc(r.name)}</span>${r.id!=='yerevan'?`<i data-nrefdel="${r.id}" title="Удалить образец">✕</i>`:''}</button>`).join('')}<label class="nref nref-add" title="Добавить свою картинку-образец"><input type="file" accept="image/*" data-nrefadd="1" hidden><b>+</b><span>Свой образец</span></label></div>`; }
 document.addEventListener('change',async e=>{ if(!e.target.dataset||!e.target.dataset.nrefadd) return; const f=e.target.files&&e.target.files[0]; e.target.value=''; if(!f) return; try{ await nRefAdd(f); toast('Образец добавлен'); if(dzSel) renderDzInsp(); }catch(_){ toast('Не удалось открыть картинку'); } });
