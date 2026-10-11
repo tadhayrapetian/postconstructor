@@ -1,11 +1,11 @@
 /* ---- watercolor painting from a photo (canvas, no network) ---- */
 const WC_PRESETS={
-  soft:{n:'Нежная',r:5,sat:1.05,light:.18,edge:.28,gran:.16,bleed:3,ink:0,deckle:1},
-  classic:{n:'Классическая',r:6,sat:1.15,light:.1,edge:.42,gran:.26,bleed:4,ink:0,deckle:1},
-  bright:{n:'Яркая',r:5,sat:1.4,light:.06,edge:.38,gran:.2,bleed:3,ink:0,deckle:1},
-  sketch:{n:'Скетч с тушью',r:5,sat:1.1,light:.14,edge:.3,gran:.18,bleed:3,ink:.75,deckle:1},
-  pastel:{n:'Пастель',r:7,sat:.85,light:.32,edge:.2,gran:.12,bleed:5,ink:0,deckle:1},
-  loose:{n:'Свободная',r:9,sat:1.2,light:.12,edge:.5,gran:.3,bleed:7,ink:0,deckle:1}};
+  soft:{n:'Нежная',r:5,sat:1.05,light:.18,edge:.28,gran:.16,bleed:3,ink:0,deckle:0},
+  classic:{n:'Классическая',r:6,sat:1.15,light:.1,edge:.42,gran:.26,bleed:4,ink:0,deckle:0},
+  bright:{n:'Яркая',r:5,sat:1.4,light:.06,edge:.38,gran:.2,bleed:3,ink:0,deckle:0},
+  sketch:{n:'Скетч с тушью',r:5,sat:1.1,light:.14,edge:.3,gran:.18,bleed:3,ink:.75,deckle:0},
+  pastel:{n:'Пастель',r:7,sat:.85,light:.32,edge:.2,gran:.12,bleed:5,ink:0,deckle:0},
+  loose:{n:'Свободная',r:9,sat:1.2,light:.12,edge:.5,gran:.3,bleed:7,ink:0,deckle:0}};
 function wcNoise(w,h,seed,scale){ /* value noise, 3 octaves, 0..1 */ const out=new Float32Array(w*h); let s=seed||7; const rnd=()=>{ s=(Math.imul(s,1664525)+1013904223)>>>0; return s/4294967296; };
   let amp=1, tot=0; for(let o=0;o<3;o++){ const cs=Math.max(2,Math.round(scale/(1<<o))), gw=Math.ceil(w/cs)+2, gh=Math.ceil(h/cs)+2, g=new Float32Array(gw*gh); for(let i=0;i<g.length;i++) g[i]=rnd();
     for(let y=0;y<h;y++){ const gy=y/cs, y0=gy|0, fy=gy-y0, sy=fy*fy*(3-2*fy); for(let x=0;x<w;x++){ const gx=x/cs, x0=gx|0, fx=gx-x0, sx=fx*fx*(3-2*fx), i=y0*gw+x0;

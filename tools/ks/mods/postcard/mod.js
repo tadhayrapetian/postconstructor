@@ -38,12 +38,12 @@ KS.thSVG=thSVG;
 
 /* ---- watercolor painting from a photo (canvas, no network) ---- */
 const WC_PRESETS={
-  soft:{n:'Нежная',r:5,sat:1.05,light:.18,edge:.28,gran:.16,bleed:3,ink:0,deckle:1},
-  classic:{n:'Классическая',r:6,sat:1.15,light:.1,edge:.42,gran:.26,bleed:4,ink:0,deckle:1},
-  bright:{n:'Яркая',r:5,sat:1.4,light:.06,edge:.38,gran:.2,bleed:3,ink:0,deckle:1},
-  sketch:{n:'Скетч с тушью',r:5,sat:1.1,light:.14,edge:.3,gran:.18,bleed:3,ink:.75,deckle:1},
-  pastel:{n:'Пастель',r:7,sat:.85,light:.32,edge:.2,gran:.12,bleed:5,ink:0,deckle:1},
-  loose:{n:'Свободная',r:9,sat:1.2,light:.12,edge:.5,gran:.3,bleed:7,ink:0,deckle:1}};
+  soft:{n:'Нежная',r:5,sat:1.05,light:.18,edge:.28,gran:.16,bleed:3,ink:0,deckle:0},
+  classic:{n:'Классическая',r:6,sat:1.15,light:.1,edge:.42,gran:.26,bleed:4,ink:0,deckle:0},
+  bright:{n:'Яркая',r:5,sat:1.4,light:.06,edge:.38,gran:.2,bleed:3,ink:0,deckle:0},
+  sketch:{n:'Скетч с тушью',r:5,sat:1.1,light:.14,edge:.3,gran:.18,bleed:3,ink:.75,deckle:0},
+  pastel:{n:'Пастель',r:7,sat:.85,light:.32,edge:.2,gran:.12,bleed:5,ink:0,deckle:0},
+  loose:{n:'Свободная',r:9,sat:1.2,light:.12,edge:.5,gran:.3,bleed:7,ink:0,deckle:0}};
 function wcNoise(w,h,seed,scale){ /* value noise, 3 octaves, 0..1 */ const out=new Float32Array(w*h); let s=seed||7; const rnd=()=>{ s=(Math.imul(s,1664525)+1013904223)>>>0; return s/4294967296; };
   let amp=1, tot=0; for(let o=0;o<3;o++){ const cs=Math.max(2,Math.round(scale/(1<<o))), gw=Math.ceil(w/cs)+2, gh=Math.ceil(h/cs)+2, g=new Float32Array(gw*gh); for(let i=0;i<g.length;i++) g[i]=rnd();
     for(let y=0;y<h;y++){ const gy=y/cs, y0=gy|0, fy=gy-y0, sy=fy*fy*(3-2*fy); for(let x=0;x<w;x++){ const gx=x/cs, x0=gx|0, fx=gx-x0, sx=fx*fx*(3-2*fx), i=y0*gw+x0;
@@ -126,7 +126,7 @@ function pcThumbs(scr){ if(pcObs) pcObs.disconnect(); pcObs=new IntersectionObse
   scr.querySelectorAll('[data-pcth]').forEach(el=>pcObs.observe(el)); }
 function pcPanel(box){ setTimeout(()=>{ const slot=box.querySelector('.pc-nref'); if(slot&&KS.neuro&&KS.neuro.hasKey()) KS.neuro.refRow('pcnref').then(h=>{ slot.innerHTML=h; }); },0); const s=pcS(), lg=s.logo;
   box.innerHTML=`<div class="card"><div class="hd">Поиск</div><input type="search" id="pcQ" placeholder="Роза, Ереван, свадьба…" value="${esc(s.q||'')}"></div>
-  <div class="card pc-wc"><div class="hd">Акварель из фото</div><p class="hint">Загрузите фото — получится картина ровно 10 × 15 (по ориентации фото), видна целиком, с белыми краями под принтер.</p>
+  <div class="card pc-wc"><div class="hd">Акварель из фото</div><p class="hint">Загрузите фото — получится картина ровно 10 × 15 (по ориентации фото), видна целиком, без белых полей.</p>
     <div class="ks-drop" id="pcWcDrop">${pcWc&&(pcWc.out||pcWc.src)?`<img src="${pcWc.out||pcWc.src}" alt="">`:'Перетащите фото сюда или нажмите — можно сразу несколько (до 10)'}</div>
     ${pcWcs.length?`<div class="pc-wcstrip">${pcWcs.map((it,i)=>`<button class="pc-wci${it===pcWc?' on':''}${it.busy?' busy':''}" data-pcwci="${i}" title="Фото ${i+1}"><img src="${it.out||it.src}" alt="">${it.out?'':'<i>фото</i>'}<span data-pcwcdel="${i}" title="Убрать">×</span></button>`).join('')}${pcWcs.length<PCWC_MAX?'<button class="pc-wci add" data-pcwcadd="1" title="Добавить фото">+</button>':''}</div>${pcWcs.length>1?`<p class="hint">Загружено фото: ${pcWcs.length}. Кнопки стилей обработают <b>все сразу</b>, каждое в одном варианте.</p>`:''}`:''}
     <div class="hd2">Быстрая акварель · бесплатно, без ИИ</div><div class="flexw">${Object.entries(WC_PRESETS).map(([k,p])=>`<button class="btn sm${s.wcPreset===k?' primary':''}" data-pcwcp="${k}">${p.n}</button>`).join('')}</div>
@@ -165,7 +165,7 @@ function pcWhite(){ if(!isPC()) return; const d=st.dz, W=d.w, H=d.h, m=6, white=
     els.forEach(e=>{ if(e.t==='rect'&&e.x===m&&e.y===m) return; const x2=Math.min(W-m,e.x+e.w), y2=Math.min(H-m,e.y+e.h); e.x=Math.max(m,e.x); e.y=Math.max(m,e.y); e.w=Math.max(2,x2-e.x); e.h=Math.max(2,y2-e.y); }); });
   update(); toast('Края открытки белые: 6 мм с каждой стороны'); }
 { const _pc=dzPrinterChecks; dzPrinterChecks=function(add){ const r=_pc.apply(this,arguments); try{ if(dzOn()&&isPC()){ const d=st.dz, W=d.w, H=d.h; let n=0;
-    ['front','back'].forEach(sd=>dzEls(sd).forEach(e=>{ if(e.hide||e.pcFull) return; /* full-sheet painting already carries its white paper margin */ if(e.x<5||e.y<5||e.x+e.w>W-5||e.y+e.h>H-5) n++; }));
+    ['front','back'].forEach(sd=>dzEls(sd).forEach(e=>{ if(e.hide||e.pcFull) return; /* full-sheet painting is meant to go edge to edge */ if(e.x<5||e.y<5||e.x+e.w>W-5||e.y+e.h>H-5) n++; }));
     const bg=dzPal(d.pal).bg; const colored=d.bg!=='white'&&String(d.bg==='bg'?bg:d.bg).toLowerCase()!=='#ffffff';
     if(n||colored) add('warn',`Открытка заходит в край 5 мм${n?` (элементов: ${n})`:''}${colored?', фон цветной до края':''}. GX4040 эти 5 мм не печатает — край выйдет белым неровно. Откройте «Открытки» → «Белые поля 6 мм».`);
     else add('ok','✓Края открытки белые — поле принтера не будет видно'); } }catch(_){ } return r; }; }
@@ -179,14 +179,13 @@ async function pcWcLoad(files,add){ files=[].concat(files||[]).filter(f=>f&&/^im
   const fresh=[]; for(const f of files){ try{ { const src=await dzReadImage(f,2400), d=await KS.imgSize(src); fresh.push({src,out:null,v:d.h>d.w}); } }catch(e){ toast('Не удалось открыть одно из фото'); } }
   if(!fresh.length) return; pcWcs=pcWcs.concat(fresh); pcWc=fresh[0]; await pcWcRun(fresh); }
 async function pcWcRun(list){ list=list||pcWcs; if(!list.length) return; const s=pcS(); let i=0;
-  for(const it of list){ i++; toast(list.length>1?`Рисую акварель ${i} из ${list.length}…`:'Рисую акварель…'); await new Promise(r=>setTimeout(r,30)); try{ it.out=await pcFit(await wcPaint(it.src,s.wcPreset),it.v,true); }catch(_){ } pcWcRedraw(); }
+  for(const it of list){ i++; toast(list.length>1?`Рисую акварель ${i} из ${list.length}…`:'Рисую акварель…'); await new Promise(r=>setTimeout(r,30)); try{ it.out=await pcFit(await wcPaint(it.src,s.wcPreset),it.v); }catch(_){ } pcWcRedraw(); }
   toast(list.length>1?`Готово: ${list.length} акварелей`:'Акварель готова'); }
-/* every result becomes an exact 10×15 sheet (1800×1200 px = 300 dpi), the picture is never cropped:
-   it is fitted whole; without painted paper edges it keeps 6 mm white so the GX4040 border cuts nothing */
+/* every result becomes an exact 10×15 sheet (1800×1200 px = 300 dpi) edge to edge, no added white border;
+   the picture is never cropped: a near-exact ratio fills the sheet, anything else is fitted whole */
 const pcAsp=it=>({aspect:it&&it.v?'2:3':'3:2'});
-async function pcFit(src,v,paper){ const W=v?1200:1800, H=v?1800:1200; const im=await new Promise((r,j)=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=j; i.src=src; });
-  const edges=paper||!!(st.ks&&st.ks.neuro&&st.ks.neuro.edges!==false), m=edges?0:Math.round(6*W/(v?102:152));
-  const k=Math.min((W-2*m)/im.naturalWidth,(H-2*m)/im.naturalHeight), dw=im.naturalWidth*k, dh=im.naturalHeight*k;
+async function pcFit(src,v){ const W=v?1200:1800, H=v?1800:1200; const im=await new Promise((r,j)=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=j; i.src=src; });
+  const iw=im.naturalWidth, ih=im.naturalHeight, near=Math.abs(Math.log((iw/ih)/(W/H)))<.04, k=(near?Math.max:Math.min)(W/iw,H/ih), dw=iw*k, dh=ih*k;
   const c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.imageSmoothingQuality='high'; g.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh); return c.toDataURL('image/jpeg',.93); }
 /* AI over every loaded photo: one variant each, two requests at a time */
 async function pcWcAI(fn,label){ const list=pcWcs.length?pcWcs:[pcWc]; if(list.length===1){ const it=list[0]; it.busy=1; pcWcRedraw(); try{ const out=await fn(it.src,pcAsp(it)); if(out){ it.out=await pcFit(out,it.v); toast('Готово'); } }catch(err){ toast(err.message||'Не получилось'); } it.busy=0; pcWcRedraw(); return; }
