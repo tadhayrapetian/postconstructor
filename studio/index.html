@@ -10073,7 +10073,7 @@ function pcPanel(box){ const s=pcS(), lg=s.logo;
   <div class="card pc-wc"><div class="hd">Акварель из фото</div><p class="hint">Загрузите фото — программа превратит его в акварельный рисунок с белыми краями бумаги.</p>
     <div class="ks-drop" id="pcWcDrop">${pcWc&&pcWc.out?`<img src="${pcWc.out}" alt="">`:'Перетащите фото сюда или нажмите'}</div>
     <div class="flexw">${Object.entries(WC_PRESETS).map(([k,p])=>`<button class="btn sm${s.wcPreset===k?' primary':''}" data-pcwcp="${k}">${p.n}</button>`).join('')}</div>
-    ${KS.neuro?`<div class="hd2">Нейро-стиль · Gemini</div>${KS.neuro.hasKey()?KS.neuro.ctl():''}<div class="flexw">${KS.neuro.hasKey()?KS.neuro.styles.map(([k,n])=>`<button class="btn sm${k.startsWith('pp_')?' pc-ppl':''}" data-pcneuro="${k}">${n.replace('Портрет: ','Люди: ')}</button>`).join('')+'<button class="btn sm" data-pcneuro="set" title="Настройки Gemini">⚙︎</button>':'<button class="btn sm" data-pcneuro="set">Подключить ключ Gemini</button>'}</div>`:''}
+    ${KS.neuro?`<div class="hd2">Нейро-стиль · ИИ</div>${KS.neuro.hasKey()?KS.neuro.ctl():''}<div class="flexw">${KS.neuro.hasKey()?KS.neuro.styles.map(([k,n])=>`<button class="btn sm${k.startsWith('pp_')?' pc-ppl':''}" data-pcneuro="${k}">${n.replace('Портрет: ','Люди: ')}</button>`).join('')+'<button class="btn sm" data-pcneuro="set" title="Настройки ИИ">⚙︎</button>':'<button class="btn sm" data-pcneuro="set">Подключить ИИ (Gemini или fal.ai)</button>'}</div>`:''}
     <div class="flexw"><button class="btn sm primary" id="pcWcCard"${pcWc&&pcWc.out?'':' disabled'}>Новая открытка</button><button class="btn sm" id="pcWcSlot"${pcWc&&pcWc.out?'':' disabled'}>В рамку макета</button><button class="btn sm" id="pcWcSave"${pcWc&&pcWc.out?'':' disabled'}>Скачать JPG</button></div></div>
   <div class="card"><div class="hd">Знак tadhayrapetian</div><div class="pc-logos">${['monoword','mono','sig','word','crest'].map(v=>`<button class="pc-logo${lg.v===v?' on':''}" data-pclogo="${v}">${thSVG({v,sub:lg.sub,color:'ink'},dzPal({ink:'#2b2b2b'}))}</button>`).join('')}</div>
     <label class="f">Подпись под знаком<input type="text" id="pcLogoSub" value="${esc(lg.sub||'')}" maxlength="22" placeholder="handmade"></label>
@@ -10148,7 +10148,7 @@ document.addEventListener('click',e=>{ let b;
   if((b=e.target.closest('[data-pccat]'))){ pcS().cat=b.dataset.pccat; save(); pcScreen(pcScr()); return; }
   if((b=e.target.closest('[data-pcwcp]'))){ pcS().wcPreset=b.dataset.pcwcp; save(); if(pcWc) pcWcRun(); else pcPanel(b.closest('.kssub')); return; }
   if((b=e.target.closest('#pcWcDrop'))){ KS.pick('image/*').then(f=>{ if(f[0]) pcWcLoad(f[0]); }); return; }
-  if((b=e.target.closest('[data-pcneuro]'))){ const k=b.dataset.pcneuro; if(k==='set'){ KS.neuro.settings(); return; } if(!pcWc||!pcWc.src){ toast('Сначала загрузите фото'); return; } const box=b.closest('.kssub'); b.disabled=true; b.textContent='Gemini рисует…';
+  if((b=e.target.closest('[data-pcneuro]'))){ const k=b.dataset.pcneuro; if(k==='set'){ KS.neuro.settings(); return; } if(!pcWc||!pcWc.src){ toast('Сначала загрузите фото'); return; } const box=b.closest('.kssub'); b.disabled=true; b.textContent='Рисую…';
     KS.neuro.stylize(pcWc.src,k).then(out=>{ if(out){ pcWc.out=out; toast('Готово'); } }).catch(err=>toast(err.message||'Не получилось')).finally(()=>{ if(box) pcPanel(box); }); return; }
   if(e.target.closest('#pcWcCard')){ pcWcCard(); return; }
   if(e.target.closest('#pcWcSlot')){ if(pcWc&&pcWc.out) KS.addImage(pcWc.out,{mode:'auto'}); return; }
@@ -10235,11 +10235,13 @@ const NSTYLES=[
  ['cartoon','Детская книга','a charming children\'s-book illustration with soft rounded shapes, friendly gentle colors, subtle textures and soft shadows'],
  ['glass','Витраж','a luminous stained-glass window design with bold dark lead lines and glowing jewel-toned glass pieces']];
 const NPOW=[['soft','Мягко','Apply the style gently: stay close to the original photo, keep fine details and exact likeness.'],['mid','Средне','Apply the style clearly while keeping the composition, subjects and likeness recognizable.'],['strong','Сильно','Fully reinterpret the photo as an artwork in this style; keep the composition and main subjects recognizable.']];
-const nOpt=()=>KS.store('neuro',{pow:'mid',edges:true,variants:2});
+const nOpt=()=>{ const o=KS.store('neuro',{pow:'mid',edges:true,variants:1,spend:{}}); if(!o.m1){ o.variants=1; o.m1=1; } if(!o.spend) o.spend={}; return o; };
 /* the key is kept in two places of this browser: localStorage and IndexedDB, and the browser is asked not to evict them */
 async function nPersist(){ try{ if(navigator.storage&&navigator.storage.persist&&!(await navigator.storage.persisted())) await navigator.storage.persist(); }catch(_){ } }
-async function nBackup(){ try{ const k=localStorage.getItem(NK)||'', m=localStorage.getItem(NM)||''; if(k) await KS.idb.set('gemini',{k,m}); else await KS.idb.del('gemini'); }catch(_){ } }
-(async()=>{ try{ if(!localStorage.getItem(NK)){ const v=await KS.idb.get('gemini'); if(v&&v.k){ localStorage.setItem(NK,v.k); if(v.m) localStorage.setItem(NM,v.m); KS.emit('neuroKey'); } } else nBackup(); }catch(_){ } })();
+async function nBackup(){ try{ const g=k=>localStorage.getItem(k)||''; const v={k:g(NK),m:g(NM),fk:g('ks-fal-key'),fe:g('ks-fal-edit'),fg:g('ks-fal-gen'),p:g('ks-ai-provider')}; if(v.k||v.fk) await KS.idb.set('gemini',v); else await KS.idb.del('gemini'); }catch(_){ } }
+(async()=>{ try{ const v=await KS.idb.get('gemini'); let ch=0; if(v){ [['ks-gemini-key','k'],['ks-gemini-model','m'],['ks-fal-key','fk'],['ks-fal-edit','fe'],['ks-fal-gen','fg'],['ks-ai-provider','p']].forEach(([a,b])=>{ if(!localStorage.getItem(a)&&v[b]){ localStorage.setItem(a,v[b]); ch=1; } }); } if(ch) KS.emit('neuroKey'); else nBackup(); }catch(_){ } })();
+/* owner's choice: Gemini 2.5 Flash Image as the working model (switched once) */
+try{ if(!localStorage.getItem('ks-ai-m2')){ localStorage.setItem('ks-gemini-model','gemini-2.5-flash-image'); localStorage.setItem('ks-ai-provider','gemini'); localStorage.setItem('ks-ai-m2','1'); } }catch(_){ }
 const nKey=()=>{ try{ return localStorage.getItem(NK)||''; }catch(_){ return ''; } };
 const nModel=()=>{ try{ return localStorage.getItem(NM)||NMODELS[0][0]; }catch(_){ return NMODELS[0][0]; } };
 async function nSmall(src,max){ const im=await new Promise((r,j)=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=j; i.src=src; }); const k=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height); return c.toDataURL('image/jpeg',.9); }
@@ -10249,9 +10251,12 @@ function nErr(status,body){ const m=(body&&body.error&&body.error.message)||''; 
 function nRatio(w,h){ const R=[['1:1',1],['3:2',1.5],['2:3',2/3],['4:3',4/3],['3:4',.75],['5:4',1.25],['4:5',.8],['16:9',16/9],['9:16',9/16]], r=w/h; return R.reduce((a,b)=>Math.abs(Math.log(b[1]/r))<Math.abs(Math.log(a[1]/r))?b:a)[0]; }
 async function nCall(key,model,body){ let r; try{ r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':key},body:JSON.stringify(body)}); }
   catch(e){ throw new Error('Нет связи с Gemini. Проверьте интернет.'); } let j=null; try{ j=await r.json(); }catch(_){} return {r,j}; }
-async function nOne(src,styleId,custom,o){ const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); }
+function nPrompt(styleId,custom,o){
   const S=NSTYLES.find(s=>s[0]===styleId), what=custom&&custom.trim()?custom.trim():(S||NSTYLES[0])[2], pow=(NPOW.find(p=>p[0]===o.pow)||NPOW[1])[2];
   const prompt=`Transform this photo into ${what}. ${pow} Preserve faces, expressions and the people's likeness; keep the same framing and aspect ratio. ${o.edges?'Leave a soft natural margin of clean white paper on all four sides so the artwork fades or ends inside the sheet — nothing touches the edges. ':''}Do not add any text, letters, signatures, logos, frames or watermarks. High detail, print quality.`;
+  return prompt; }
+async function gOne(src,styleId,custom,o){ const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); }
+  const prompt=nPrompt(styleId,custom,o);
   const img=await nSmall(src,1536), b64=img.split(',')[1], dims=await KS.imgSize(img), model=nModel();
   const base={contents:[{role:'user',parts:[{text:prompt},{inline_data:{mime_type:'image/jpeg',data:b64}}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}};
   const ic={aspectRatio:nRatio(dims.w||3,dims.h||2)}; if(/pro/i.test(model)) ic.imageSize='2K';
@@ -10267,7 +10272,7 @@ async function nStylize(src,styleId,custom,o){ o=Object.assign({},nOpt(),o||{});
   if(!ok.length) throw res[0].reason; if(ok.length===1||o.noPick) return ok[0]; return nPick(src,ok); }
 
 /* text → image (logo generation) */
-async function nGen(prompt,o){ o=o||{}; const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); } const model=nModel(), n=Math.max(1,Math.min(4,+o.n||1));
+async function gGen(prompt,o){ o=o||{}; const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); } const model=nModel(), n=Math.max(1,Math.min(4,+o.n||1));
   const one=async()=>{ const base={contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}}; const ic={aspectRatio:o.aspect||'1:1'}; if(/pro/i.test(model)) ic.imageSize='2K';
     let {r,j}=await nCall(key,model,Object.assign({},base,{generationConfig:Object.assign({},base.generationConfig,{imageConfig:ic})})); if(r.status===400&&!/API key/i.test(((j&&j.error&&j.error.message)||''))) ({r,j}=await nCall(key,model,base));
     if(!r.ok) throw new Error(nErr(r.status,j)); const parts=((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]; const p=parts.find(x=>x.inlineData||x.inline_data); if(!p) throw new Error('Gemini не вернул картинку. Попробуйте ещё раз.');
@@ -10275,62 +10280,95 @@ async function nGen(prompt,o){ o=o||{}; const key=nKey(); if(!key){ nSettings();
   const res=await Promise.allSettled(Array.from({length:n},one)); const ok=res.filter(x=>x.status==='fulfilled').map(x=>x.value); if(!ok.length) throw res[0].reason; return ok; }
 
 /* generic image edit with an instruction (bg removal, upscale…) and text-only generation helpers */
-async function nEdit(src,instruction,o){ o=o||{}; const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); } const model=nModel();
+async function gEdit(src,instruction,o){ o=o||{}; const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); } const model=nModel();
   const img=await nSmall(src,o.max||1536), b64=img.split(',')[1], dims=await KS.imgSize(img);
   const base={contents:[{role:'user',parts:[{text:instruction},{inline_data:{mime_type:'image/jpeg',data:b64}}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}};
   const ic={aspectRatio:nRatio(dims.w||3,dims.h||2)}; if(/pro/i.test(model)||o.big) ic.imageSize=o.big?'2K':'2K';
   let {r,j}=await nCall(key,model,Object.assign({},base,{generationConfig:Object.assign({},base.generationConfig,{imageConfig:ic})})); if(r.status===400&&!/API key/i.test(((j&&j.error&&j.error.message)||''))) ({r,j}=await nCall(key,model,base));
   if(!r.ok) throw new Error(nErr(r.status,j)); const parts=((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]; const p=parts.find(x=>x.inlineData||x.inline_data); if(!p) throw new Error('Gemini не вернул картинку. Попробуйте ещё раз.');
   const d=p.inlineData||p.inline_data; return `data:${d.mimeType||d.mime_type||'image/png'};base64,${d.data}`; }
-async function nText(prompt,o){ o=o||{}; const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); } const model=o.model||'gemini-2.5-flash';
+async function nText(prompt,o){ o=o||{}; const key=nKey(); if(!key){ if(prov()!=='fal') nSettings(); throw new Error('Тексты пишет Gemini: добавьте ключ Gemini в настройках ИИ или выберите текст из библиотеки'); } const model=o.model||'gemini-2.5-flash';
   const {r,j}=await nCall(key,model,{contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:Object.assign({temperature:.9},o.json?{responseMimeType:'application/json'}:{})});
   if(!r.ok) throw new Error(nErr(r.status,j)); const t=(((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]).map(x=>x.text||'').join(''); if(!t) throw new Error('Gemini ничего не ответил'); return t; }
+
+/* ---- providers: Gemini or fal.ai (FLUX Kontext etc.), with a running cost estimate ---- */
+const NP='ks-ai-provider', FK='ks-fal-key', FME='ks-fal-edit', FMG='ks-fal-gen';
+const FEDIT=[['fal-ai/flux-kontext/dev','FLUX Kontext dev — дешевле всего (≈ $0,025)'],['fal-ai/flux-pro/kontext','FLUX Kontext Pro — лучше качество (≈ $0,04)']];
+const FGEN=[['fal-ai/flux/schnell','FLUX schnell — копейки (≈ $0,003), без точного текста'],['fal-ai/flux/dev','FLUX dev (≈ $0,025)'],['fal-ai/flux-pro/kontext/text-to-image','FLUX Kontext Pro (≈ $0,04), текст точнее']];
+const ls=(k,d)=>{ try{ return localStorage.getItem(k)||d; }catch(_){ return d; } };
+const fKey=()=>ls(FK,''), fEditM=()=>ls(FME,FEDIT[0][0]), fGenM=()=>ls(FMG,FGEN[2][0]);
+const prov=()=>ls(NP,'gemini')==='fal'&&fKey()?'fal':'gemini';
+const nHas=()=>prov()==='fal'?!!fKey():!!nKey();
+const PRICE={'gemini-2.5-flash-image':.039,'gemini-3.1-flash-image-preview':.045,'gemini-3-pro-image-preview':.134,'fal-ai/flux-kontext/dev':.025,'fal-ai/flux-pro/kontext':.04,'fal-ai/flux/schnell':.003,'fal-ai/flux/dev':.025,'fal-ai/flux-pro/kontext/text-to-image':.04};
+const nPrice=kind=>{ const m=prov()==='fal'?(kind==='gen'?fGenM():fEditM()):nModel(); return PRICE[m]??.04; };
+function nSpend(n,kind){ const o=nOpt(), sp=o.spend, d=KS.today(), mo=d.slice(0,7), c=n*nPrice(kind); if(sp.d!==d){ sp.d=d; sp.day=0; } if(sp.m!==mo){ sp.m=mo; sp.month=0; } sp.day=(sp.day||0)+c; sp.month=(sp.month||0)+c; sp.total=(sp.total||0)+c; save(); }
+const usd=v=>{ v=+v||0; return '$'+(v>0&&v<.1?v.toFixed(3):v.toFixed(2)); };
+function nSpendLine(){ const sp=nOpt().spend||{}, d=KS.today(); return `≈ ${usd(nPrice('edit'))} за картинку · сегодня ${usd(sp.d===d?sp.day:0)} · за месяц ${usd(sp.m===d.slice(0,7)?sp.month:0)}`; }
+function fErr(status,j){ const m=(j&&(j.detail&&(typeof j.detail==='string'?j.detail:JSON.stringify(j.detail))||j.message))||''; if(status===401) return 'Ключ fal.ai не подошёл. Проверьте его в настройках.'; if(status===402||status===403||/balance|credit|exhausted|locked/i.test(m)) return 'На балансе fal.ai закончились деньги — пополните на fal.ai → Billing.';
+  if(status===404) return 'Модель fal.ai не найдена. Выберите другую в настройках.'; if(status===422) return 'fal.ai не принял запрос: '+String(m).slice(0,140); if(status===429) return 'fal.ai просит подождать: слишком много запросов.'; if(status>=500) return 'Сервер fal.ai занят. Попробуйте ещё раз.'; return 'fal.ai ответил ошибкой '+status; }
+async function fCall(model,body){ const key=fKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ fal.ai'); } let r; try{ r=await fetch('https://fal.run/'+model,{method:'POST',headers:{'Authorization':'Key '+key,'content-type':'application/json'},body:JSON.stringify(body)}); }catch(e){ throw new Error('Нет связи с fal.ai. Проверьте интернет.'); }
+  let j=null; try{ j=await r.json(); }catch(_){} if(!r.ok) throw new Error(fErr(r.status,j)); return j||{}; }
+async function fImg(u){ if(!u) throw new Error('fal.ai не вернул картинку'); if(/^data:/.test(u)) return u; const r=await fetch(u); if(!r.ok) throw new Error('Не удалось скачать картинку fal.ai'); const b=await r.blob(); return await new Promise((res,rej)=>{ const f=new FileReader(); f.onload=()=>res(f.result); f.onerror=rej; f.readAsDataURL(b); }); }
+async function fEdit(src,prompt){ const img=await nSmall(src,1536); const j=await fCall(fEditM(),{prompt,image_url:img,num_images:1,output_format:'jpeg',safety_tolerance:'5'}); return fImg(j.images&&j.images[0]&&j.images[0].url); }
+async function fGen(prompt,o){ const n=Math.max(1,Math.min(4,+o.n||1)); const j=await fCall(fGenM(),{prompt,num_images:n,aspect_ratio:o.aspect||'1:1',output_format:'png',image_size:'square_hd'}); const L=(j.images||[]).map(x=>x.url); if(!L.length) throw new Error('fal.ai не вернул картинку'); return Promise.all(L.map(fImg)); }
+async function nOne(src,styleId,custom,o){ const r=prov()==='fal'?await fEdit(src,nPrompt(styleId,custom,o)):await gOne(src,styleId,custom,o); nSpend(1,'edit'); return r; }
+async function nEdit(src,instruction,o){ const r=prov()==='fal'?await fEdit(src,instruction):await gEdit(src,instruction,o); nSpend(1,'edit'); return r; }
+async function nGen(prompt,o){ o=o||{}; const r=prov()==='fal'?await fGen(prompt,o):await gGen(prompt,o); nSpend(r.length,'gen'); return r; }
 const npk=KS.modal({id:'neuroPick',title:'Выберите вариант',wide:true});
 function nPick(src,list){ return new Promise(res=>{ let done=false; const fin=v=>{ if(done) return; done=true; npk.close(); res(v); };
   npk.el.innerHTML=`<p class="hint">Нажмите на понравившийся вариант. Оригинал — для сравнения.</p><div class="npick"><figure><img src="${src}" alt=""><figcaption>Оригинал</figcaption></figure>${list.map((u,i)=>`<button class="npick-v" data-npick="${i}"><img src="${u}" alt=""><span>Вариант ${i+1}</span></button>`).join('')}</div>`;
   npk.el.onclick=e=>{ const b=e.target.closest('[data-npick]'); if(b) fin(list[+b.dataset.npick]); };
   npk.open(); const _c=npk.close; npk.root.addEventListener('click',e=>{ if(e.target===npk.root||e.target.closest('[data-ksclose]')) fin(null); },{once:true}); }); }
-const nm=KS.modal({id:'neuro',title:'Нейро-стиль: настройки Gemini'});
-function nSettings(){ const k=nKey(), m=nModel(), known=NMODELS.some(x=>x[0]===m);
-  nm.el.innerHTML=`<p class="hint">Ключ вводится один раз и остаётся после закрытия программы и перезагрузки. Хранится только на этом устройстве. Он не попадает в проекты, файлы и резервные копии. Ключ даёт доступ к вашему платному аккаунту Google — не пересылайте его никому.</p>
-  <label class="f">Ключ Gemini API (из aistudio.google.com/apikey)<input type="password" id="nKey" value="${esc(k)}" placeholder="AIza…" autocomplete="off"></label>
-  <label class="f">Модель<select id="nModel">${NMODELS.map(([v,n])=>`<option value="${v}"${v===m?' selected':''}>${n}</option>`).join('')}<option value="__own"${known?'':' selected'}>Другая модель…</option></select></label>
+const nm=KS.modal({id:'neuro',title:'Нейро-стиль: настройки ИИ'});
+function nSettings(){ const k=nKey(), m=nModel(), known=NMODELS.some(x=>x[0]===m), P=ls(NP,'gemini'), fk=fKey(), sp=nOpt().spend||{};
+  nm.el.innerHTML=`<div class="seg"><button data-nprov="gemini"${P!=='fal'?' class="on"':''}>Gemini (Google)</button><button data-nprov="fal"${P==='fal'?' class="on"':''}>fal.ai (FLUX) — дешевле</button></div>
+  <p class="hint">Ключи вводятся один раз и остаются после закрытия программы. Хранятся только на этом устройстве, не попадают в проекты и резервные копии. Не пересылайте их никому.</p>
+  <div id="nGem"${P==='fal'?' hidden':''}><label class="f">Ключ Gemini API (aistudio.google.com/apikey)<input type="password" id="nKey" value="${esc(k)}" placeholder="AIza…" autocomplete="off"></label>
+  <label class="f">Модель<select id="nModel">${NMODELS.map(([v,n])=>`<option value="${v}"${v===m?' selected':''}>${n} — ≈ ${usd(PRICE[v]??.04)}</option>`).join('')}<option value="__own"${known?'':' selected'}>Другая модель…</option></select></label>
   <label class="f" id="nOwnBox"${known?' hidden':''}>Название модели<input type="text" id="nOwn" value="${known?'':esc(m)}" placeholder="gemini-…-image"></label>
-  <div class="flexw"><button class="btn primary" id="nSave">Сохранить</button><button class="btn" id="nCheck">Проверить ключ</button>${k?'<button class="btn danger" id="nDel">Удалить ключ</button>':''}<span class="hint" id="nStat"></span></div>
-  <p class="hint">Обработка одной картинки стоит около $0,04–0,13 в зависимости от модели. Нужна включённая оплата (Billing) у проекта ключа.</p>`;
-  nm.open(); setTimeout(()=>{ const i=$('#nKey'); if(i&&!k) i.focus(); },50); }
-nm.el.addEventListener('change',e=>{ if(e.target.id==='nModel') $('#nOwnBox').hidden=e.target.value!=='__own'; });
-nm.el.addEventListener('click',async e=>{ const t=e.target;
-  const store=()=>{ try{ localStorage.setItem(NK,$('#nKey').value.trim()); const v=$('#nModel').value; localStorage.setItem(NM,v==='__own'?($('#nOwn').value.trim()||NMODELS[0][0]):v); }catch(_){ toast('Браузер не дал сохранить ключ'); } };
-  if(t.id==='nSave'){ store(); await nBackup(); nPersist(); nm.close(); toast(nKey()?'Ключ Gemini сохранён на этом устройстве — вводить его снова не нужно':'Ключ пустой'); KS.emit('neuroKey'); renderDzInsp&&dzSel&&renderDzInsp(); }
-  if(t.id==='nDel'){ try{ localStorage.removeItem(NK); }catch(_){} await nBackup(); nSettings(); toast('Ключ удалён с этого устройства'); }
-  if(t.id==='nCheck'){ store(); const s=$('#nStat'); s.textContent='Проверяю…'; try{ const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':nKey()}}); const b=await r.json().catch(()=>null);
+  <p class="hint" id="nProWarn"${/pro/.test(m)?'':' hidden'}>⚠︎ Pro-модель стоит ≈ $0,13 за картинку — в 3,5 раза дороже Flash. Берите её только для самых важных работ.</p></div>
+  <div id="nFal"${P==='fal'?'':' hidden'}><label class="f">Ключ fal.ai (fal.ai → Dashboard → API Keys; баланс пополняется в Billing)<input type="password" id="nFKey" value="${esc(fk)}" placeholder="xxxxxxxx-…:…" autocomplete="off"></label>
+  <label class="f">Модель для стилей и правок фото<select id="nFEdit">${FEDIT.map(([v,n])=>`<option value="${v}"${v===fEditM()?' selected':''}>${n}</option>`).join('')}</select></label>
+  <label class="f">Модель для логотипов и картинок с нуля<select id="nFGen">${FGEN.map(([v,n])=>`<option value="${v}"${v===fGenM()?' selected':''}>${n}</option>`).join('')}</select></label>
+  <p class="hint">Тексты-поздравления по-прежнему пишет Gemini (если ключ есть) или встроенная библиотека.</p></div>
+  <div class="card" style="padding:10px"><b>Расходы (примерно)</b><span class="hint">Сегодня ${usd(sp.d===KS.today()?sp.day:0)} · за месяц ${usd(sp.m===KS.today().slice(0,7)?sp.month:0)} · всего ${usd(sp.total)}</span><span class="hint">Точную сумму смотрите в кабинете Google / fal.ai. По умолчанию — 1 вариант на нажатие.</span></div>
+  <div class="flexw"><button class="btn primary" id="nSave">Сохранить</button><button class="btn" id="nCheck">Проверить ключ</button>${(P==='fal'?fk:k)?'<button class="btn danger" id="nDel">Удалить ключ</button>':''}<span class="hint" id="nStat"></span></div>`;
+  nm.open(); }
+nm.el.addEventListener('change',e=>{ if(e.target.id==='nModel'){ $('#nOwnBox').hidden=e.target.value!=='__own'; $('#nProWarn').hidden=!/pro/.test(e.target.value); } });
+nm.el.addEventListener('click',async e=>{ const t=e.target; const pb=t.closest('[data-nprov]');
+  if(pb){ try{ localStorage.setItem(NP,pb.dataset.nprov); }catch(_){} nm.el.querySelectorAll('[data-nprov]').forEach(x=>x.classList.toggle('on',x===pb)); $('#nGem').hidden=pb.dataset.nprov==='fal'; $('#nFal').hidden=pb.dataset.nprov!=='fal'; return; }
+  const store=()=>{ try{ localStorage.setItem(NK,$('#nKey').value.trim()); const v=$('#nModel').value; localStorage.setItem(NM,v==='__own'?($('#nOwn').value.trim()||NMODELS[0][0]):v); localStorage.setItem(FK,$('#nFKey').value.trim()); localStorage.setItem(FME,$('#nFEdit').value); localStorage.setItem(FMG,$('#nFGen').value); }catch(_){ toast('Браузер не дал сохранить ключ'); } };
+  if(t.id==='nSave'){ store(); await nBackup(); nPersist(); nm.close(); toast(nHas()?(prov()==='fal'?'fal.ai подключён — ':'Gemini подключён — ')+nSpendLine():'Ключ пустой'); KS.emit('neuroKey'); if(dzSel) renderDzInsp(); }
+  if(t.id==='nDel'){ try{ localStorage.removeItem(ls(NP,'gemini')==='fal'?FK:NK); }catch(_){} await nBackup(); nSettings(); toast('Ключ удалён с этого устройства'); }
+  if(t.id==='nCheck'){ store(); const s=$('#nStat'); s.textContent='Проверяю…';
+    if(ls(NP,'gemini')==='fal'){ try{ const r=await fetch('https://fal.run/fal-ai/flux/schnell',{method:'POST',headers:{'Authorization':'Key '+fKey(),'content-type':'application/json'},body:JSON.stringify({prompt:'a small dot',num_images:1,image_size:'square'})}); const j=await r.json().catch(()=>null); s.textContent=r.ok?'✓ Ключ fal.ai работает (пробная картинка ≈ $0,003)':fErr(r.status,j); }catch(_){ s.textContent='Нет связи с fal.ai'; } return; }
+    try{ const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':nKey()}}); const b=await r.json().catch(()=>null);
       if(!r.ok){ s.textContent=nErr(r.status,b); return; } const ids=((b&&b.models)||[]).map(x=>String(x.name).replace('models/','')); const img=ids.filter(x=>/image/.test(x));
       s.textContent=ids.includes(nModel())?'✓ Ключ работает, модель доступна':'Ключ работает, но модели «'+nModel()+'» нет'+(img.length?'. Есть: '+img.slice(0,4).join(', '):''); }catch(_){ s.textContent='Нет связи с Google'; } } });
 /* inspector section for photos */
-KS.insp({id:'neuro',title:'Нейро-стиль (Gemini)',order:31,when:e=>e.t==='img'&&!!e.src&&e.k!=='logo',
-  html:e=>nKey()?`${nCtl()}<div class="hd2">Люди</div><div class="flexw">${NSTYLES.filter(x=>x[0].startsWith('pp_')).map(([k,n])=>`<button class="btn sm" data-nst="${k}">${n.replace('Портрет: ','')}</button>`).join('')}</div><div class="hd2">Живопись и графика</div><div class="flexw">${NSTYLES.filter(x=>!x[0].startsWith('pp_')).map(([k,n])=>`<button class="btn sm" data-nst="${k}">${n}</button>`).join('')}</div><div class="ks-row"><input class="grow" type="text" data-nown="1" placeholder="Свой стиль: акварель в бежевых тонах…"><button class="btn sm" data-nst="own">Сделать</button></div>${e.wcOrig?'<button class="btn sm" data-nst="undo">Вернуть фото</button>':''}<button class="btn sm" data-nst="set" style="align-self:flex-start">Настройки Gemini</button>`
-    :`<p class="hint">Превращает фото в акварель, масло, карандаш и другие стили с помощью Gemini.</p><button class="btn sm primary" data-nst="set" style="align-self:flex-start">Подключить ключ Gemini</button>`,
+KS.insp({id:'neuro',title:'Нейро-стиль (ИИ)',order:31,when:e=>e.t==='img'&&!!e.src&&e.k!=='logo',
+  html:e=>nHas()?`<p class="hint">${nSpendLine()}</p>${nCtl()}<div class="hd2">Люди</div><div class="flexw">${NSTYLES.filter(x=>x[0].startsWith('pp_')).map(([k,n])=>`<button class="btn sm" data-nst="${k}">${n.replace('Портрет: ','')}</button>`).join('')}</div><div class="hd2">Живопись и графика</div><div class="flexw">${NSTYLES.filter(x=>!x[0].startsWith('pp_')).map(([k,n])=>`<button class="btn sm" data-nst="${k}">${n}</button>`).join('')}</div><div class="ks-row"><input class="grow" type="text" data-nown="1" placeholder="Свой стиль: акварель в бежевых тонах…"><button class="btn sm" data-nst="own">Сделать</button></div>${e.wcOrig?'<button class="btn sm" data-nst="undo">Вернуть фото</button>':''}<button class="btn sm" data-nst="set" style="align-self:flex-start">Настройки ИИ</button>`
+    :`<p class="hint">Превращает фото в акварель, масло, карандаш и другие стили с помощью Gemini.</p><button class="btn sm primary" data-nst="set" style="align-self:flex-start">Подключить ИИ (Gemini или fal.ai)</button>`,
   bind(div,e){ div.addEventListener('click',async ev=>{ const b=ev.target.closest('[data-nst]'); if(!b) return; const k=b.dataset.nst;
     if(k==='set'){ nSettings(); return; }
     if(k==='undo'){ const o=await KS.idb.get('wc:'+e.wcOrig,'files'); if(o){ e.src=o; delete e.wcOrig; update(); } return; }
     const custom=k==='own'?(div.querySelector('[data-nown]').value||''):''; if(k==='own'&&!custom.trim()){ toast('Опишите стиль словами'); return; }
-    div.querySelectorAll('[data-nst]').forEach(x=>x.disabled=true); b.textContent='Gemini рисует…';
+    div.querySelectorAll('[data-nst]').forEach(x=>x.disabled=true); b.textContent=(prov()==='fal'?'fal.ai':'Gemini')+' рисует…';
     try{ let orig=e.src; if(!e.wcOrig){ const key=KS.uid('w'); await KS.idb.set('wc:'+key,e.src,'files'); e.wcOrig=key; } else { orig=(await KS.idb.get('wc:'+e.wcOrig,'files'))||e.src; }
       const out=await nStylize(orig,k==='own'?'':k,custom); if(out){ e.src=out; update(); toast('Готово'); } else renderDzInsp(); }
     catch(err){ toast(err.message||'Не получилось'); renderDzInsp(); } }); }});
 function nCtl(){ const o=nOpt(); return `<div class="ks-row"><div class="seg">${NPOW.map(([k,n])=>`<button data-npow="${k}"${o.pow===k?' class="on"':''}>${n}</button>`).join('')}</div></div><div class="flexw"><label class="chk"><input type="checkbox" data-nedge="1"${o.edges?' checked':''}>Белые края бумаги</label><label class="chk">Вариантов<select data-nvar="1">${[1,2,3,4].map(n=>`<option${o.variants==n?' selected':''}>${n}</option>`).join('')}</select></label></div>`; }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-npow]'); if(!b) return; nOpt().pow=b.dataset.npow; save(); b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); });
 document.addEventListener('change',e=>{ if(e.target.dataset.nedge){ nOpt().edges=e.target.checked; save(); } if(e.target.dataset.nvar){ nOpt().variants=+e.target.value; save(); } });
-KS.cmd('Нейро-стиль: настройки Gemini','настройки',nSettings);
-KS.neuro={edit:nEdit,text:nText,gen:nGen,ctl:nCtl,stylize:nStylize,styles:NSTYLES,settings:nSettings,hasKey:()=>!!nKey()};
+KS.cmd('Нейро-стиль: настройки ИИ (Gemini / fal.ai)','настройки',nSettings);
+KS.neuro={edit:nEdit,text:nText,gen:nGen,ctl:nCtl,stylize:nStylize,styles:NSTYLES,settings:nSettings,spendLine:nSpendLine,provider:prov,hasKey:()=>nHas()};
 
 })(); }catch(e){ console.error('[KS] module neuro failed',e); }
 
 /* ===== ks module: logo ===== */
 try{ (function(){ 'use strict';
 KS.mod('logo',{title:'Генератор логотипов'});
-const lgS=()=>KS.store('logo',{txt:'tadhayrapetian',sub:'handmade',ini:'',ff:'serif',color:'#1d1d1f',mode:'vec',what:'',style:'elegant',col:'black',n:2});
+const lgS=()=>{ const o=KS.store('logo',{txt:'tadhayrapetian',sub:'handmade',ini:'',ff:'serif',color:'#1d1d1f',mode:'vec',what:'',style:'elegant',col:'black',n:1}); if(!o.m1){ o.n=1; o.m1=1; } return o; };
 const LG_LAY=[['monoword','Монограмма и имя',1],['mono','Монограмма',1],['sig','Подпись',.6],['word','Надпись',.25],['crest','Медальон',1],['badge','Плашка',.6],['stack','Два шрифта',.6]];
 const LG_FF=[['serif','Классика'],['didone','Дидона'],['slab','Строгий'],['sans','Модерн'],['script','Каллиграфия'],['hand','От руки']];
 const LG_COL=[['#1d1d1f','Чёрный'],['ink','Цвет текста макета'],['acc','Акцент макета'],['#b08d57','Золото'],['#a35a43','Терракота'],['#5f7a63','Шалфей'],['#1f3a5f','Тёмно-синий'],['#8a3a52','Бордо']];
@@ -10341,16 +10379,16 @@ let lgRes=[];
 function lgSample(v,ff){ const s=lgS(), e={v,ff,txt:s.txt,sub:s.sub,ini:s.ini,color:s.color}; const pal=dzPal(st.dz&&st.dz.pal); return KS.thSVG(e,pal); }
 function lgRender(){ const s=lgS(), hasKey=!!(KS.neuro&&KS.neuro.hasKey());
   m.el.innerHTML=`<div class="lg-top"><label class="f grow">Надпись<input type="text" id="lgTxt" value="${esc(s.txt)}" placeholder="Название, имя, бренд" maxlength="40"></label><label class="f">Подпись<input type="text" id="lgSub" value="${esc(s.sub)}" placeholder="handmade, с 2026…" maxlength="40"></label><label class="f lg-ini">Инициалы<input type="text" id="lgIni" value="${esc(s.ini)}" placeholder="авто" maxlength="2"></label></div>
-  <div class="seg lg-mode"><button data-lgmode="vec"${s.mode==='vec'?' class="on"':''}>Векторный · бесплатно</button><button data-lgmode="ai"${s.mode==='ai'?' class="on"':''}>Нейро-логотип · Gemini</button></div>
+  <div class="seg lg-mode"><button data-lgmode="vec"${s.mode==='vec'?' class="on"':''}>Векторный · бесплатно</button><button data-lgmode="ai"${s.mode==='ai'?' class="on"':''}>Нейро-логотип · ИИ</button></div>
   ${s.mode==='vec'?`<div class="flexw"><span class="hd2">Шрифт</span>${LG_FF.map(([k,n])=>`<button class="btn sm${s.ff===k?' primary':''}" data-lgff="${k}">${n}</button>`).join('')}</div>
    <div class="flexw"><span class="hd2">Цвет</span>${LG_COL.map(([k,n])=>`<button class="lg-sw${s.color===k?' on':''}" data-lgcol="${k}" title="${n}" style="background:${k.startsWith('#')?k:dzCol(k,dzPal(st.dz&&st.dz.pal))}"></button>`).join('')}</div>
    <p class="hint">Буквы всегда точные и чёткие в печати. Нажмите на вариант — он встанет на макет; потом его можно двигать, менять цвет и надпись в «Макете».</p>
    <div class="lg-grid">${LG_LAY.map(([v,n,r])=>`<button class="lg-card" data-lgvec="${v}"><span class="lg-prev" style="aspect-ratio:${1/r>2?'4/1':r<1?'5/3':'1/1'};background:${s.color.startsWith('#')?'#fff':dzPal(st.dz&&st.dz.pal).bg}">${lgSample(v,s.ff)}</span><b>${n}</b></button>`).join('')}</div>`
-  :`${hasKey?'':`<div class="ks-empty">Для нейро-логотипа нужен ключ Gemini. <button class="btn sm primary" data-lgkey="1">Подключить ключ</button></div>`}
+  :`${hasKey?'':`<div class="ks-empty">Для нейро-логотипа нужен ключ Gemini или fal.ai. <button class="btn sm primary" data-lgkey="1">Подключить ключ</button></div>`}
    <label class="f">Что изобразить (необязательно)<input type="text" id="lgWhat" value="${esc(s.what)}" placeholder="цветок граната, конверт с сердцем, кисть и краски…"></label>
    <div class="flexw"><span class="hd2">Стиль</span>${LG_AI.map(([k,n])=>`<button class="btn sm${s.style===k?' primary':''}" data-lgai="${k}">${n}</button>`).join('')}</div>
    <div class="flexw"><span class="hd2">Цвета</span>${LG_AICOL.map(([k,n])=>`<button class="btn sm${s.col===k?' primary':''}" data-lgaic="${k}">${n}</button>`).join('')}<span class="hd2" style="margin-left:8px">Вариантов</span><select id="lgN">${[1,2,3,4].map(n=>`<option${s.n==n?' selected':''}>${n}</option>`).join('')}</select><button class="btn primary" id="lgGo"${hasKey?'':' disabled'}>Создать логотип</button></div>
-   <p class="hint">Gemini рисует эмблему с вашей надписью. Иногда он ошибается в буквах — тогда нажмите «Создать» ещё раз или возьмите векторный вариант. Каждый вариант оплачивается отдельно.</p>
+   <p class="hint">ИИ рисует эмблему с вашей надписью. Иногда он ошибается в буквах — тогда нажмите «Создать» ещё раз или возьмите векторный вариант. Каждый вариант оплачивается отдельно${KS.neuro?' — '+KS.neuro.spendLine():''}.</p>
    <div class="lg-res">${lgRes.map((u,i)=>`<div class="lg-ri"><img src="${u}" alt=""><div class="flexw"><button class="btn sm primary" data-lgput="${i}" data-clear="1">На макет без фона</button><button class="btn sm" data-lgput="${i}">С белым фоном</button><button class="btn sm" data-lgdl="${i}">PNG</button></div></div>`).join('')}</div>`}`; }
 function lgOpen(){ lgRender(); m.open(); }
 function lgPut(el){ if(!dzOn()){ KS.ensureDesign(); } const d=st.dz, r=el.r, w=Math.min(d.w*.5,r>=1?30:50), h=w*Math.min(1,r); const e=Object.assign({id:dzId(),x:(d.w-w)/2,y:(d.h-h)/2,w,h},el.p); delete e.r; dzEls().push(e); dzSelect(e.id); update(); m.close(); toast('Логотип на макете'); }
@@ -10359,7 +10397,7 @@ async function lgNoWhite(src){ const im=await new Promise((r,j)=>{ const i=new I
   g.putImageData(d,0,0); return c.toDataURL('image/png'); }
 async function lgGen(){ const s=lgS(); if(!s.txt.trim()){ toast('Впишите надпись'); return; } const st0=LG_AI.find(x=>x[0]===s.style)||LG_AI[0], col={black:'black ink only',gold:'warm metallic gold tones',terracotta:'terracotta and warm brown',sage:'sage green and soft olive',navy:'deep navy blue',pastel:'soft pastel colors',colorful:'a cheerful harmonious color palette'}[s.col]||'black ink';
   const prompt=`Design ${st0[2]}. The logo text must read exactly "${s.txt.trim()}" — spell every letter exactly as given, no other words${s.sub.trim()?`, plus a small tagline that reads exactly "${s.sub.trim()}"`:''}. ${s.what.trim()?`Symbol/emblem idea: ${s.what.trim()}. `:''}Colors: ${col}. Flat professional vector-style logo, centered, generous empty space around it, on a plain pure white background. No mockup, no paper texture, no shadows, no extra text or letters, no watermark. Print-ready, crisp edges.`;
-  const b=$('#lgGo'); if(b){ b.disabled=true; b.textContent='Gemini рисует…'; }
+  const b=$('#lgGo'); if(b){ b.disabled=true; b.textContent='Рисую…'; }
   try{ lgRes=await KS.neuro.gen(prompt,{n:s.n,aspect:'1:1'}); toast('Готово: '+lgRes.length+' вар.'); }catch(err){ toast(err.message||'Не получилось'); } lgRender(); }
 m.el.addEventListener('click',async e=>{ const t=e.target, s=lgS(); let b;
   if((b=t.closest('[data-lgmode]'))){ s.mode=b.dataset.lgmode; save(); lgRender(); return; }

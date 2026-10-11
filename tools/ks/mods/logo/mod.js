@@ -1,5 +1,5 @@
 KS.mod('logo',{title:'Генератор логотипов'});
-const lgS=()=>KS.store('logo',{txt:'tadhayrapetian',sub:'handmade',ini:'',ff:'serif',color:'#1d1d1f',mode:'vec',what:'',style:'elegant',col:'black',n:2});
+const lgS=()=>{ const o=KS.store('logo',{txt:'tadhayrapetian',sub:'handmade',ini:'',ff:'serif',color:'#1d1d1f',mode:'vec',what:'',style:'elegant',col:'black',n:1}); if(!o.m1){ o.n=1; o.m1=1; } return o; };
 const LG_LAY=[['monoword','Монограмма и имя',1],['mono','Монограмма',1],['sig','Подпись',.6],['word','Надпись',.25],['crest','Медальон',1],['badge','Плашка',.6],['stack','Два шрифта',.6]];
 const LG_FF=[['serif','Классика'],['didone','Дидона'],['slab','Строгий'],['sans','Модерн'],['script','Каллиграфия'],['hand','От руки']];
 const LG_COL=[['#1d1d1f','Чёрный'],['ink','Цвет текста макета'],['acc','Акцент макета'],['#b08d57','Золото'],['#a35a43','Терракота'],['#5f7a63','Шалфей'],['#1f3a5f','Тёмно-синий'],['#8a3a52','Бордо']];
@@ -10,16 +10,16 @@ let lgRes=[];
 function lgSample(v,ff){ const s=lgS(), e={v,ff,txt:s.txt,sub:s.sub,ini:s.ini,color:s.color}; const pal=dzPal(st.dz&&st.dz.pal); return KS.thSVG(e,pal); }
 function lgRender(){ const s=lgS(), hasKey=!!(KS.neuro&&KS.neuro.hasKey());
   m.el.innerHTML=`<div class="lg-top"><label class="f grow">Надпись<input type="text" id="lgTxt" value="${esc(s.txt)}" placeholder="Название, имя, бренд" maxlength="40"></label><label class="f">Подпись<input type="text" id="lgSub" value="${esc(s.sub)}" placeholder="handmade, с 2026…" maxlength="40"></label><label class="f lg-ini">Инициалы<input type="text" id="lgIni" value="${esc(s.ini)}" placeholder="авто" maxlength="2"></label></div>
-  <div class="seg lg-mode"><button data-lgmode="vec"${s.mode==='vec'?' class="on"':''}>Векторный · бесплатно</button><button data-lgmode="ai"${s.mode==='ai'?' class="on"':''}>Нейро-логотип · Gemini</button></div>
+  <div class="seg lg-mode"><button data-lgmode="vec"${s.mode==='vec'?' class="on"':''}>Векторный · бесплатно</button><button data-lgmode="ai"${s.mode==='ai'?' class="on"':''}>Нейро-логотип · ИИ</button></div>
   ${s.mode==='vec'?`<div class="flexw"><span class="hd2">Шрифт</span>${LG_FF.map(([k,n])=>`<button class="btn sm${s.ff===k?' primary':''}" data-lgff="${k}">${n}</button>`).join('')}</div>
    <div class="flexw"><span class="hd2">Цвет</span>${LG_COL.map(([k,n])=>`<button class="lg-sw${s.color===k?' on':''}" data-lgcol="${k}" title="${n}" style="background:${k.startsWith('#')?k:dzCol(k,dzPal(st.dz&&st.dz.pal))}"></button>`).join('')}</div>
    <p class="hint">Буквы всегда точные и чёткие в печати. Нажмите на вариант — он встанет на макет; потом его можно двигать, менять цвет и надпись в «Макете».</p>
    <div class="lg-grid">${LG_LAY.map(([v,n,r])=>`<button class="lg-card" data-lgvec="${v}"><span class="lg-prev" style="aspect-ratio:${1/r>2?'4/1':r<1?'5/3':'1/1'};background:${s.color.startsWith('#')?'#fff':dzPal(st.dz&&st.dz.pal).bg}">${lgSample(v,s.ff)}</span><b>${n}</b></button>`).join('')}</div>`
-  :`${hasKey?'':`<div class="ks-empty">Для нейро-логотипа нужен ключ Gemini. <button class="btn sm primary" data-lgkey="1">Подключить ключ</button></div>`}
+  :`${hasKey?'':`<div class="ks-empty">Для нейро-логотипа нужен ключ Gemini или fal.ai. <button class="btn sm primary" data-lgkey="1">Подключить ключ</button></div>`}
    <label class="f">Что изобразить (необязательно)<input type="text" id="lgWhat" value="${esc(s.what)}" placeholder="цветок граната, конверт с сердцем, кисть и краски…"></label>
    <div class="flexw"><span class="hd2">Стиль</span>${LG_AI.map(([k,n])=>`<button class="btn sm${s.style===k?' primary':''}" data-lgai="${k}">${n}</button>`).join('')}</div>
    <div class="flexw"><span class="hd2">Цвета</span>${LG_AICOL.map(([k,n])=>`<button class="btn sm${s.col===k?' primary':''}" data-lgaic="${k}">${n}</button>`).join('')}<span class="hd2" style="margin-left:8px">Вариантов</span><select id="lgN">${[1,2,3,4].map(n=>`<option${s.n==n?' selected':''}>${n}</option>`).join('')}</select><button class="btn primary" id="lgGo"${hasKey?'':' disabled'}>Создать логотип</button></div>
-   <p class="hint">Gemini рисует эмблему с вашей надписью. Иногда он ошибается в буквах — тогда нажмите «Создать» ещё раз или возьмите векторный вариант. Каждый вариант оплачивается отдельно.</p>
+   <p class="hint">ИИ рисует эмблему с вашей надписью. Иногда он ошибается в буквах — тогда нажмите «Создать» ещё раз или возьмите векторный вариант. Каждый вариант оплачивается отдельно${KS.neuro?' — '+KS.neuro.spendLine():''}.</p>
    <div class="lg-res">${lgRes.map((u,i)=>`<div class="lg-ri"><img src="${u}" alt=""><div class="flexw"><button class="btn sm primary" data-lgput="${i}" data-clear="1">На макет без фона</button><button class="btn sm" data-lgput="${i}">С белым фоном</button><button class="btn sm" data-lgdl="${i}">PNG</button></div></div>`).join('')}</div>`}`; }
 function lgOpen(){ lgRender(); m.open(); }
 function lgPut(el){ if(!dzOn()){ KS.ensureDesign(); } const d=st.dz, r=el.r, w=Math.min(d.w*.5,r>=1?30:50), h=w*Math.min(1,r); const e=Object.assign({id:dzId(),x:(d.w-w)/2,y:(d.h-h)/2,w,h},el.p); delete e.r; dzEls().push(e); dzSelect(e.id); update(); m.close(); toast('Логотип на макете'); }
@@ -28,7 +28,7 @@ async function lgNoWhite(src){ const im=await new Promise((r,j)=>{ const i=new I
   g.putImageData(d,0,0); return c.toDataURL('image/png'); }
 async function lgGen(){ const s=lgS(); if(!s.txt.trim()){ toast('Впишите надпись'); return; } const st0=LG_AI.find(x=>x[0]===s.style)||LG_AI[0], col={black:'black ink only',gold:'warm metallic gold tones',terracotta:'terracotta and warm brown',sage:'sage green and soft olive',navy:'deep navy blue',pastel:'soft pastel colors',colorful:'a cheerful harmonious color palette'}[s.col]||'black ink';
   const prompt=`Design ${st0[2]}. The logo text must read exactly "${s.txt.trim()}" — spell every letter exactly as given, no other words${s.sub.trim()?`, plus a small tagline that reads exactly "${s.sub.trim()}"`:''}. ${s.what.trim()?`Symbol/emblem idea: ${s.what.trim()}. `:''}Colors: ${col}. Flat professional vector-style logo, centered, generous empty space around it, on a plain pure white background. No mockup, no paper texture, no shadows, no extra text or letters, no watermark. Print-ready, crisp edges.`;
-  const b=$('#lgGo'); if(b){ b.disabled=true; b.textContent='Gemini рисует…'; }
+  const b=$('#lgGo'); if(b){ b.disabled=true; b.textContent='Рисую…'; }
   try{ lgRes=await KS.neuro.gen(prompt,{n:s.n,aspect:'1:1'}); toast('Готово: '+lgRes.length+' вар.'); }catch(err){ toast(err.message||'Не получилось'); } lgRender(); }
 m.el.addEventListener('click',async e=>{ const t=e.target, s=lgS(); let b;
   if((b=t.closest('[data-lgmode]'))){ s.mode=b.dataset.lgmode; save(); lgRender(); return; }
