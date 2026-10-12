@@ -867,7 +867,11 @@ function nbPrintScreen(scr){ const S=nbS(), P=nbPages(), imp=nbImpose(S,P); nbSc
 function nbPrintJob(kind,o){ const S=nbS(), P=nbPages(); if(!P.length){ KS.toast('Нет страниц для печати'); return 0; } const imp=nbImpose(S,P); const out=nbJob(S,P,imp,kind,o); if(!out.length){ KS.toast('Нечего печатать в этом диапазоне'); return 0; } KS.print(out.map(nbPrintPage)); return out.length; }
 function nbOutAll(S,P,imp){ return S.pr.what==='pages'?P.map(pg=>nbPageOut(S,pg)):nbJob(S,P,imp,'all'); }
 async function nbDownloadPDF(btn,outs,name){ const S=nbS(), P=nbPages(); if(!P.length&&!outs){ KS.toast('Нет страниц'); return; } outs=outs||nbOutAll(S,P,nbImpose(S,P)); const lbl=btn&&btn.innerHTML;
-  try{ const r=await nbPDF(outs,name||((S.title||'blocknot').replace(/[^\wа-яё\- ]+/gi,'').trim().replace(/\s+/g,'-')||'blocknot')+'.pdf',(i,n)=>{ if(btn) btn.textContent=`${i+1} из ${n}…`; }); if(r){ await KS.download(r.name,r.blob); KS.toast('PDF сохранён: '+r.name); } }
+  const fname=name||((S.title||'blocknot').replace(/[^\wа-яё\- ]+/gi,'').trim().replace(/\s+/g,'-')||'blocknot')+'.pdf', prog=(i,n)=>{ if(btn) btn.textContent=`${i+1} из ${n}…`; };
+  /* true vector PDF (text as glyph outlines) through the vpdf engine when it is built in; the jsPDF path stays as fallback */
+  if(KS.vpdf&&typeof KS.vpdf.pdf==='function'){ try{ const blob=await KS.vpdf.pdf(outs.map(nbPrintPage),{name:fname,prog:(i,n)=>prog(i,n||outs.length)}); await KS.download(fname,blob); KS.toast('PDF сохранён: '+fname); if(btn) btn.innerHTML=lbl; return; }
+    catch(e){ console.warn('[notebook] vector pdf failed, fallback',e); KS.toast('Векторный PDF не получился — сохраняю упрощённый'); } }
+  try{ const r=await nbPDF(outs,fname,prog); if(r){ await KS.download(r.name,r.blob); KS.toast('PDF сохранён: '+r.name); } }
   catch(e){ console.error('[notebook] pdf',e); KS.toast('Не получилось сделать PDF. Попробуйте «PDF через окно печати».'); } finally{ if(btn) btn.innerHTML=lbl; } }
 function nbVectorPDF(){ const S=nbS(), P=nbPages(); const pages=nbOutAll(S,P,nbImpose(S,P)).map(nbPrintPage); if(typeof vectorPDF==='function') vectorPDF(pages); else KS.print(pages); }
 function nbRefillS(box){ const S=nbS(), g=k=>box.querySelector(`[data-nbrefill="${k}"]`); const v=g('type').value, n=Math.max(1,Math.min(500,+g('n').value||20)), fmt=g('fmt').value, sides=+g('sides').value;
