@@ -1,0 +1,12 @@
+.eth-card .hd .eth-sub{font-weight:500;font-size:12px;color:var(--muted);margin-left:6px}
+.eth-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}
+.eth-v{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 6px 6px;border:1px solid var(--edge2);border-radius:14px;background:#fff;cursor:pointer;min-height:86px;transition:transform .15s,box-shadow .15s}
+.eth-v.dark{background:#2b2b2b}
+.eth-v:hover{transform:translateY(-1px);box-shadow:0 6px 16px -10px rgb(0 0 0 / .4)}
+.eth-v.on{outline:2px solid var(--accent);outline-offset:1px}
+.eth-v span{position:relative;display:block;width:100%;height:52px}
+.eth-v small{font-size:11px;color:#6e6e73;line-height:1.1;text-align:center}
+.eth-v.dark small{color:#d1d1d6}
+.eth-cols{align-items:center}
+.eth-cols .btn i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px;box-shadow:inset 0 0 0 1px rgb(0 0 0 / .18)}
+.eth-cols input[type=color]{width:38px;height:32px;padding:0;border:none;background:none}
