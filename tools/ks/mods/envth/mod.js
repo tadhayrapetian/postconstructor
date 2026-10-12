@@ -1,6 +1,6 @@
 KS.mod('envth',{title:'Знак TH в Конвертах'});
 /* The tadhayrapetian / TH brand mark in «Конверты». The mark is drawn by the postcard module (KS.thSVG); here it becomes an
-   envelope drawing {data:SVG with text turned into outlines (KS.vpdf), w, th:{settings}} so it moves, scales, rotates and
+   envelope drawing {data:SVG thumbnail, w, th:{settings}}; envHTML draws it inline with the real web fonts, so it moves, scales, rotates and
    prints like every other envelope element and stays vector. */
 const ETV=[['monoword','Знак + имя'],['mono','Монограмма'],['sig','Подпись'],['word','Надпись'],['crest','Герб'],['badge','Плашка'],['stack','Два слова']];
 const ETVB={sig:[200,120],badge:[200,120],stack:[200,120],word:[240,60],mono:[100,100],monoword:[100,100],crest:[100,100]};
@@ -13,21 +13,19 @@ function colOf(o){ const c=envCols(); return ({ink:c.ink,accent:c.accent,gold:'#
 const thOf=(o,color)=>({v:o.v,txt:o.txt||'',ini:o.ini||'',sub:o.sub||'',ff:o.ff||'',color});
 function markHTML(o,color){ return KS.thSVG(thOf(o,color),dzPal({ink:color})); }
 const sizeOf=(v,w)=>{ const b=ETVB[v]||[100,100]; return {w,h:+(w*b[1]/b[0]).toFixed(2)}; };
-/* standalone SVG: text → glyph outlines via the vector-PDF engine, so the mark looks identical everywhere (an <img> SVG can't load web fonts) */
+/* data = small standalone SVG (thumbnail in the list); on the envelope, in print and in PDF the mark is drawn inline (see envHTML
+   below) with the page's real web fonts, so it is always crisp vector and laid out exactly like in Типография */
 async function markData(o){ const color=colOf(o), {w,h}=sizeOf(o.v,o.w||30), inner=markHTML(o,color);
-  const page=KS.page(w,h,`<div style="position:absolute;inset:0">${inner}</div>`,'th'); page.html=page.html.replace('background:#fff','background:transparent');
-  if(KS.vpdf&&KS.vpdf.svg){ try{ await document.fonts.ready; let svg=await KS.vpdf.svg(page);
-      svg=svg.replace(/<svg\b([^>]*)>/,(m,a)=>'<svg'+a.replace(/\s(width|height)="[^"]*"/g,'')+` width="${w}mm" height="${h}mm">`);
-      if(!/<path|<use/.test(svg)) throw new Error('empty');
-      return {data:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg),vec:true}; }catch(e){ console.warn('[envth] outline failed',e); } }
   const raw=inner.replace(/<svg\b([^>]*)>/,(m,a)=>'<svg xmlns="http://www.w3.org/2000/svg"'+a.replace(/\sstyle="[^"]*"/,'').replace(/\s(width|height)="[^"]*"/g,'')+` width="${w}mm" height="${h}mm">`);
-  return {data:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(raw),vec:false}; }
+  return {data:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(raw),vec:true}; }
+const inlineOf=d=>{ const t=d.th, {w,h}=sizeOf(t.v,d.w||t.w||30); return `<div class="eth-mark" style="position:relative;width:${w}mm;height:${h}mm">${markHTML(t,colOf(t))}</div>`; };
+{ const _eh=envHTML; envHTML=function(){ let h=_eh.apply(this,arguments); try{ if(h&&(st.drawings||[]).some(d=>d&&d.th)) st.drawings.forEach(d=>{ if(!d||!d.th) return; const img=`<img src="${d.data}" style="width:${d.w}mm;height:auto">`; if(h.includes(img)) h=h.split(img).join(inlineOf(d)); }); }catch(_){ } return h; }; }
 const selIdx=()=>{ const m=/^dr(\d+)$/.exec(typeof sel==='string'?sel:''); if(!m) return -1; const i=+m[1]; return st.drawings[i]&&st.drawings[i].th?i:-1; };
 let busy=false;
 async function addMark(side){ if(busy) return; if(!KS.thSVG){ toast('Знак TH недоступен'); return; } busy=true; const o=S();
   try{ if(side==='back'&&st.view!=='back') setView('back'); else if(side==='front'&&st.view!=='front') setView('front');
     const r=await markData(o); st.drawings.push(sideNew({data:r.data,w:o.w||30,th:Object.assign({},o)})); sel='dr'+(st.drawings.length-1);
-    syncUI(); update(); toast((r.vec?'Знак TH на конверте':'Знак TH на конверте (шрифт упрощён: нет интернета)')+'. Тяните его мышью, ширина — в списке ниже.'); }
+    syncUI(); update(); toast('Знак TH на конверте. Тяните его мышью, ширина — в списке ниже.'); }
   catch(e){ console.error(e); toast('Не получилось поставить знак'); } finally{ busy=false; renderCard(); } }
 async function updateSel(){ const i=selIdx(); if(i<0||busy) return; busy=true; const o=S(), d=st.drawings[i];
   try{ const r=await markData(Object.assign({},o,{w:d.w})); d.data=r.data; d.th=Object.assign({},o,{w:d.w}); syncUI(); update(); toast('Знак обновлён'); }
