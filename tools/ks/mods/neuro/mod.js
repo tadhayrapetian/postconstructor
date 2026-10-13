@@ -184,3 +184,25 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-npow]'); 
 document.addEventListener('change',e=>{ if(e.target.dataset.nedge){ nOpt().edges=e.target.checked; save(); } if(e.target.dataset.nvar){ nOpt().variants=+e.target.value; save(); } });
 KS.cmd('Нейро-стиль: настройки ИИ (Gemini / fal.ai)','настройки',nSettings);
 KS.neuro={refs:nRefs,refRow:nRefRow,stylizeRef:nStylizeRef,edit:nEdit,text:nText,gen:nGen,ctl:nCtl,stylize:nStylize,styles:NSTYLES,settings:nSettings,spendLine:nSpendLine,provider:prov,hasKey:()=>nHas(),price:()=>nPrice('edit')};
+
+/* ---- generic helpers for other modules (added for the «Instagram» section; existing behaviour unchanged) ----
+   compose(images[], prompt, {aspect,size}) → dataURL: several pictures in one request (product photo(s) + optional style reference),
+     the prompt refers to them as «IMAGE 1», «IMAGE 2»… in the given order. fal.ai: single-image edit with the first picture.
+   vision(images[], prompt, {json,model,max}) → text: Gemini answers a question about pictures (fal.ai cannot do this). */
+function nOut(j){ const c=j&&j.candidates&&j.candidates[0], parts=((c&&c.content)||{}).parts||[], p=parts.find(x=>x.inlineData||x.inline_data);
+  if(!p){ const why=(c&&c.finishReason)||((j&&j.promptFeedback&&j.promptFeedback.blockReason)||''); throw new Error(/SAFETY|PROHIBITED|BLOCK|OTHER/.test(why)?'Gemini отказался рисовать этот кадр по своим правилам. Измените описание или выберите другое фото.':'Gemini не вернул картинку. Попробуйте ещё раз.'); }
+  const d=p.inlineData||p.inline_data; return `data:${d.mimeType||d.mime_type||'image/png'};base64,${d.data}`; }
+async function gCompose(images,prompt,o){ const key=nKey(); if(!key){ nSettings(); throw new Error('Сначала вставьте ключ Gemini'); } const model=nModel();
+  const parts=[{text:prompt}]; for(let i=0;i<images.length;i++){ const img=await nSmall(images[i],i===0?1536:(o.refMax||1280)); parts.push({text:'IMAGE '+(i+1)+':'},{inline_data:{mime_type:'image/jpeg',data:img.split(',')[1]}}); }
+  const base={contents:[{role:'user',parts}],generationConfig:{responseModalities:['TEXT','IMAGE']}};
+  const ic={aspectRatio:o.aspect||'1:1'}; if(/pro/i.test(model)) ic.imageSize=o.size||'2K';
+  let {r,j}=await nCall(key,model,Object.assign({},base,{generationConfig:Object.assign({},base.generationConfig,{imageConfig:ic})})); if(r.status===400&&!/API key/i.test(((j&&j.error&&j.error.message)||''))) ({r,j}=await nCall(key,model,base));
+  if(!r.ok) throw new Error(nErr(r.status,j)); return nOut(j); }
+async function fCompose(images,prompt,o){ const img=await nSmall(images[0],1536); const j=await fCall(fEditM(),Object.assign({prompt,image_url:img,num_images:1,output_format:'jpeg',safety_tolerance:'5'},o.aspect?{aspect_ratio:o.aspect}:{})); return fImg(j.images&&j.images[0]&&j.images[0].url); }
+async function nCompose(images,prompt,o){ o=o||{}; images=[].concat(images||[]).filter(Boolean); if(!images.length) throw new Error('Нет картинки для ИИ'); const r=prov()==='fal'?await fCompose(images,prompt,o):await gCompose(images,prompt,o); nSpend(1,'edit'); return r; }
+async function nVision(images,prompt,o){ o=o||{}; const key=nKey(); if(!key){ nSettings(); throw new Error('Разбирать фото умеет только Gemini: добавьте ключ Gemini в настройках ИИ (fal.ai этого не умеет)'); }
+  const parts=[{text:prompt}]; for(const s of [].concat(images||[]).filter(Boolean)){ const img=await nSmall(s,o.max||1024); parts.push({inline_data:{mime_type:'image/jpeg',data:img.split(',')[1]}}); }
+  const {r,j}=await nCall(key,o.model||'gemini-2.5-flash',{contents:[{role:'user',parts}],generationConfig:Object.assign({temperature:o.temperature??.4},o.json?{responseMimeType:'application/json'}:{})});
+  if(!r.ok) throw new Error(nErr(r.status,j)); const t=(((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]).map(x=>x.text||'').join(''); if(!t) throw new Error('Gemini ничего не ответил'); return t; }
+const nModelName=()=>{ if(prov()==='fal'){ const m=fEditM(), f=FEDIT.find(x=>x[0]===m); return f?f[1].split(' — ')[0]:m; } const m=nModel(), f=NMODELS.find(x=>x[0]===m); return f?f[1]:m; };
+Object.assign(KS.neuro,{compose:nCompose,vision:nVision,model:()=>prov()==='fal'?fEditM():nModel(),modelName:nModelName,hasGemini:()=>!!nKey()});
