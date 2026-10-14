@@ -1,7 +1,7 @@
 KS.mod('neuro',{title:'Нейро-стиль (Gemini)'});
 /* Gemini image styling. The API key lives only in this browser's localStorage, never in st/projects/backups. */
 const NK='ks-gemini-key', NM='ks-gemini-model';
-const NMODELS=[['gemini-2.5-flash-image','Быстрая и дешёвая (2.5 Flash Image)'],['gemini-3.1-flash-image-preview','Новая быстрая (3.1 Flash Image)'],['gemini-3-pro-image-preview','Самая качественная (3 Pro Image)']];
+const NMODELS=[['gemini-3-pro-image','Самая качественная (3 Pro Image)'],['gemini-3.1-flash-image','Быстрая (3.1 Flash Image)'],['gemini-2.5-flash-image','Дешёвая (2.5 Flash Image)']];
 const NSTYLES=[
  ['pp_soft','Портрет: мягкая иллюстрация','an original modern flat editorial illustration of the people in the photo: simplified graceful figures with slightly elongated necks and soft rounded shapes, calm serene faces drawn with minimal features (gently closed or tiny dot eyes, a small single-line nose, a soft smile), round blush on the cheeks, hair as one solid flowing shape; NO outlines, only flat color shapes with subtle hand-made gouache grain; a harmonious muted palette of warm cream, sage, terracotta, dusty rose and deep brown; a plain warm background with one or two soft abstract organic shapes or small botanical sprigs; keep each person\'s hairstyle, clothing colors, pose and what they hold recognizable. Original style — do not imitate any specific artist'],
  ['pp_paper','Портрет: бумажная аппликация','an original layered cut-paper collage portrait of the people in the photo: every shape cut from matte colored paper with slightly irregular hand-cut edges and soft drop shadows between layers, simplified friendly faces with minimal features and rosy cheeks, a soft pastel palette with one warm accent color, a simple paper background with a few cut-out leaves or confetti; keep hairstyles, clothing colors and pose recognizable'],
@@ -33,9 +33,11 @@ async function nPersist(){ try{ if(navigator.storage&&navigator.storage.persist&
 async function nBackup(){ try{ const g=k=>localStorage.getItem(k)||''; const v={k:g(NK),m:g(NM),fk:g('ks-fal-key'),fe:g('ks-fal-edit'),fg:g('ks-fal-gen'),p:g('ks-ai-provider')}; if(v.k||v.fk) await KS.idb.set('gemini',v); else await KS.idb.del('gemini'); }catch(_){ } }
 (async()=>{ try{ const v=await KS.idb.get('gemini'); let ch=0; if(v){ [['ks-gemini-key','k'],['ks-gemini-model','m'],['ks-fal-key','fk'],['ks-fal-edit','fe'],['ks-fal-gen','fg'],['ks-ai-provider','p']].forEach(([a,b])=>{ if(!localStorage.getItem(a)&&v[b]){ localStorage.setItem(a,v[b]); ch=1; } }); } if(ch) KS.emit('neuroKey'); else nBackup(); }catch(_){ } })();
 /* owner's choice: Gemini 2.5 Flash Image as the working model (switched once) */
-try{ if(!localStorage.getItem('ks-ai-m3')){ localStorage.setItem('ks-gemini-model','gemini-3-pro-image-preview'); localStorage.setItem('ks-ai-provider','gemini'); localStorage.setItem('ks-ai-m2','1'); localStorage.setItem('ks-ai-m3','1'); } }catch(_){ }
+try{ if(!localStorage.getItem('ks-ai-m3')){ localStorage.setItem('ks-gemini-model','gemini-3-pro-image'); localStorage.setItem('ks-ai-provider','gemini'); localStorage.setItem('ks-ai-m2','1'); localStorage.setItem('ks-ai-m3','1'); } }catch(_){ }
 const nKey=()=>{ try{ return localStorage.getItem(NK)||''; }catch(_){ return ''; } };
-const NDEF='gemini-3-pro-image-preview';
+const NDEF='gemini-3-pro-image';
+/* Google retired the preview ids on 25 June 2026 (gemini-3-pro-image-preview → gemini-3-pro-image): move saved choices once */
+try{ const MV={'gemini-3-pro-image-preview':'gemini-3-pro-image','gemini-3.1-flash-image-preview':'gemini-3.1-flash-image','gemini-2.5-flash-image-preview':'gemini-2.5-flash-image'}, cur=localStorage.getItem('ks-gemini-model'); if(cur&&MV[cur]){ localStorage.setItem('ks-gemini-model',MV[cur]); setTimeout(()=>{ try{ nBackup(); }catch(_){ } },0); } }catch(_){ }
 const nModel=()=>{ try{ return localStorage.getItem(NM)||NDEF; }catch(_){ return NDEF; } };
 async function nSmall(src,max){ const im=await new Promise((r,j)=>{ const i=new Image(); i.onload=()=>r(i); i.onerror=j; i.src=src; }); const k=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height); return c.toDataURL('image/jpeg',.9); }
 function nErr(status,body){ const m=(body&&body.error&&body.error.message)||''; if(status===400&&/API key/i.test(m)) return 'Ключ Gemini не подошёл. Проверьте его в настройках «Нейро-стиля».';
@@ -48,8 +50,26 @@ async function nFrame(src,aspect,max){ const [aw,ah]=aspect.split(':').map(Numbe
   const dw=iw*k, dh=ih*k; g.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh); return c.toDataURL('image/jpeg',.9); }
 const nWhole=o=>o.aspect?` The final image must have exactly a ${o.aspect} format (a ${o.aspect==='2:3'?'vertical':'horizontal'} 10×15 postcard). Show the WHOLE scene from the photo: do not crop, cut off or zoom in on anything — every building, person and object that is visible in the photo must stay fully visible inside the image.${o.edges?' Any empty white area around the photo is simply white paper.':' If the photo has empty white bands, continue the scene naturally into them so the painting fills the whole format edge to edge, with no white borders, margins or frame.'}`:'';
 function nRatio(w,h){ const R=[['1:1',1],['3:2',1.5],['2:3',2/3],['4:3',4/3],['3:4',.75],['5:4',1.25],['4:5',.8],['16:9',16/9],['9:16',9/16]], r=w/h; return R.reduce((a,b)=>Math.abs(Math.log(b[1]/r))<Math.abs(Math.log(a[1]/r))?b:a)[0]; }
-async function nCall(key,model,body){ let r; try{ r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':key},body:JSON.stringify(body)}); }
-  catch(e){ throw new Error('Нет связи с Gemini. Проверьте интернет.'); } let j=null; try{ j=await r.json(); }catch(_){} return {r,j}; }
+async function nCall(key,model,body,again){ let r; try{ r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':key},body:JSON.stringify(body)}); }
+  catch(e){ throw new Error('Нет связи с Gemini. Проверьте интернет.'); } let j=null; try{ j=await r.json(); }catch(_){}
+  if(r.status===404&&!again){ try{ const alt=nPickModel(await nListModels(key),model); if(alt&&alt!==model){
+        if(/image|nano-banana/i.test(model)){ if(model===nModel()){ localStorage.setItem(NM,alt); try{ nBackup(); }catch(_){ } } } else localStorage.setItem(NTM,alt);
+        toast(`Google отключил модель «${model}» — работаю на «${alt}»`); KS.emit('neuroKey'); return nCall(key,alt,body,true); } }catch(_){ } }
+  return {r,j}; }
+/* Google renames and retires model ids (e.g. the *-preview image models were shut down on 25 June 2026). On a 404 the app asks
+   the key which models exist, takes the closest one of the same kind (image / text, pro / flash / lite, newest stable), remembers it
+   and repeats the request once. */
+const NTM='ks-gemini-tmodel'; let NLIST=null;
+const nTModel=()=>{ try{ return localStorage.getItem(NTM)||'gemini-2.5-flash'; }catch(_){ return 'gemini-2.5-flash'; } };
+async function nListModels(key){ if(NLIST&&NLIST.key===key&&Date.now()-NLIST.t<6e5) return NLIST.ids;
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000',{headers:{'x-goog-api-key':key}}); const b=await r.json().catch(()=>null); if(!r.ok) throw new Error(nErr(r.status,b));
+  const ids=((b&&b.models)||[]).filter(m=>!m.supportedGenerationMethods||m.supportedGenerationMethods.includes('generateContent')).map(m=>String(m.name).replace(/^models\//,'')); NLIST={key,ids,t:Date.now()}; return ids; }
+const nVer=id=>{ const m=String(id).match(/(\d+(?:\.\d+)?)/); return m?parseFloat(m[1]):0; };
+function nPickModel(ids,want){ const img=/image|nano-banana/i.test(want);
+  const L=ids.filter(id=>img?(/image|nano-banana/i.test(id)&&!/imagen|generation/i.test(id)):/^gemini-[\d.]+-(flash|pro)(-lite)?(-latest)?$/i.test(id)); if(!L.length) return null;
+  const tier=/pro/i.test(want)?'pro':/lite/i.test(want)?'lite':'flash', base=String(want).replace(/-preview.*$/,'');
+  const score=id=>(id===base?1000:0)+(id.includes(tier)?100:0)-(tier!=='lite'&&/lite/i.test(id)?60:0)-(/preview|exp/i.test(id)?25:0)+nVer(id)*10;
+  return L.slice().sort((x,y)=>score(y)-score(x))[0]; }
 function nPrompt(styleId,custom,o){
   const S=NSTYLES.find(s=>s[0]===styleId), what=custom&&custom.trim()?custom.trim():(S||NSTYLES[0])[2], pow=(NPOW.find(p=>p[0]===o.pow)||NPOW[1])[2];
   const prompt=`Use this photo only as a reference and create a hand-made artwork of the same scene: ${what}. ${pow} The result must look like a real physical artwork scanned from paper or canvas — absolutely no photographic noise, sharpness or texture, no HDR look, no photo filter look. Keep the same scene, main shapes, framing and aspect ratio; people keep their likeness and expressions. ${o.edges?'Leave a generous natural margin of clean white paper on all four sides: the painting ends with irregular hand-painted edges inside the sheet and nothing touches the borders. ':''}Do not add any text, letters, signatures, logos, frames or watermarks. Rich, detailed, print quality.${nWhole(o)}`;
@@ -86,7 +106,7 @@ async function gEdit(src,instruction,o){ o=o||{}; const key=nKey(); if(!key){ nS
   let {r,j}=await nCall(key,model,Object.assign({},base,{generationConfig:Object.assign({},base.generationConfig,{imageConfig:ic})})); if(r.status===400&&!/API key/i.test(((j&&j.error&&j.error.message)||''))) ({r,j}=await nCall(key,model,base));
   if(!r.ok) throw new Error(nErr(r.status,j)); const parts=((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]; const p=parts.find(x=>x.inlineData||x.inline_data); if(!p) throw new Error('Gemini не вернул картинку. Попробуйте ещё раз.');
   const d=p.inlineData||p.inline_data; return `data:${d.mimeType||d.mime_type||'image/png'};base64,${d.data}`; }
-async function nText(prompt,o){ o=o||{}; const key=nKey(); if(!key){ if(prov()!=='fal') nSettings(); throw new Error('Тексты пишет Gemini: добавьте ключ Gemini в настройках ИИ или выберите текст из библиотеки'); } const model=o.model||'gemini-2.5-flash';
+async function nText(prompt,o){ o=o||{}; const key=nKey(); if(!key){ if(prov()!=='fal') nSettings(); throw new Error('Тексты пишет Gemini: добавьте ключ Gemini в настройках ИИ или выберите текст из библиотеки'); } const model=o.model||nTModel();
   const {r,j}=await nCall(key,model,{contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:Object.assign({temperature:.9},o.json?{responseMimeType:'application/json'}:{})});
   if(!r.ok) throw new Error(nErr(r.status,j)); const t=(((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]).map(x=>x.text||'').join(''); if(!t) throw new Error('Gemini ничего не ответил'); return t; }
 
@@ -98,8 +118,8 @@ const ls=(k,d)=>{ try{ return localStorage.getItem(k)||d; }catch(_){ return d; }
 const fKey=()=>ls(FK,''), fEditM=()=>ls(FME,FEDIT[0][0]), fGenM=()=>ls(FMG,FGEN[2][0]);
 const prov=()=>ls(NP,'gemini')==='fal'&&fKey()?'fal':'gemini';
 const nHas=()=>prov()==='fal'?!!fKey():!!nKey();
-const PRICE={'gemini-2.5-flash-image':.039,'gemini-3.1-flash-image-preview':.045,'gemini-3-pro-image-preview':.134,'fal-ai/flux-kontext/dev':.025,'fal-ai/flux-pro/kontext':.04,'fal-ai/flux/schnell':.003,'fal-ai/flux/dev':.025,'fal-ai/flux-pro/kontext/text-to-image':.04};
-const nPrice=kind=>{ const m=prov()==='fal'?(kind==='gen'?fGenM():fEditM()):nModel(); return PRICE[m]??.04; };
+const PRICE={'gemini-2.5-flash-image':.039,'gemini-3.1-flash-image':.045,'gemini-3.1-flash-image-preview':.045,'gemini-3-pro-image':.134,'gemini-3-pro-image-preview':.134,'fal-ai/flux-kontext/dev':.025,'fal-ai/flux-pro/kontext':.04,'fal-ai/flux/schnell':.003,'fal-ai/flux/dev':.025,'fal-ai/flux-pro/kontext/text-to-image':.04};
+const nPrice=kind=>{ const m=prov()==='fal'?(kind==='gen'?fGenM():fEditM()):nModel(); return PRICE[m]??(/pro/i.test(m)&&/image|banana/i.test(m)?.134:.04); };
 function nSpend(n,kind){ const o=nOpt(), sp=o.spend, d=KS.today(), mo=d.slice(0,7), c=n*nPrice(kind); if(sp.d!==d){ sp.d=d; sp.day=0; } if(sp.m!==mo){ sp.m=mo; sp.month=0; } sp.day=(sp.day||0)+c; sp.month=(sp.month||0)+c; sp.total=(sp.total||0)+c; save(); }
 const usd=v=>{ v=+v||0; return '$'+(v>0&&v<.1?v.toFixed(3):v.toFixed(2)); };
 function nSpendLine(){ const sp=nOpt().spend||{}, d=KS.today(); return `≈ ${usd(nPrice('edit'))} за картинку · сегодня ${usd(sp.d===d?sp.day:0)} · за месяц ${usd(sp.m===d.slice(0,7)?sp.month:0)}`; }
@@ -153,7 +173,12 @@ function nSettings(){ const k=nKey(), m=nModel(), known=NMODELS.some(x=>x[0]===m
   <p class="hint">Тексты-поздравления по-прежнему пишет Gemini (если ключ есть) или встроенная библиотека.</p></div>
   <div class="card" style="padding:10px"><b>Расходы (примерно)</b><span class="hint">Сегодня ${usd(sp.d===KS.today()?sp.day:0)} · за месяц ${usd(sp.m===KS.today().slice(0,7)?sp.month:0)} · всего ${usd(sp.total)}</span><span class="hint">Точную сумму смотрите в кабинете Google / fal.ai. По умолчанию — 1 вариант на нажатие.</span></div>
   <div class="flexw"><button class="btn primary" id="nSave">Сохранить</button><button class="btn" id="nCheck">Проверить ключ</button>${(P==='fal'?fk:k)?'<button class="btn danger" id="nDel">Удалить ключ</button>':''}<span class="hint" id="nStat"></span></div>`;
-  nm.open(); }
+  nm.open();
+  /* show which image models this key really has (Google renames them from time to time) */
+  if(k) nListModels(k).then(ids=>{ const sel=$('#nModel'); if(!sel) return; const own=sel.querySelector('option[value="__own"]'), have=new Set([...sel.options].map(o=>o.value));
+    ids.filter(id=>/image|nano-banana/i.test(id)&&!/imagen|generation/i.test(id)).forEach(id=>{ if(have.has(id)) return; const o=document.createElement('option'); o.value=id; o.textContent=id+' — ≈ '+usd(PRICE[id]??(/pro/i.test(id)?.134:.04)); sel.insertBefore(o,own); });
+    [...sel.options].forEach(o=>{ if(o.value!=='__own'&&!ids.includes(o.value)&&!/недоступна/.test(o.textContent)) o.textContent+=' — недоступна для ключа'; });
+    if(!ids.includes(sel.value)&&sel.value!=='__own'){ const alt=nPickModel(ids,sel.value); if(alt){ sel.value=alt; const s=$('#nStat'); if(s) s.textContent='Модель «'+m+'» Google отключил — выбрана «'+alt+'». Нажмите «Сохранить».'; } } }).catch(()=>{}); }
 nm.el.addEventListener('change',e=>{ if(e.target.id==='nModel'){ $('#nOwnBox').hidden=e.target.value!=='__own'; $('#nProWarn').hidden=!/pro/.test(e.target.value); } });
 nm.el.addEventListener('click',async e=>{ const t=e.target; const pb=t.closest('[data-nprov]');
   if(pb){ try{ localStorage.setItem(NP,pb.dataset.nprov); }catch(_){} nm.el.querySelectorAll('[data-nprov]').forEach(x=>x.classList.toggle('on',x===pb)); $('#nGem').hidden=pb.dataset.nprov==='fal'; $('#nFal').hidden=pb.dataset.nprov!=='fal'; return; }
@@ -202,7 +227,7 @@ async function fCompose(images,prompt,o){ const img=await nSmall(images[0],1536)
 async function nCompose(images,prompt,o){ o=o||{}; images=[].concat(images||[]).filter(Boolean); if(!images.length) throw new Error('Нет картинки для ИИ'); const r=prov()==='fal'?await fCompose(images,prompt,o):await gCompose(images,prompt,o); nSpend(1,'edit'); return r; }
 async function nVision(images,prompt,o){ o=o||{}; const key=nKey(); if(!key){ nSettings(); throw new Error('Разбирать фото умеет только Gemini: добавьте ключ Gemini в настройках ИИ (fal.ai этого не умеет)'); }
   const parts=[{text:prompt}]; for(const s of [].concat(images||[]).filter(Boolean)){ const img=await nSmall(s,o.max||1024); parts.push({inline_data:{mime_type:'image/jpeg',data:img.split(',')[1]}}); }
-  const {r,j}=await nCall(key,o.model||'gemini-2.5-flash',{contents:[{role:'user',parts}],generationConfig:Object.assign({temperature:o.temperature??.4},o.json?{responseMimeType:'application/json'}:{})});
+  const {r,j}=await nCall(key,o.model||nTModel(),{contents:[{role:'user',parts}],generationConfig:Object.assign({temperature:o.temperature??.4},o.json?{responseMimeType:'application/json'}:{})});
   if(!r.ok) throw new Error(nErr(r.status,j)); const t=(((j&&j.candidates&&j.candidates[0]&&j.candidates[0].content)||{}).parts||[]).map(x=>x.text||'').join(''); if(!t) throw new Error('Gemini ничего не ответил'); return t; }
 const nModelName=()=>{ if(prov()==='fal'){ const m=fEditM(), f=FEDIT.find(x=>x[0]===m); return f?f[1].split(' — ')[0]:m; } const m=nModel(), f=NMODELS.find(x=>x[0]===m); return f?f[1]:m; };
 Object.assign(KS.neuro,{compose:nCompose,vision:nVision,model:()=>prov()==='fal'?fEditM():nModel(),modelName:nModelName,hasGemini:()=>!!nKey()});
