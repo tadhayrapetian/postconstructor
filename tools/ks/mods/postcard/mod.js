@@ -160,6 +160,7 @@ function pcPanel(box){ setTimeout(()=>{ const slot=box.querySelector('.pc-nref')
     <label class="f">Бумага<select id="pcPaper"><option value="1015"${s.paper==='1015'?' selected':''}>Фотобумага 10 × 15, по одной</option><option value="a4"${s.paper==='a4'?' selected':''}>A4, две открытки на листе</option></select></label>
     <label class="f">Копий<input type="number" id="pcCopies" min="1" max="200" value="${s.copies||1}"></label>
     <div class="flexw"><button class="btn sm primary" data-pcprint="front">Печать лицевых</button><button class="btn sm" data-pcprint="back">Печать оборотов</button><button class="btn sm" data-pcprint="both">Обе подряд</button></div>
+    <div class="flexw"><button class="btn sm" data-pcean="1" title="Штрихкод товара для маркетплейса: 13 цифр, внизу оборота">Штрихкод EAN-13 на оборот</button></div>
     <p class="hint">Двусторонняя на 10 × 15: напечатайте лицевые, переверните стопку и напечатайте обороты. В окне печати: масштаб 100%, без полей выкл.</p></div>`; }
 KS.tab({id:'pc',group:'postcard',title:'Открытки',icon:KS.icon('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M13 9h5M13 12h5M13 15h3M8 9v6"/>'),before:'shop',screen:true,
   render(box,o){ if(o.reason==='show'||!box.firstChild) pcPanel(box); if(o.screen&&(o.reason==='show'||!o.screen.firstChild)) pcScreen(o.screen); }});
@@ -260,6 +261,7 @@ document.addEventListener('click',e=>{ let b;
   if(e.target.closest('#pcLogoAll')){ if(!dzOn()) return; const L=pcS().logo; let n=0; ['front','back'].forEach(sd=>dzEls(sd).forEach(x=>{ if(x.t==='thlogo'){ x.v=L.v; x.sub=L.sub; n++; } })); update(); toast(n?'Знак TH обновлён: '+n:'В макете нет знака TH — добавьте его кнопкой'); return; }
   if(e.target.closest('[data-pclogogen]')){ if(KS.logo) KS.logo.open(); return; }
   if(e.target.closest('#pcWhite')){ pcWhite(); return; }
+  if(e.target.closest('[data-pcean]')){ if(KS.ean) KS.ean.addToBack(); else toast('Модуль штрихкодов не подключён'); return; }
   if((b=e.target.closest('[data-pcprint]'))){ pcPrint(b.dataset.pcprint); return; }
 });
 document.addEventListener('input',e=>{ const t=e.target;

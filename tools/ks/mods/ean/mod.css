@@ -1,0 +1,5 @@
+.ean-seg{width:100%}.ean-seg button{flex:1}
+.ean-st{font-size:12.5px;padding:7px 10px;border-radius:12px;font-variant-numeric:tabular-nums}
+.ean-st.ok{background:rgb(52 199 89 / .16);color:#1f8a3a}.ean-st.bad{background:rgb(255 59 48 / .14);color:#c4271c}
+html[data-theme=dark] .ean-st.ok{color:#5fd27f}html[data-theme=dark] .ean-st.bad{color:#ff7b72}
+.ean-warn{color:#c4271c}html[data-theme=dark] .ean-warn{color:#ff7b72}
